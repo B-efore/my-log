@@ -1,5 +1,6 @@
-package com.jiwon.mylog.entity;
+package com.jiwon.mylog.entity.role;
 
+import com.jiwon.mylog.entity.user.UserRole;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

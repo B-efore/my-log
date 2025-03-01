@@ -1,5 +1,6 @@
-package com.jiwon.mylog.entity;
+package com.jiwon.mylog.entity.user;
 
+import com.jiwon.mylog.entity.base.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,7 +13,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
-public class User extends BaseEntity{
+public class User extends BaseEntity {
 
     @Column(nullable = false, unique = true)
     private String username;

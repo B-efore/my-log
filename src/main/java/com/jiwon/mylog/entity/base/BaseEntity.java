@@ -1,4 +1,4 @@
-package com.jiwon.mylog.entity;
+package com.jiwon.mylog.entity.base;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

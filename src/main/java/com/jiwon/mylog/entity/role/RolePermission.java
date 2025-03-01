@@ -1,5 +1,6 @@
-package com.jiwon.mylog.entity;
+package com.jiwon.mylog.entity.role;
 
+import com.jiwon.mylog.entity.permission.Permission;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
