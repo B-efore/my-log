@@ -2,6 +2,7 @@ package com.jiwon.mylog.controller;
 
 import com.jiwon.mylog.dto.UserSaveRequest;
 import com.jiwon.mylog.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,12 +19,8 @@ public class AuthController {
     public final UserService userService;
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestBody UserSaveRequest userSaveRequest) {
-        try {
-            Long savedId = userService.save(userSaveRequest);
-            return new ResponseEntity<>("Created User ID:" + savedId, HttpStatus.CREATED);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<String> signup(@Valid @RequestBody UserSaveRequest userSaveRequest) {
+        Long savedId = userService.save(userSaveRequest);
+        return new ResponseEntity<>("Created User ID:" + savedId, HttpStatus.CREATED);
     }
 }
