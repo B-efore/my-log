@@ -1,5 +1,6 @@
 package com.jiwon.mylog.entity.user;
 
+import com.jiwon.mylog.entity.post.Post;
 import com.jiwon.mylog.entity.base.BaseEntity;
 import com.jiwon.mylog.entity.role.Role;
 import jakarta.persistence.CascadeType;
@@ -32,7 +33,7 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private String username;
 
     @Column(nullable = false, unique = true)
@@ -45,12 +46,17 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private UserStatus status;
 
-    private String profileImageUrl;
+    @Builder.Default
+    private String profileImageUrl = "";
 
-    private String bio;
+    @Builder.Default
+    private String bio = "";
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserRole> userRoles = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Post> posts = new ArrayList<>();
 
     public List<Role> getUserRoles() {
         return userRoles.stream()
