@@ -1,6 +1,9 @@
 package com.jiwon.mylog.controller;
 
+import com.jiwon.mylog.dto.UserLoginRequest;
+import com.jiwon.mylog.dto.UserLoginResponse;
 import com.jiwon.mylog.dto.UserSaveRequest;
+import com.jiwon.mylog.service.AuthService;
 import com.jiwon.mylog.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,11 +19,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class AuthController {
 
+    public final AuthService authService;
     public final UserService userService;
 
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@Valid @RequestBody UserSaveRequest userSaveRequest) {
         Long savedId = userService.save(userSaveRequest);
         return new ResponseEntity<>("Created User ID:" + savedId, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<UserLoginResponse> login(@Valid @RequestBody UserLoginRequest userLoginRequest) {
+        UserLoginResponse userLoginResponse = authService.login(userLoginRequest);
+        return new ResponseEntity<>(userLoginResponse, HttpStatus.OK);
     }
 }

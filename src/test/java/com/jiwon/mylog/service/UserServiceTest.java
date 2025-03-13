@@ -45,7 +45,7 @@ class UserServiceTest {
     @Test
     void 회원가입() {
         //given
-        User mockUser = new User(1L, "testUser", "test@example.com", "password123!", UserStatus.PENDING, null, null, null);
+        User mockUser = new User(1L, "testUser", "test@example.com", "password123!", UserStatus.PENDING, null, null, null, null);
         given(userRepository.existsByEmail(user.getEmail())).willReturn(false);
         given(userRepository.save(any(User.class))).willReturn(mockUser);
 
