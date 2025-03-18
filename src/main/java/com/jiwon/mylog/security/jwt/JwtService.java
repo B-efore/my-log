@@ -34,7 +34,7 @@ public class JwtService {
     }
 
     public String getEmail(String token) {
-        return Jwts.parser().verifyWith(getSecretKey()).build().parseSignedClaims(token).getPayload().get("email", String.class);
+        return Jwts.parser().verifyWith(getSecretKey()).build().parseSignedClaims(token).getPayload().getSubject();
     }
 
     public String createToken(Long userId, Authentication authentication) {
@@ -73,12 +73,11 @@ public class JwtService {
 
     public boolean validateToken(String token) {
         try {
-            return Jwts.parser()
+            Jwts.parser()
                     .verifyWith(getSecretKey())
                     .build()
-                    .parseSignedClaims(token)
-                    .getPayload()
-                    .getExpiration().before(new Date());
+                    .parseSignedClaims(token);
+            return true;
         } catch (ExpiredJwtException e) {
             log.error("Expired JWT token: {}", e.getMessage());
         } catch (MalformedJwtException e) {
