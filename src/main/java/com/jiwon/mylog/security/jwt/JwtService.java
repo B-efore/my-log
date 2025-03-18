@@ -24,16 +24,22 @@ import org.springframework.stereotype.Service;
 @Service
 public class JwtService {
 
+    private static final String TOKEN_PREFIX = "Bearer ";
+    private static final String ID_KEY = "id";
     private static final String ROLES_KEY = "roles";
     private final JwtProperties jwtProperties;
 
-    public String getEmail(String token) {
-        return Jwts.parser().verifyWith(getSecretKey()).build().parseSignedClaims(token).getPayload().get("email", String.class);
+    public Long getUserId(String token) {
+        return Jwts.parser().verifyWith(getSecretKey()).build().parseSignedClaims(token).getPayload().get("id", Long.class);
     }
 
-    public String createToken(Authentication authentication) {
+    public String getEmail(String token) {
+        return Jwts.parser().verifyWith(getSecretKey()).build().parseSignedClaims(token).getPayload().getSubject();
+    }
 
-        Claims claims = createClaims(authentication);
+    public String createToken(Long userId, Authentication authentication) {
+
+        Claims claims = createClaims(userId, authentication);
         String issuer = jwtProperties.getIssuer();
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtProperties.getAccessExpiry());
@@ -47,10 +53,12 @@ public class JwtService {
                 .compact();
     }
 
-    private Claims createClaims(Authentication authentication) {
+    private Claims createClaims(Long userId, Authentication authentication) {
         String username = authentication.getName();
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+
         ClaimsBuilder claimsBuilder = Jwts.claims().subject(username);
+        claimsBuilder.add(ID_KEY, userId);
 
         if (!authorities.isEmpty()) {
             claimsBuilder.add(
@@ -65,12 +73,11 @@ public class JwtService {
 
     public boolean validateToken(String token) {
         try {
-            return Jwts.parser()
+            Jwts.parser()
                     .verifyWith(getSecretKey())
                     .build()
-                    .parseSignedClaims(token)
-                    .getPayload()
-                    .getExpiration().before(new Date());
+                    .parseSignedClaims(token);
+            return true;
         } catch (ExpiredJwtException e) {
             log.error("Expired JWT token: {}", e.getMessage());
         } catch (MalformedJwtException e) {
@@ -83,6 +90,15 @@ public class JwtService {
             log.error("JWT error: {}", e.getMessage());
         }
         return false;
+    }
+
+    public String getAccessToken(String authorizationHeader) {
+
+        if (authorizationHeader != null && authorizationHeader.startsWith(TOKEN_PREFIX)) {
+            return authorizationHeader.substring(7);
+        }
+
+        return null;
     }
 
     private SecretKey getSecretKey() {
