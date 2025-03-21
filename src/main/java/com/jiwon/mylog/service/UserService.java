@@ -1,6 +1,6 @@
 package com.jiwon.mylog.service;
 
-import com.jiwon.mylog.dto.UserSaveRequest;
+import com.jiwon.mylog.entity.user.dto.request.UserSaveRequest;
 import com.jiwon.mylog.entity.user.User;
 import com.jiwon.mylog.exception.DuplicateEmailException;
 import com.jiwon.mylog.repository.UserRepository;

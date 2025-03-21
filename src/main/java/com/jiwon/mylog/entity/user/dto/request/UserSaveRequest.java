@@ -1,4 +1,4 @@
-package com.jiwon.mylog.dto;
+package com.jiwon.mylog.entity.user.dto.request;
 
 import com.jiwon.mylog.entity.user.User;
 import com.jiwon.mylog.entity.user.UserStatus;

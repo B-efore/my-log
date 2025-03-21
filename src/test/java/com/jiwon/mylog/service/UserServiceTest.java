@@ -7,7 +7,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.jiwon.mylog.dto.UserSaveRequest;
+import com.jiwon.mylog.entity.user.dto.request.UserSaveRequest;
 import com.jiwon.mylog.entity.user.User;
 import com.jiwon.mylog.entity.user.UserStatus;
 import com.jiwon.mylog.exception.DuplicateEmailException;

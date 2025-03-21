@@ -1,4 +1,4 @@
-package com.jiwon.mylog.dto;
+package com.jiwon.mylog.entity.user.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;
