@@ -7,11 +7,13 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import lombok.Getter;
 import org.hibernate.annotations.Formula;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 @Entity
 public class Category {
 

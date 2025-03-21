@@ -7,11 +7,19 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Formula;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Getter
 @Entity
 public class Tag {
     @Id
@@ -19,8 +27,9 @@ public class Tag {
     private Long id;
     private String name;
 
-    @Formula("(select count(*) from post p where p.tag_id = id)")
+    @Formula("(select count(*) from post_tag pt where pt.tag_id = id)")
     private int postCount;
+
     @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostTag> postTags = new ArrayList<>();
 }
