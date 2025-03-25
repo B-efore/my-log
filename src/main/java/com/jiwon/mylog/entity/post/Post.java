@@ -4,6 +4,7 @@ package com.jiwon.mylog.entity.post;
 import com.jiwon.mylog.entity.category.Category;
 import com.jiwon.mylog.entity.Visibility;
 import com.jiwon.mylog.entity.base.BaseEntity;
+import com.jiwon.mylog.entity.post.dto.request.PostCreateRequest;
 import com.jiwon.mylog.entity.user.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -71,5 +72,18 @@ public class Post extends BaseEntity {
 
     public void addPostTag(PostTag postTag) {
         postTags.add(postTag);
+        postTag.setPost(this);
+    }
+
+    public static Post create(PostCreateRequest request, User user, Category category) {
+        return Post.builder()
+                .title(request.getTitle())
+                .content(request.getContent())
+                .contentPreview(request.getContentPreview())
+                .postStatus(PostStatus.PUBLISHED)
+                .visibility(Visibility.fromString(request.getVisibility()))
+                .user(user)
+                .category(category)
+                .build();
     }
 }

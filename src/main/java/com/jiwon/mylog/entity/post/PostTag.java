@@ -25,7 +25,6 @@ public class PostTag {
 
     public static PostTag createPostTag(Post post, Tag tag) {
         PostTag postTag = new PostTag();
-        postTag.setPost(post);
         postTag.setTag(tag);
         post.addPostTag(postTag);
         return postTag;
