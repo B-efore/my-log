@@ -4,6 +4,7 @@ import com.jiwon.mylog.annotation.LoginUser;
 import com.jiwon.mylog.entity.post.dto.request.PostCreateRequest;
 import com.jiwon.mylog.entity.post.dto.response.PostDetailResponse;
 import com.jiwon.mylog.service.PostService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,7 @@ public class PostController {
     @PostMapping
     public ResponseEntity<PostDetailResponse> createPost(
             @LoginUser Long userId,
-            @RequestBody PostCreateRequest postRequest) {
+            @Valid @RequestBody PostCreateRequest postRequest) {
         PostDetailResponse response = postService.createPost(userId, postRequest);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
