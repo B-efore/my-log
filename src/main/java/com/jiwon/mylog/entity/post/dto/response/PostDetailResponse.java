@@ -39,7 +39,7 @@ public class PostDetailResponse {
                 .postStatus(post.getPostStatus())
                 .visibility(post.getVisibility())
                 .user(UserResponse.fromUser(post.getUser()))
-//                .category(CategoryResponse.fromCategory(post.getCategory()))
+                .category(CategoryResponse.fromCategory(post.getCategory()))
                 .tags(post.getPostTags().stream()
                         .map(postTag -> TagResponse.fromTag(postTag.getTag()))
                         .toList())

@@ -1,6 +1,8 @@
 package com.jiwon.mylog.entity.post.dto.request;
 
 import com.jiwon.mylog.entity.tag.dto.request.TagRequest;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.validation.Valid;
@@ -30,5 +32,5 @@ public class PostCreateRequest {
 
     private Long categoryId;
 
-    private List<@Valid TagRequest> tagRequests;
+    private List<@Valid TagRequest> tagRequests = new ArrayList<>();
 }
