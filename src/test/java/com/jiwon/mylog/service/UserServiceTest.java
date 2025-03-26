@@ -10,7 +10,8 @@ import static org.mockito.Mockito.verify;
 import com.jiwon.mylog.entity.user.dto.request.UserSaveRequest;
 import com.jiwon.mylog.entity.user.User;
 import com.jiwon.mylog.entity.user.UserStatus;
-import com.jiwon.mylog.exception.DuplicateEmailException;
+import com.jiwon.mylog.exception.DuplicateException;
+import com.jiwon.mylog.exception.ErrorCode;
 import com.jiwon.mylog.repository.UserRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -66,8 +67,8 @@ class UserServiceTest {
 
         //when & then
         Assertions.assertThatThrownBy(() -> userService.save(user))
-                .isInstanceOf(DuplicateEmailException.class)
-                .hasMessage("이미 사용 중인 이메일입니다.");
+                .isInstanceOf(DuplicateException.class)
+                .hasMessage(ErrorCode.DUPLICATE_EMAIL.getMessage());
 
         verify(userRepository, times(1)).existsByEmail(user.getEmail());
         verify(userRepository, never()).save(any(User.class));

@@ -2,7 +2,8 @@ package com.jiwon.mylog.service;
 
 import com.jiwon.mylog.entity.user.dto.request.UserSaveRequest;
 import com.jiwon.mylog.entity.user.User;
-import com.jiwon.mylog.exception.DuplicateEmailException;
+import com.jiwon.mylog.exception.DuplicateException;
+import com.jiwon.mylog.exception.ErrorCode;
 import com.jiwon.mylog.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ public class UserService {
     public Long save(UserSaveRequest userSaveRequest) {
 
         if (userRepository.existsByEmail(userSaveRequest.getEmail())) {
-            throw new DuplicateEmailException("이미 사용 중인 이메일입니다.");
+            throw new DuplicateException(ErrorCode.DUPLICATE_EMAIL);
         }
 
         String encodedPassword = bCryptPasswordEncoder.encode(userSaveRequest.getPassword());

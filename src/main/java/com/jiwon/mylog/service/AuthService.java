@@ -2,6 +2,7 @@ package com.jiwon.mylog.service;
 
 import com.jiwon.mylog.entity.user.dto.request.UserLoginRequest;
 import com.jiwon.mylog.entity.user.dto.response.UserLoginResponse;
+import com.jiwon.mylog.exception.ErrorCode;
 import com.jiwon.mylog.exception.InvalidEmailOrPasswordException;
 import com.jiwon.mylog.security.CustomUserDetails;
 import com.jiwon.mylog.security.jwt.JwtService;
@@ -35,7 +36,7 @@ public class AuthService {
 
             return UserLoginResponse.of(token);
         } catch (BadCredentialsException e) {
-            throw new InvalidEmailOrPasswordException("잘못된 이메일 또는 비밀번호입니다.");
+            throw new InvalidEmailOrPasswordException(ErrorCode.INVALID_EMAIL_OR_PASSWORD);
         } catch (AuthenticationException e) {
             throw new IllegalArgumentException(e.getMessage());
         }

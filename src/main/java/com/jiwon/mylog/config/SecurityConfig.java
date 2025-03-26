@@ -36,7 +36,7 @@ public class SecurityConfig {
                 .httpBasic(auth -> auth.disable());
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/error, /auth/**").permitAll()
+                        .requestMatchers("/error", "/auth/**").permitAll()
                         .requestMatchers("/posts/**").authenticated());
 
         http
