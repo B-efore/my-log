@@ -9,6 +9,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jiwon.mylog.entity.user.dto.request.UserSaveRequest;
+import com.jiwon.mylog.exception.ErrorCode;
+import com.jiwon.mylog.security.jwt.JwtService;
+import com.jiwon.mylog.service.AuthService;
 import com.jiwon.mylog.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -33,7 +36,13 @@ class AuthControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
+    private AuthService authService;
+
+    @MockitoBean
     private UserService userService;
+
+    @MockitoBean
+    private JwtService jwtService;
 
     private ResultActions signUpRequest(UserSaveRequest request) throws Exception {
         given(userService.save(any(UserSaveRequest.class))).willReturn(1L);
@@ -45,7 +54,7 @@ class AuthControllerTest {
 
     private void validateErrorResponse(ResultActions result, String field, String expectedMessage) throws Exception {
         result.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("입력값이 올바르지 않습니다."))
+                .andExpect(jsonPath("$.message").value(ErrorCode.INVALID_INPUT.getMessage()))
                 .andExpect(jsonPath("$.errors." + field).value(expectedMessage));
     }
 
