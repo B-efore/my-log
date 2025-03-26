@@ -1,4 +1,4 @@
-package com.jiwon.mylog.dto;
+package com.jiwon.mylog.entity.user.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

@@ -36,7 +36,8 @@ public class SecurityConfig {
                 .httpBasic(auth -> auth.disable());
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll());
+                        .requestMatchers("/error", "/auth/**").permitAll()
+                        .requestMatchers("/posts/**").authenticated());
 
         http
                 .addFilterBefore(new JwtTokenAuthenticationFilter(jwtService, userDetailsService), UsernamePasswordAuthenticationFilter.class);

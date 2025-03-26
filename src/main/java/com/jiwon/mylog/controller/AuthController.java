@@ -1,8 +1,8 @@
 package com.jiwon.mylog.controller;
 
-import com.jiwon.mylog.dto.UserLoginRequest;
-import com.jiwon.mylog.dto.UserLoginResponse;
-import com.jiwon.mylog.dto.UserSaveRequest;
+import com.jiwon.mylog.entity.user.dto.request.UserLoginRequest;
+import com.jiwon.mylog.entity.user.dto.response.UserLoginResponse;
+import com.jiwon.mylog.entity.user.dto.request.UserSaveRequest;
 import com.jiwon.mylog.service.AuthService;
 import com.jiwon.mylog.service.UserService;
 import jakarta.validation.Valid;
