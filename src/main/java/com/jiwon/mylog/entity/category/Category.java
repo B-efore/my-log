@@ -50,4 +50,8 @@ public class Category {
                 .user(user)
                 .build();
     }
+
+    public void updateName(String name) {
+        this.name = name;
+    }
 }
