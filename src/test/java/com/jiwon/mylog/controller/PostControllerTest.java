@@ -51,7 +51,7 @@ class PostControllerTest {
         // given
         PostCreateRequest request = new PostCreateRequest("title", "content", "contentPreview", "공개", 1L, null);
         UserResponse user = createUser(1L, "testUser");
-        CategoryResponse category = createCategory("category");
+        CategoryResponse category = createCategory(1L, "category");
         List<TagResponse> tags = List.of(
                 createTag(1L, "tag1"),
                 createTag(2L, "tag2"));
@@ -92,10 +92,10 @@ class PostControllerTest {
                 .build();
     }
 
-    private CategoryResponse createCategory(String name) {
+    private CategoryResponse createCategory(Long categoryId, String name) {
         return CategoryResponse.builder()
+                .categoryId(categoryId)
                 .name(name)
-                .postCount(1)
                 .build();
     }
 
