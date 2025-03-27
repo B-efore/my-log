@@ -4,6 +4,7 @@ import com.jiwon.mylog.entity.user.dto.request.UserSaveRequest;
 import com.jiwon.mylog.entity.user.User;
 import com.jiwon.mylog.exception.DuplicateException;
 import com.jiwon.mylog.exception.ErrorCode;
+import com.jiwon.mylog.exception.NotFoundException;
 import com.jiwon.mylog.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -32,5 +33,11 @@ public class UserService {
         User savedUser = userRepository.save(user);
 
         return savedUser.getId();
+    }
+
+    @Transactional(readOnly = true)
+    public User findUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND, userId));
     }
 }

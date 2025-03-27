@@ -37,7 +37,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/error", "/auth/**").permitAll()
-                        .requestMatchers("/posts/**").authenticated());
+                        .requestMatchers("/posts/**", "/categories").authenticated());
 
         http
                 .addFilterBefore(new JwtTokenAuthenticationFilter(jwtService, userDetailsService), UsernamePasswordAuthenticationFilter.class);
