@@ -24,15 +24,19 @@ public class UserService {
     @Transactional
     public Long save(UserSaveRequest userSaveRequest) {
 
-        if (userRepository.existsByEmail(userSaveRequest.getEmail())) {
-            throw new DuplicateException(ErrorCode.DUPLICATE_EMAIL);
-        }
+        validateDuplicateEmail(userSaveRequest);
 
         String encodedPassword = bCryptPasswordEncoder.encode(userSaveRequest.getPassword());
         User user = userSaveRequest.toEntity(encodedPassword);
         User savedUser = userRepository.save(user);
 
         return savedUser.getId();
+    }
+
+    private void validateDuplicateEmail(UserSaveRequest userSaveRequest) {
+        if (userRepository.existsByEmail(userSaveRequest.getEmail())) {
+            throw new DuplicateException(ErrorCode.DUPLICATE_EMAIL);
+        }
     }
 
     @Transactional(readOnly = true)

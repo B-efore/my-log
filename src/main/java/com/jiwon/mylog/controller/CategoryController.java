@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,5 +38,13 @@ public class CategoryController {
             @Valid @RequestBody CategoryRequest categoryRequest) {
         CategoryResponse response = categoryService.update(userId, categoryId, categoryRequest);
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{categoryId}")
+    public ResponseEntity<Void> delete(
+            @LoginUser Long userId,
+            @PathVariable Long categoryId) {
+        categoryService.delete(userId, categoryId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

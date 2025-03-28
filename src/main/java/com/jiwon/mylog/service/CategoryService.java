@@ -32,13 +32,20 @@ public class CategoryService {
     public CategoryResponse update(Long userId, Long categoryId, CategoryRequest categoryRequest) {
         User user = userService.findUserById(userId);
         validateDuplicateCategory(user, categoryRequest.getName());
-        Category category = getCategory(categoryId);
+        Category category = getCategory(user, categoryId);
         category.updateName(categoryRequest.getName());
         return CategoryResponse.fromCategory(category);
     }
 
-    private Category getCategory(Long categoryId) {
-        return categoryRepository.findById(categoryId)
+    @Transactional
+    public void delete(Long userId, Long categoryId) {
+        User user = userService.findUserById(userId);
+        Category category = getCategory(user, categoryId);
+        categoryRepository.delete(category);
+    }
+
+    private Category getCategory(User user, Long categoryId) {
+        return categoryRepository.findByUserAndId(user, categoryId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND, categoryId));
     }
 
