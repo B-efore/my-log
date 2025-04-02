@@ -1,5 +1,6 @@
 package com.jiwon.mylog.entity.user;
 
+import com.jiwon.mylog.entity.category.Category;
 import com.jiwon.mylog.entity.post.Post;
 import com.jiwon.mylog.entity.base.BaseEntity;
 import com.jiwon.mylog.entity.role.Role;
@@ -59,6 +60,10 @@ public class User extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Category> categories = new ArrayList<>();
 
     public List<Role> getUserRoles() {
         return userRoles.stream()

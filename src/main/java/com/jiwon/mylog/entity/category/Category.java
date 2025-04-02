@@ -1,11 +1,15 @@
 package com.jiwon.mylog.entity.category;
 
+import com.jiwon.mylog.entity.category.dto.request.CategoryRequest;
 import com.jiwon.mylog.entity.post.Post;
+import com.jiwon.mylog.entity.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,7 +31,7 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = 10)
     private String name;
 
     @Formula("(select count(*) from post p where p.category_id = id)")
@@ -35,4 +39,19 @@ public class Category {
 
     @OneToMany(mappedBy = "category")
     private List<Post> posts = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User user;
+
+    public static Category create(CategoryRequest request, User user) {
+        return Category.builder()
+                .name(request.getName())
+                .postCount(0)
+                .user(user)
+                .build();
+    }
+
+    public void updateName(String name) {
+        this.name = name;
+    }
 }

@@ -16,12 +16,12 @@ public class ErrorResponse {
     private final String message;
     private final Map<String, String> errors;
 
-    public static ResponseEntity<ErrorResponse> toResponseEntity(ErrorCode errorCode) {
+    public static ResponseEntity<ErrorResponse> toResponseEntity(ErrorCode errorCode, String message) {
         return ResponseEntity
                 .status(errorCode.getStatus())
                 .body(ErrorResponse.builder()
                         .status(errorCode.getStatus().value())
-                        .message(errorCode.getMessage())
+                        .message(message)
                         .build());
     }
 }
