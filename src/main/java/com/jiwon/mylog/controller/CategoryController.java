@@ -1,14 +1,16 @@
 package com.jiwon.mylog.controller;
 
 import com.jiwon.mylog.annotation.LoginUser;
+import com.jiwon.mylog.entity.category.dto.response.CategoryListResponse;
 import com.jiwon.mylog.entity.category.dto.response.CategoryResponse;
-import com.jiwon.mylog.entity.category.request.CategoryRequest;
+import com.jiwon.mylog.entity.category.dto.request.CategoryRequest;
 import com.jiwon.mylog.service.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -46,5 +48,12 @@ public class CategoryController {
             @PathVariable Long categoryId) {
         categoryService.delete(userId, categoryId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping
+    public ResponseEntity<CategoryListResponse> getCategories(
+            @LoginUser Long userId) {
+        CategoryListResponse response = categoryService.getCategories(userId);
+        return new ResponseEntity(response, HttpStatus.OK);
     }
 }

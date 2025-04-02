@@ -70,11 +70,6 @@ public class Post extends BaseEntity {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostTag> postTags = new ArrayList<>();
 
-    public void addPostTag(PostTag postTag) {
-        postTags.add(postTag);
-        postTag.setPost(this);
-    }
-
     public static Post create(PostCreateRequest request, User user, Category category) {
         return Post.builder()
                 .title(request.getTitle())

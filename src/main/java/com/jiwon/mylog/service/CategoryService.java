@@ -1,8 +1,9 @@
 package com.jiwon.mylog.service;
 
 import com.jiwon.mylog.entity.category.Category;
+import com.jiwon.mylog.entity.category.dto.response.CategoryListResponse;
 import com.jiwon.mylog.entity.category.dto.response.CategoryResponse;
-import com.jiwon.mylog.entity.category.request.CategoryRequest;
+import com.jiwon.mylog.entity.category.dto.request.CategoryRequest;
 import com.jiwon.mylog.entity.user.User;
 import com.jiwon.mylog.exception.DuplicateException;
 import com.jiwon.mylog.exception.ErrorCode;
@@ -11,6 +12,8 @@ import com.jiwon.mylog.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -42,6 +45,13 @@ public class CategoryService {
         User user = userService.findUserById(userId);
         Category category = getCategory(user, categoryId);
         categoryRepository.delete(category);
+    }
+
+    @Transactional
+    public CategoryListResponse getCategories(Long userId) {
+        User user = userService.findUserById(userId);
+        List<Category> categories = categoryRepository.findAllByUser(user);
+        return CategoryListResponse.fromCategories(categories);
     }
 
     private Category getCategory(User user, Long categoryId) {

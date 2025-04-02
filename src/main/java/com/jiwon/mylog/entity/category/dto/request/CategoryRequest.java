@@ -1,4 +1,4 @@
-package com.jiwon.mylog.entity.category.request;
+package com.jiwon.mylog.entity.category.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

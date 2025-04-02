@@ -2,7 +2,7 @@ package com.jiwon.mylog.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jiwon.mylog.entity.category.dto.response.CategoryResponse;
-import com.jiwon.mylog.entity.category.request.CategoryRequest;
+import com.jiwon.mylog.entity.category.dto.request.CategoryRequest;
 import com.jiwon.mylog.resolver.LoginUserArgumentResolver;
 import com.jiwon.mylog.service.CategoryService;
 import org.junit.jupiter.api.DisplayName;

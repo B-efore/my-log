@@ -1,6 +1,6 @@
 package com.jiwon.mylog.service;
 
-import com.jiwon.mylog.entity.category.request.CategoryRequest;
+import com.jiwon.mylog.entity.category.dto.request.CategoryRequest;
 import com.jiwon.mylog.entity.user.User;
 import com.jiwon.mylog.exception.DuplicateException;
 import com.jiwon.mylog.exception.ErrorCode;

@@ -1,6 +1,6 @@
 package com.jiwon.mylog.entity.category;
 
-import com.jiwon.mylog.entity.category.request.CategoryRequest;
+import com.jiwon.mylog.entity.category.dto.request.CategoryRequest;
 import com.jiwon.mylog.entity.post.Post;
 import com.jiwon.mylog.entity.user.User;
 import jakarta.persistence.Column;
