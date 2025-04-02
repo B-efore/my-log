@@ -33,4 +33,6 @@ public class PostCreateRequest {
     private Long categoryId;
 
     private List<@Valid TagRequest> tagRequests = new ArrayList<>();
+
+    private boolean pinned;
 }

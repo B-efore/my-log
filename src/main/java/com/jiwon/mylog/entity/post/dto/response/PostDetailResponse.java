@@ -29,6 +29,7 @@ public class PostDetailResponse {
     private final List<TagResponse> tags;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private final LocalDateTime createdAt;
+    private final boolean pinned;
 
     public static PostDetailResponse fromPost(Post post) {
         return PostDetailResponse.builder()
@@ -44,6 +45,7 @@ public class PostDetailResponse {
                         .map(postTag -> TagResponse.fromTag(postTag.getTag()))
                         .toList())
                 .createdAt(post.getCreatedAt())
+                .pinned(post.isPinned())
                 .build();
     }
 }

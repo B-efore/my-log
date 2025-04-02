@@ -79,6 +79,7 @@ public class Post extends BaseEntity {
                 .visibility(Visibility.fromString(request.getVisibility()))
                 .user(user)
                 .category(category)
+                .pinned(request.isPinned())
                 .build();
     }
 }
