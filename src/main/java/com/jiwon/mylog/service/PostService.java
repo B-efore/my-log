@@ -36,6 +36,17 @@ public class PostService {
         return PostDetailResponse.fromPost(post);
     }
 
+    @Transactional(readOnly = true)
+    public PostDetailResponse getPost(Long postId) {
+        Post post = getPostById(postId);
+        return PostDetailResponse.fromPost(post);
+    }
+
+    private Post getPostById(Long postId) {
+        return postRepository.findById(postId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND, postId));
+    }
+
     private Category getCategoryById(Long categoryId) {
         return categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND, categoryId));
