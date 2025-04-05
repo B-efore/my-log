@@ -33,6 +33,15 @@ public class PostController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @PatchMapping("/{postId}")
+    public ResponseEntity<PostDetailResponse> editPost(
+            @LoginUser Long userId,
+            @PathVariable("postId") Long postId,
+            @Valid @RequestBody PostRequest postRequest) {
+        PostDetailResponse response = postService.editPost(userId, postId, postRequest);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     @GetMapping("/{postId}")
     public ResponseEntity<PostDetailResponse> getPost(
             @PathVariable("postId") Long postId) {

@@ -87,9 +87,28 @@ public class Post extends BaseEntity {
         return post;
     }
 
+    public void update(PostRequest request, Category category, Set<Tag> tags) {
+        this.title = request.getTitle();
+        this.content = request.getContent();
+        this.contentPreview = request.getContentPreview();
+        this.visibility = Visibility.fromString(request.getVisibility());
+        this.pinned = request.isPinned();
+        this.category = category;
+        updateTags(tags);
+    }
+
     private void setTags(Set<Tag> tags) {
         this.postTags = tags.stream()
                 .map(tag -> PostTag.createPostTag(this, tag))
                 .toList();
+    }
+
+    private void updateTags(Set<Tag> tags) {
+        this.postTags.clear();
+        this.postTags.addAll(
+                tags.stream()
+                        .map(tag -> PostTag.createPostTag(this, tag))
+                        .toList()
+        );
     }
 }

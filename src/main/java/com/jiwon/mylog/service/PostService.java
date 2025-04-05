@@ -34,6 +34,22 @@ public class PostService {
         return PostDetailResponse.fromPost(postRepository.save(post));
     }
 
+    @Transactional
+    public PostDetailResponse editPost(Long userId, Long postId, PostRequest postRequest) {
+        User user = getUserById(userId);
+        Post post = getPostById(postId);
+
+        if(!post.getUser().equals(user)) {
+            throw new IllegalArgumentException("게시글 작성자만 게시글을 수정할 수 있습니다.");
+        }
+
+        Category category = getCategoryById(user, postRequest.getCategoryId());
+        Set<Tag> tags = tagService.getTagsById(postRequest.getTagRequests());
+        post.update(postRequest, category, tags);
+
+        return PostDetailResponse.fromPost(post);
+    }
+
     @Transactional(readOnly = true)
     public PostDetailResponse getPost(Long postId) {
         Post post = getPostById(postId);
