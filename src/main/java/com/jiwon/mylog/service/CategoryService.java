@@ -56,7 +56,7 @@ public class CategoryService {
 
     private Category getCategory(User user, Long categoryId) {
         return categoryRepository.findByUserAndId(user, categoryId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND, categoryId));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_CATEGORY));
     }
 
     private void validateDuplicateCategory(User user, String name) {

@@ -59,13 +59,12 @@ class CategoryServiceTest {
 
         given(userService.findUserById(userId)).willReturn(user);
         given(categoryRepository.existsByUserAndName(user, request.getName())).willReturn(false);
-        given(categoryRepository.findById(categoryId)).willReturn(Optional.empty());
+        given(categoryRepository.findByUserAndId(user, categoryId)).willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> categoryService.update(userId, categoryId, request))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining(String.valueOf(categoryId))
-                .hasMessageContaining( ErrorCode.NOT_FOUND.getMessage());
+                .hasMessageContaining( ErrorCode.NOT_FOUND_CATEGORY.getMessage());
     }
 
     @DisplayName("중복된 카테고리명으로 수정을 요청할 시 예외가 발생한다.")

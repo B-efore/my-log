@@ -7,6 +7,7 @@ import com.jiwon.mylog.entity.post.dto.response.PostDetailResponse;
 import com.jiwon.mylog.entity.tag.Tag;
 import com.jiwon.mylog.entity.user.User;
 import com.jiwon.mylog.exception.ErrorCode;
+import com.jiwon.mylog.exception.ForbiddenException;
 import com.jiwon.mylog.exception.NotFoundException;
 import com.jiwon.mylog.repository.CategoryRepository;
 import com.jiwon.mylog.repository.PostRepository;
@@ -39,9 +40,7 @@ public class PostService {
         User user = getUserById(userId);
         Post post = getPostById(postId);
 
-        if(!post.getUser().equals(user)) {
-            throw new IllegalArgumentException("게시글 작성자만 게시글을 수정할 수 있습니다.");
-        }
+        validateOwner(post, user);
 
         Category category = getCategoryById(user, postRequest.getCategoryId());
         Set<Tag> tags = tagService.getTagsById(postRequest.getTagRequests());
@@ -58,16 +57,22 @@ public class PostService {
 
     private Post getPostById(Long postId) {
         return postRepository.findById(postId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND, postId));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_POST));
     }
 
     private Category getCategoryById(User user, Long categoryId) {
         return categoryRepository.findByUserAndId(user, categoryId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND, categoryId));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_CATEGORY));
     }
 
     private User getUserById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND, userId));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
+    }
+
+    private void validateOwner(Post post, User user) {
+        if(!post.getUser().equals(user)) {
+            throw new ForbiddenException(ErrorCode.FORBIDDEN);
+        }
     }
 }
