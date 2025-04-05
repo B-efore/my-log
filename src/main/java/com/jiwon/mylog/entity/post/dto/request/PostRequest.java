@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostCreateRequest {
+public class PostRequest {
 
     @NotBlank(message = "제목은 필수 입력값입니다.")
     @Size(max = 255, message = "제목은 최대 255자까지 입력할 수 있습니다.")

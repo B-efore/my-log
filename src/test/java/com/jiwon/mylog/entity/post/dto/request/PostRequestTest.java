@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class PostCreateRequestTest {
+class PostRequestTest {
 
     private Validator validator;
 
@@ -29,10 +29,10 @@ class PostCreateRequestTest {
     @MethodSource("titles")
     void validateTitleLength(String title, boolean validated) {
         // given
-        PostCreateRequest request = new PostCreateRequest(title, "content", "preview", "visibility", 1L, null);
+        PostRequest request = new PostRequest(title, "content", "preview", "visibility", 1L, null, false);
 
         // when
-        Set<ConstraintViolation<PostCreateRequest>> violations = validator.validate(request);
+        Set<ConstraintViolation<PostRequest>> violations = validator.validate(request);
 
         // then
         if (validated) {
@@ -54,10 +54,10 @@ class PostCreateRequestTest {
     @ValueSource(strings = {"", " "})
     void validateTitleIsNotBlank(String title) {
         // given
-        PostCreateRequest request = new PostCreateRequest(title, "content", "preview", "visibility", 1L, null);
+        PostRequest request = new PostRequest(title, "content", "preview", "visibility", 1L, null, false);
 
         // when
-        Set<ConstraintViolation<PostCreateRequest>> violations = validator.validate(request);
+        Set<ConstraintViolation<PostRequest>> violations = validator.validate(request);
 
         // then
         assertThat(violations).anyMatch(v -> v.getMessage().equals("제목은 필수 입력값입니다."));
@@ -68,10 +68,10 @@ class PostCreateRequestTest {
     @ValueSource(strings = {"", " "})
     void validateContentIsNotBlank(String content) {
         // given
-        PostCreateRequest request = new PostCreateRequest("title", content, "preview", "visibility", 1L, null);
+        PostRequest request = new PostRequest("title", content, "preview", "visibility", 1L, null, false);
 
         // when
-        Set<ConstraintViolation<PostCreateRequest>> violations = validator.validate(request);
+        Set<ConstraintViolation<PostRequest>> violations = validator.validate(request);
 
         // then
         assertThat(violations).anyMatch(v -> v.getMessage().equals("내용은 필수 입력값입니다."));
@@ -82,10 +82,10 @@ class PostCreateRequestTest {
     @ValueSource(strings = {"", " "})
     void validateVisibilityIsNotBlank(String visibility) {
         // given
-        PostCreateRequest request = new PostCreateRequest("title", "content", "preview", visibility, 1L, null);
+        PostRequest request = new PostRequest("title", "content", "preview", visibility, 1L, null, false);
 
         // when
-        Set<ConstraintViolation<PostCreateRequest>> violations = validator.validate(request);
+        Set<ConstraintViolation<PostRequest>> violations = validator.validate(request);
 
         // then
         assertThat(violations).anyMatch(v -> v.getMessage().equals("게시글 공개 범위를 지정해주세요."));
@@ -96,10 +96,10 @@ class PostCreateRequestTest {
     @MethodSource("contentPreviews")
     void validateContentPreviewLength(String contentPreview, boolean validated) {
         // given
-        PostCreateRequest request = new PostCreateRequest("title", "content", contentPreview, "visibility", 1L, null);
+        PostRequest request = new PostRequest("title", "content", contentPreview, "visibility", 1L, null, false);
 
         // when
-        Set<ConstraintViolation<PostCreateRequest>> violations = validator.validate(request);
+        Set<ConstraintViolation<PostRequest>> violations = validator.validate(request);
 
         // then
         if (validated) {

@@ -2,12 +2,13 @@ package com.jiwon.mylog.service;
 
 import com.jiwon.mylog.entity.category.Category;
 import com.jiwon.mylog.entity.post.Post;
-import com.jiwon.mylog.entity.post.dto.request.PostCreateRequest;
+import com.jiwon.mylog.entity.post.dto.request.PostRequest;
 import com.jiwon.mylog.entity.post.dto.response.PostDetailResponse;
 import com.jiwon.mylog.entity.user.User;
 import com.jiwon.mylog.repository.CategoryRepository;
 import com.jiwon.mylog.repository.PostRepository;
 import com.jiwon.mylog.repository.UserRepository;
+import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,13 +47,13 @@ class PostServiceTest {
     void createPost() {
         // given
         Long id = 1L;
-        PostCreateRequest request = new PostCreateRequest("title", "content", "contentPreview", "공개", 1L, null);
+        PostRequest request = new PostRequest("title", "content", "contentPreview", "공개", 1L, null, false);
         User user = User.builder().id(id).username("testUser").build();
         Category category = Category.builder().id(id).name("category").postCount(1).build();
-        Post post = Post.create(request, user, category);
+        Post post = Post.create(request, user, category, Set.of());
 
         given(userRepository.findById(eq(id))).willReturn(Optional.of(user));
-        given(categoryRepository.findById(eq(id))).willReturn(Optional.of(category));
+        given(categoryRepository.findByUserAndId(eq(user), eq(id))).willReturn(Optional.of(category));
         given(postRepository.save(any(Post.class))).willReturn(post);
 
         // when
@@ -63,7 +64,7 @@ class PostServiceTest {
         assertThat(response.getUser().getUsername()).isEqualTo("testUser");
 
         verify(userRepository).findById(id);
-        verify(categoryRepository).findById(id);
+        verify(categoryRepository).findByUserAndId(user, id);
         verify(postRepository).save(any(Post.class));
     }
 }
