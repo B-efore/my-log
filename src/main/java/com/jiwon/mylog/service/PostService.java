@@ -4,6 +4,8 @@ import com.jiwon.mylog.entity.category.Category;
 import com.jiwon.mylog.entity.post.Post;
 import com.jiwon.mylog.entity.post.dto.request.PostRequest;
 import com.jiwon.mylog.entity.post.dto.response.PostDetailResponse;
+import com.jiwon.mylog.entity.post.dto.response.PostSummaryPageResponse;
+import com.jiwon.mylog.entity.post.dto.response.PostSummaryResponse;
 import com.jiwon.mylog.entity.tag.Tag;
 import com.jiwon.mylog.entity.user.User;
 import com.jiwon.mylog.exception.ErrorCode;
@@ -12,11 +14,16 @@ import com.jiwon.mylog.exception.NotFoundException;
 import com.jiwon.mylog.repository.CategoryRepository;
 import com.jiwon.mylog.repository.PostRepository;
 import com.jiwon.mylog.repository.UserRepository;
+import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class PostService {
@@ -36,7 +43,7 @@ public class PostService {
     }
 
     @Transactional
-    public PostDetailResponse editPost(Long userId, Long postId, PostRequest postRequest) {
+    public PostDetailResponse updatePost(Long userId, Long postId, PostRequest postRequest) {
         User user = getUserById(userId);
         Post post = getPostById(postId);
 
@@ -53,6 +60,21 @@ public class PostService {
     public PostDetailResponse getPost(Long postId) {
         Post post = getPostById(postId);
         return PostDetailResponse.fromPost(post);
+    }
+
+    @Transactional(readOnly = true)
+    public PostSummaryPageResponse getAllPosts(Long userId, Pageable pageable) {
+        Page<Post> postPage = postRepository.findAllByUser(userId, pageable);
+        List<PostSummaryResponse> posts = postPage.stream()
+                .map(post -> PostSummaryResponse.fromPost(post))
+                .toList();
+
+        return PostSummaryPageResponse.from(
+                posts,
+                postPage.getNumber(),
+                postPage.getSize(),
+                postPage.getTotalPages(),
+                (int) postPage.getTotalElements());
     }
 
     private Post getPostById(Long postId) {

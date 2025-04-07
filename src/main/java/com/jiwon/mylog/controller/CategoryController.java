@@ -36,7 +36,7 @@ public class CategoryController {
     @PatchMapping("/{categoryId}")
     public ResponseEntity<CategoryResponse> update(
             @LoginUser Long userId,
-            @PathVariable Long categoryId,
+            @PathVariable("categoryId") Long categoryId,
             @Valid @RequestBody CategoryRequest categoryRequest) {
         CategoryResponse response = categoryService.update(userId, categoryId, categoryRequest);
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -45,7 +45,7 @@ public class CategoryController {
     @DeleteMapping("/{categoryId}")
     public ResponseEntity<Void> delete(
             @LoginUser Long userId,
-            @PathVariable Long categoryId) {
+            @PathVariable("categoryId") Long categoryId) {
         categoryService.delete(userId, categoryId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -54,6 +54,6 @@ public class CategoryController {
     public ResponseEntity<CategoryListResponse> getCategories(
             @LoginUser Long userId) {
         CategoryListResponse response = categoryService.getCategories(userId);
-        return new ResponseEntity(response, HttpStatus.OK);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
