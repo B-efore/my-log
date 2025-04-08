@@ -36,7 +36,7 @@ public class PostService {
     @Transactional
     public PostDetailResponse createPost(Long userId, PostRequest postRequest) {
         User user = getUserById(userId);
-        Category category = getCategoryById(user, postRequest.getCategoryId());
+        Category category = getCategoryById(userId, postRequest.getCategoryId());
         Set<Tag> tags = tagService.getTagsById(postRequest.getTagRequests());
         Post post = Post.create(postRequest, user, category, tags);
         return PostDetailResponse.fromPost(postRepository.save(post));
@@ -44,12 +44,11 @@ public class PostService {
 
     @Transactional
     public PostDetailResponse updatePost(Long userId, Long postId, PostRequest postRequest) {
-        User user = getUserById(userId);
         Post post = getPostById(postId);
 
-        validateOwner(post, user);
+        validateOwner(post, userId);
 
-        Category category = getCategoryById(user, postRequest.getCategoryId());
+        Category category = getCategoryById(userId, postRequest.getCategoryId());
         Set<Tag> tags = tagService.getTagsById(postRequest.getTagRequests());
         post.update(postRequest, category, tags);
 
@@ -82,8 +81,8 @@ public class PostService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_POST));
     }
 
-    private Category getCategoryById(User user, Long categoryId) {
-        return categoryRepository.findByUserAndId(user, categoryId)
+    private Category getCategoryById(Long userId, Long categoryId) {
+        return categoryRepository.findByUserIdAndId(userId, categoryId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_CATEGORY));
     }
 
@@ -92,8 +91,8 @@ public class PostService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
     }
 
-    private void validateOwner(Post post, User user) {
-        if(!post.getUser().equals(user)) {
+    private void validateOwner(Post post, Long userId) {
+        if(!post.getUser().getId().equals(userId)) {
             throw new ForbiddenException(ErrorCode.FORBIDDEN);
         }
     }

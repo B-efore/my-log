@@ -53,7 +53,7 @@ class PostServiceTest {
         Post post = Post.create(request, user, category, Set.of());
 
         given(userRepository.findById(eq(id))).willReturn(Optional.of(user));
-        given(categoryRepository.findByUserAndId(eq(user), eq(id))).willReturn(Optional.of(category));
+        given(categoryRepository.findByUserIdAndId(eq(id), eq(id))).willReturn(Optional.of(category));
         given(postRepository.save(any(Post.class))).willReturn(post);
 
         // when
@@ -64,7 +64,7 @@ class PostServiceTest {
         assertThat(response.getUser().getUsername()).isEqualTo("testUser");
 
         verify(userRepository).findById(id);
-        verify(categoryRepository).findByUserAndId(user, id);
+        verify(categoryRepository).findByUserIdAndId(id, id);
         verify(postRepository).save(any(Post.class));
     }
 }
