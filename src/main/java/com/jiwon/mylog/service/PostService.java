@@ -37,7 +37,7 @@ public class PostService {
     public PostDetailResponse createPost(Long userId, PostRequest postRequest) {
         User user = getUserById(userId);
         Category category = getCategoryById(userId, postRequest.getCategoryId());
-        Set<Tag> tags = tagService.getTagsById(postRequest.getTagRequests());
+        Set<Tag> tags = tagService.getTagsById(user, postRequest.getTagRequests());
         Post post = Post.create(postRequest, user, category, tags);
         return PostDetailResponse.fromPost(postRepository.save(post));
     }
@@ -49,7 +49,7 @@ public class PostService {
         validateOwner(post, userId);
 
         Category category = getCategoryById(userId, postRequest.getCategoryId());
-        Set<Tag> tags = tagService.getTagsById(postRequest.getTagRequests());
+        Set<Tag> tags = tagService.getTagsById(post.getUser(), postRequest.getTagRequests());
         post.update(postRequest, category, tags);
 
         return PostDetailResponse.fromPost(post);

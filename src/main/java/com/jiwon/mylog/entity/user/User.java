@@ -4,6 +4,7 @@ import com.jiwon.mylog.entity.category.Category;
 import com.jiwon.mylog.entity.post.Post;
 import com.jiwon.mylog.entity.base.BaseEntity;
 import com.jiwon.mylog.entity.role.Role;
+import com.jiwon.mylog.entity.tag.Tag;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -64,6 +65,10 @@ public class User extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Category> categories = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Tag> tags = new ArrayList<>();
 
     public List<Role> getUserRoles() {
         return userRoles.stream()
