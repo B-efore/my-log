@@ -6,6 +6,7 @@ import com.jiwon.mylog.exception.DuplicateException;
 import com.jiwon.mylog.exception.ErrorCode;
 import com.jiwon.mylog.exception.NotFoundException;
 import com.jiwon.mylog.repository.CategoryRepository;
+import com.jiwon.mylog.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +17,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,7 +31,7 @@ class CategoryServiceTest {
     private CategoryRepository categoryRepository;
 
     @Mock
-    private UserService userService;
+    private UserRepository userRepository;
 
     @DisplayName("중복된 카테고리명으로 생성을 요청할 시 예외가 발생한다.")
     @Test
@@ -38,8 +41,8 @@ class CategoryServiceTest {
         User user = User.builder().id(userId).username("testUser").build();
         CategoryRequest request = new CategoryRequest("나의 카테고리");
 
-        given(userService.findUserById(userId)).willReturn(user);
-        given(categoryRepository.existsByUserAndName(user, request.getName())).willReturn(true);
+        given(userRepository.findById(userId)).willReturn(Optional.of(user));
+        given(categoryRepository.existsByUserIdAndName(user.getId(), request.getName())).willReturn(true);
 
         // when & then
         assertThatThrownBy(() -> categoryService.create(userId, request))
@@ -54,18 +57,15 @@ class CategoryServiceTest {
         // given
         Long userId = 1L;
         Long categoryId = 10L;
-        User user = User.builder().id(userId).username("testUser").build();
         CategoryRequest request = new CategoryRequest("뉴카테고리!!");
 
-        given(userService.findUserById(userId)).willReturn(user);
-        given(categoryRepository.existsByUserAndName(user, request.getName())).willReturn(false);
-        given(categoryRepository.findById(categoryId)).willReturn(Optional.empty());
+        given(categoryRepository.existsByUserIdAndName(userId, request.getName())).willReturn(false);
+        given(categoryRepository.findByUserIdAndId(userId, categoryId)).willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> categoryService.update(userId, categoryId, request))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining(String.valueOf(categoryId))
-                .hasMessageContaining( ErrorCode.NOT_FOUND.getMessage());
+                .hasMessageContaining( ErrorCode.NOT_FOUND_CATEGORY.getMessage());
     }
 
     @DisplayName("중복된 카테고리명으로 수정을 요청할 시 예외가 발생한다.")
@@ -74,11 +74,9 @@ class CategoryServiceTest {
         // given
         Long userId = 1L;
         Long categoryId = 1L;
-        User user = User.builder().id(userId).username("testUser").build();
         CategoryRequest request = new CategoryRequest("뉴카테고리!!");
 
-        given(userService.findUserById(userId)).willReturn(user);
-        given(categoryRepository.existsByUserAndName(user, request.getName())).willReturn(true);
+        given(categoryRepository.existsByUserIdAndName(userId, request.getName())).willReturn(true);
 
         // when & then
         assertThatThrownBy(() -> categoryService.update(userId, categoryId, request))

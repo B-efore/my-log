@@ -4,7 +4,8 @@ package com.jiwon.mylog.entity.post;
 import com.jiwon.mylog.entity.category.Category;
 import com.jiwon.mylog.entity.Visibility;
 import com.jiwon.mylog.entity.base.BaseEntity;
-import com.jiwon.mylog.entity.post.dto.request.PostCreateRequest;
+import com.jiwon.mylog.entity.post.dto.request.PostRequest;
+import com.jiwon.mylog.entity.tag.Tag;
 import com.jiwon.mylog.entity.user.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -18,6 +19,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -63,15 +65,15 @@ public class Post extends BaseEntity {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="category_id")
+    @JoinColumn(name = "category_id")
     private Category category;
 
     @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostTag> postTags = new ArrayList<>();
 
-    public static Post create(PostCreateRequest request, User user, Category category) {
-        return Post.builder()
+    public static Post create(PostRequest request, User user, Category category, Set<Tag> tags) {
+        Post post = Post.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
                 .contentPreview(request.getContentPreview())
@@ -79,6 +81,42 @@ public class Post extends BaseEntity {
                 .visibility(Visibility.fromString(request.getVisibility()))
                 .user(user)
                 .category(category)
+                .pinned(request.isPinned())
                 .build();
+        post.setTags(tags);
+        return post;
+    }
+
+    public void update(PostRequest request, Category category, Set<Tag> tags) {
+        this.title = request.getTitle();
+        this.content = request.getContent();
+        this.contentPreview = request.getContentPreview();
+        this.visibility = Visibility.fromString(request.getVisibility());
+        this.pinned = request.isPinned();
+        this.category = category;
+        updateTags(tags);
+    }
+
+    private void setTags(Set<Tag> tags) {
+        this.postTags = tags.stream()
+                .map(tag -> PostTag.createPostTag(this, tag))
+                .toList();
+    }
+
+    private void updateTags(Set<Tag> tags) {
+        this.postTags.clear();
+        this.postTags.addAll(
+                tags.stream()
+                        .map(tag -> PostTag.createPostTag(this, tag))
+                        .toList()
+        );
+    }
+
+    public void delete() {
+        super.delete();
+    }
+
+    public boolean isDeleted() {
+        return super.isDeleted();
     }
 }
