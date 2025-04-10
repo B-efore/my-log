@@ -111,4 +111,12 @@ public class Post extends BaseEntity {
                         .toList()
         );
     }
+
+    public void delete() {
+        super.delete();
+    }
+
+    public boolean isDeleted() {
+        return super.isDeleted();
+    }
 }

@@ -55,10 +55,24 @@ public class PostService {
         return PostDetailResponse.fromPost(post);
     }
 
+    @Transactional
+    public void deletePost(Long userId, Long postId) {
+        Post post = getPostById(postId);
+        validateOwner(post, userId);
+        post.delete();
+    }
+
     @Transactional(readOnly = true)
     public PostDetailResponse getPost(Long postId) {
         Post post = getPostById(postId);
+        validateNotDeleted(post);
         return PostDetailResponse.fromPost(post);
+    }
+
+    private static void validateNotDeleted(Post post) {
+        if (post.isDeleted()) {
+           throw new NotFoundException(ErrorCode.NOT_FOUND_POST);
+        }
     }
 
     @Transactional(readOnly = true)

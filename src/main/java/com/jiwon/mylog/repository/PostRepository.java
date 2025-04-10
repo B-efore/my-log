@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
-    @Query(value = "select p from Post p join fetch p.category left join fetch p.postTags pt left join fetch pt.tag t where p.user.id = :userId",
+    @Query(value = "select p from Post p join fetch p.category left join fetch p.postTags pt left join fetch pt.tag t where p.deletedAt is null and p.user.id = :userId",
             countQuery = "select count(p) from Post p where p.user.id = :userId")
     Page<Post> findAllByUser(@Param("userId") Long userId, Pageable pageable);
 
