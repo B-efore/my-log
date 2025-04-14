@@ -4,6 +4,7 @@ import com.jiwon.mylog.entity.user.User;
 import com.jiwon.mylog.entity.user.UserStatus;
 import lombok.Builder;
 import lombok.Getter;
+
 @Builder
 @Getter
 public class UserResponse {

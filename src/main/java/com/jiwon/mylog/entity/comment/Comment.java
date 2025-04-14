@@ -1,5 +1,6 @@
 package com.jiwon.mylog.entity.comment;
 
+import com.jiwon.mylog.entity.comment.dto.request.CommentRequest;
 import com.jiwon.mylog.entity.post.Post;
 import com.jiwon.mylog.entity.Visibility;
 import com.jiwon.mylog.entity.base.BaseEntity;
@@ -18,30 +19,59 @@ import jakarta.persistence.OneToMany;
 
 import java.util.ArrayList;
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Builder
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 public class Comment extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_cooment_id")
-    private Comment parentComment;
-    @OneToMany(mappedBy = "parentComment")
-    private List<Comment> childComments = new ArrayList<>();
+    @JoinColumn(name = "parent_id")
+    private Comment parent;
+
+    @OneToMany(mappedBy = "parent")
+    private List<Comment> children = new ArrayList<>();
+
     @Column(nullable = false)
     private int depth;
+
     @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String content;
+
     @Enumerated(value = EnumType.STRING)
     private CommentStatus commentStatus;
+
     @Enumerated(value = EnumType.STRING)
     private Visibility visibility;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
+
+    public static Comment create(CommentRequest request, Comment parent, User user, Post post) {
+        int depth = (parent == null) ? 0 : parent.getDepth() + 1;
+        return Comment.builder()
+                .parent(parent)
+                .depth(depth)
+                .content(request.getContent())
+                .commentStatus(CommentStatus.WRITTEN)
+                .visibility(Visibility.fromString(request.getVisibility()))
+                .user(user)
+                .post(post)
+                .build();
+    }
 }
