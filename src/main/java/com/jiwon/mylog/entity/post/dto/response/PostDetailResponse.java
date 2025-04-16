@@ -3,6 +3,7 @@ package com.jiwon.mylog.entity.post.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.jiwon.mylog.entity.Visibility;
 import com.jiwon.mylog.entity.category.dto.response.CategoryResponse;
+import com.jiwon.mylog.entity.comment.dto.response.CommentResponse;
 import com.jiwon.mylog.entity.post.Post;
 import com.jiwon.mylog.entity.post.PostStatus;
 import com.jiwon.mylog.entity.tag.dto.response.TagResponse;
@@ -30,6 +31,7 @@ public class PostDetailResponse {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private final LocalDateTime createdAt;
     private final boolean pinned;
+    private final List<CommentResponse> comments;
 
     public static PostDetailResponse fromPost(Post post) {
         return PostDetailResponse.builder()
@@ -46,6 +48,9 @@ public class PostDetailResponse {
                         .toList())
                 .createdAt(post.getCreatedAt())
                 .pinned(post.isPinned())
+                .comments(post.getComments().stream()
+                        .map(comment -> CommentResponse.fromComment(comment))
+                        .toList())
                 .build();
     }
 }
