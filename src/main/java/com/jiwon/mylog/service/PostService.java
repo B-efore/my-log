@@ -44,7 +44,7 @@ public class PostService {
 
     @Transactional
     public PostDetailResponse updatePost(Long userId, Long postId, PostRequest postRequest) {
-        Post post = getPostById(postId);
+        Post post = getPostWithDetails(postId);
 
         validateOwner(post, userId);
 
@@ -64,12 +64,12 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public PostDetailResponse getPost(Long postId) {
-        Post post = getPostById(postId);
+        Post post = getPostWithDetails(postId);
         validateNotDeleted(post);
         return PostDetailResponse.fromPost(post);
     }
 
-    private static void validateNotDeleted(Post post) {
+    private void validateNotDeleted(Post post) {
         if (post.isDeleted()) {
            throw new NotFoundException(ErrorCode.NOT_FOUND_POST);
         }
@@ -88,6 +88,14 @@ public class PostService {
                 postPage.getSize(),
                 postPage.getTotalPages(),
                 (int) postPage.getTotalElements());
+    }
+
+    private Post getPostWithDetails(Long postId) {
+        Post post = postRepository.findWithUserAndCategory(postId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_POST));
+        postRepository.findWithTags(post);
+        postRepository.findWithComments(post);
+        return post;
     }
 
     private Post getPostById(Long postId) {

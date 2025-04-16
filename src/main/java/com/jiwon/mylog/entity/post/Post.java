@@ -4,6 +4,7 @@ package com.jiwon.mylog.entity.post;
 import com.jiwon.mylog.entity.category.Category;
 import com.jiwon.mylog.entity.Visibility;
 import com.jiwon.mylog.entity.base.BaseEntity;
+import com.jiwon.mylog.entity.comment.Comment;
 import com.jiwon.mylog.entity.post.dto.request.PostRequest;
 import com.jiwon.mylog.entity.tag.Tag;
 import com.jiwon.mylog.entity.user.User;
@@ -71,6 +72,10 @@ public class Post extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostTag> postTags = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "post")
+    private List<Comment> comments = new ArrayList<>();
 
     public static Post create(PostRequest request, User user, Category category, Set<Tag> tags) {
         Post post = Post.builder()
