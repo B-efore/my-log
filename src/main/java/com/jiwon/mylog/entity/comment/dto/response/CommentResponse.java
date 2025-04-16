@@ -31,7 +31,7 @@ public class CommentResponse {
                 .depth(comment.getDepth())
                 .visibility(comment.getVisibility())
                 .commentStatus(comment.getCommentStatus())
-                .content(comment.getContent())
+                .content(comment.isDeleted() ? "삭제된 댓글입니다." : comment.getContent())
                 .user(UserResponse.fromUser(comment.getUser()))
                 .createdAt(comment.getCreatedAt())
                 .updatedAt(comment.getUpdatedAt())

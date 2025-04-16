@@ -51,6 +51,13 @@ public class CommentService {
         return CommentResponse.fromComment(comment);
     }
 
+    @Transactional
+    public void delete(Long userId, Long commentId) {
+        Comment comment = getComment(commentId);
+        validateOwner(userId, comment);
+        comment.delete();
+    }
+
     private Comment getComment(Long commentId) {
         return commentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_COMMENT));

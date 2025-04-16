@@ -80,4 +80,8 @@ public class Comment extends BaseEntity {
         this.content = request.getContent();
         this.visibility = Visibility.fromString(request.getVisibility());
     }
+
+    public void delete() {
+        super.delete();
+    }
 }
