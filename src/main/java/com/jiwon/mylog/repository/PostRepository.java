@@ -15,9 +15,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             countQuery = "select count(p) from Post p where p.user.id = :userId")
     Page<Post> findAllByUser(@Param("userId") Long userId, Pageable pageable);
 
-    @Query("select p from Post p join fetch p.user where p.id = :id")
-    Optional<Post> findById(@Param("id") Long id);
-
     @Query("select p from Post p join fetch p.user join fetch p.category where p.id = :id")
     Optional<Post> findWithUserAndCategory(@Param("id") Long id);
 
