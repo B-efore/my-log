@@ -21,6 +21,8 @@ public class CommentResponse {
     private final UserResponse user;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private final LocalDateTime createdAt;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private final LocalDateTime updatedAt;
 
     public static CommentResponse fromComment(Comment comment) {
         return CommentResponse.builder()
@@ -32,6 +34,7 @@ public class CommentResponse {
                 .content(comment.getContent())
                 .user(UserResponse.fromUser(comment.getUser()))
                 .createdAt(comment.getCreatedAt())
+                .updatedAt(comment.getUpdatedAt())
                 .build();
     }
 }

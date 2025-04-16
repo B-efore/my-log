@@ -20,7 +20,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OrderBy;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -72,12 +71,10 @@ public class Post extends BaseEntity {
 
     @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("id asc")
     private List<PostTag> postTags = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "post")
-    @OrderBy("createdAt asc")
     private List<Comment> comments = new ArrayList<>();
 
     public static Post create(PostRequest request, User user, Category category, Set<Tag> tags) {

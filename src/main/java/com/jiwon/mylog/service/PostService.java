@@ -69,7 +69,7 @@ public class PostService {
         return PostDetailResponse.fromPost(post);
     }
 
-    private static void validateNotDeleted(Post post) {
+    private void validateNotDeleted(Post post) {
         if (post.isDeleted()) {
            throw new NotFoundException(ErrorCode.NOT_FOUND_POST);
         }

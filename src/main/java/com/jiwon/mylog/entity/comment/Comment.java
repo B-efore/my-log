@@ -1,6 +1,7 @@
 package com.jiwon.mylog.entity.comment;
 
-import com.jiwon.mylog.entity.comment.dto.request.CommentRequest;
+import com.jiwon.mylog.entity.comment.dto.request.CommentCreateRequest;
+import com.jiwon.mylog.entity.comment.dto.request.CommentUpdateRequest;
 import com.jiwon.mylog.entity.post.Post;
 import com.jiwon.mylog.entity.Visibility;
 import com.jiwon.mylog.entity.base.BaseEntity;
@@ -62,7 +63,7 @@ public class Comment extends BaseEntity {
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
-    public static Comment create(CommentRequest request, Comment parent, User user, Post post) {
+    public static Comment create(CommentCreateRequest request, Comment parent, User user, Post post) {
         int depth = (parent == null) ? 0 : parent.getDepth() + 1;
         return Comment.builder()
                 .parent(parent)
@@ -73,5 +74,10 @@ public class Comment extends BaseEntity {
                 .user(user)
                 .post(post)
                 .build();
+    }
+
+    public void update(CommentUpdateRequest request) {
+        this.content = request.getContent();
+        this.visibility = Visibility.fromString(request.getVisibility());
     }
 }
