@@ -9,14 +9,10 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
 import java.util.Date;
-import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -26,7 +22,6 @@ public class JwtService {
 
     private static final String TOKEN_PREFIX = "Bearer ";
     private static final String ID_KEY = "id";
-    private static final String ROLES_KEY = "roles";
     private final JwtProperties jwtProperties;
 
     public Long getUserId(String token) {
@@ -37,12 +32,19 @@ public class JwtService {
         return Jwts.parser().verifyWith(getSecretKey()).build().parseSignedClaims(token).getPayload().getSubject();
     }
 
-    public String createToken(Long userId, Authentication authentication) {
+    public String createAccessToken(Long userId) {
+        return createToken(userId, jwtProperties.getAccessExpiry());
+    }
 
-        Claims claims = createClaims(userId, authentication);
+    public String createRefreshToken(Long userId) {
+        return createToken(userId, jwtProperties.getRefreshExpiry());
+    }
+
+    private String createToken(Long userId, Long expiredTime) {
+        Claims claims = createClaims(userId);
         String issuer = jwtProperties.getIssuer();
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtProperties.getAccessExpiry());
+        Date expiryDate = new Date(now.getTime() + expiredTime);
 
         return Jwts.builder()
                 .issuer(issuer)
@@ -53,21 +55,9 @@ public class JwtService {
                 .compact();
     }
 
-    private Claims createClaims(Long userId, Authentication authentication) {
-        String username = authentication.getName();
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-
-        ClaimsBuilder claimsBuilder = Jwts.claims().subject(username);
+    private Claims createClaims(Long userId) {
+        ClaimsBuilder claimsBuilder = Jwts.claims();
         claimsBuilder.add(ID_KEY, userId);
-
-        if (!authorities.isEmpty()) {
-            claimsBuilder.add(
-                    ROLES_KEY,
-                    authorities.stream()
-                            .map(GrantedAuthority::getAuthority)
-                            .collect(Collectors.joining(",")));
-        }
-
         return claimsBuilder.build();
     }
 

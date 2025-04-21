@@ -1,8 +1,9 @@
 package com.jiwon.mylog.controller;
 
 import com.jiwon.mylog.entity.user.dto.request.UserLoginRequest;
-import com.jiwon.mylog.entity.user.dto.response.UserLoginResponse;
+import com.jiwon.mylog.security.token.TokenResponse;
 import com.jiwon.mylog.entity.user.dto.request.UserSaveRequest;
+import com.jiwon.mylog.security.token.ReissueTokenRequest;
 import com.jiwon.mylog.service.AuthService;
 import com.jiwon.mylog.service.UserService;
 import jakarta.validation.Valid;
@@ -29,8 +30,14 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserLoginResponse> login(@Valid @RequestBody UserLoginRequest userLoginRequest) {
-        UserLoginResponse userLoginResponse = authService.login(userLoginRequest);
-        return new ResponseEntity<>(userLoginResponse, HttpStatus.OK);
+    public ResponseEntity<TokenResponse> login(@Valid @RequestBody UserLoginRequest userLoginRequest) {
+        TokenResponse tokenResponse = authService.login(userLoginRequest);
+        return new ResponseEntity<>(tokenResponse, HttpStatus.OK);
+    }
+
+    @PostMapping("/reissue")
+    public ResponseEntity<TokenResponse> reissueToken(@RequestBody ReissueTokenRequest reissueTokenRequest) {
+        TokenResponse tokenResponse = authService.reissueToken(reissueTokenRequest);
+        return new ResponseEntity<>(tokenResponse, HttpStatus.OK);
     }
 }
