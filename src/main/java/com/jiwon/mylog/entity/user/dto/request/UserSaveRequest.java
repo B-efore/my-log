@@ -28,6 +28,9 @@ public class UserSaveRequest {
             message = "비밀번호는 영문 대소문자, 숫자, 특수문자를 혼합해 8~16자를 사용하세요.")
     private String password;
 
+    @NotBlank(message = "비밀번호 확인은 필수 입력값입니다.")
+    private String confirmPassword;
+
     public User toEntity(String encodedPassword) {
         return User.builder()
                 .email(email)

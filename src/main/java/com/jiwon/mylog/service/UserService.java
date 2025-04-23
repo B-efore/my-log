@@ -1,12 +1,11 @@
 package com.jiwon.mylog.service;
 
 import com.jiwon.mylog.entity.category.dto.request.CategoryRequest;
-import com.jiwon.mylog.entity.category.dto.response.CategoryResponse;
 import com.jiwon.mylog.entity.user.dto.request.UserSaveRequest;
 import com.jiwon.mylog.entity.user.User;
+import com.jiwon.mylog.exception.CustomException;
 import com.jiwon.mylog.exception.DuplicateException;
 import com.jiwon.mylog.exception.ErrorCode;
-import com.jiwon.mylog.exception.NotFoundException;
 import com.jiwon.mylog.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -25,6 +24,7 @@ public class UserService {
     public Long save(UserSaveRequest userSaveRequest) {
 
         validateDuplicateEmail(userSaveRequest);
+        validateConfirmPassword(userSaveRequest);
 
         String encodedPassword = bCryptPasswordEncoder.encode(userSaveRequest.getPassword());
         User user = userSaveRequest.toEntity(encodedPassword);
@@ -32,6 +32,12 @@ public class UserService {
         categoryService.create(savedUser.getId(), new CategoryRequest("전체"));
 
         return savedUser.getId();
+    }
+
+    private static void validateConfirmPassword(UserSaveRequest userSaveRequest) {
+        if(!userSaveRequest.getPassword().equals(userSaveRequest.getConfirmPassword())) {
+            throw new CustomException(ErrorCode.NOT_CONFIRM_PASSWORD);
+        }
     }
 
     private void validateDuplicateEmail(UserSaveRequest userSaveRequest) {
