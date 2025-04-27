@@ -80,4 +80,8 @@ public class User extends BaseEntity {
                 .map(UserRole::getRole)
                 .collect(Collectors.toList());
     }
+
+    public void verifyUser() {
+        this.status = UserStatus.ACTIVE;
+    }
 }

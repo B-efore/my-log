@@ -1,6 +1,8 @@
 package com.jiwon.mylog.service;
 
+import com.jiwon.mylog.entity.user.User;
 import com.jiwon.mylog.entity.user.dto.request.UserLoginRequest;
+import com.jiwon.mylog.mail.MailService;
 import com.jiwon.mylog.security.token.TokenResponse;
 import com.jiwon.mylog.exception.ErrorCode;
 import com.jiwon.mylog.exception.InvalidEmailOrPasswordException;
@@ -24,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final MailService mailService;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
@@ -64,5 +67,16 @@ public class AuthService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
         String accessToken = jwtService.createAccessToken(userId);
         return TokenResponse.of(accessToken, refreshToken);
+    }
+
+    @Transactional
+    public boolean verifyEmailCode(String email, String code) {
+        boolean verified = mailService.verifyEmailCode(email, code);
+        if (verified) {
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
+            user.verifyUser();
+        }
+        return verified;
     }
 }

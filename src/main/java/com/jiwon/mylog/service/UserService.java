@@ -6,7 +6,9 @@ import com.jiwon.mylog.entity.user.User;
 import com.jiwon.mylog.exception.CustomException;
 import com.jiwon.mylog.exception.DuplicateException;
 import com.jiwon.mylog.exception.ErrorCode;
+import com.jiwon.mylog.mail.MailService;
 import com.jiwon.mylog.repository.UserRepository;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final CategoryService categoryService;
+    private final MailService mailService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Transactional
@@ -31,10 +34,16 @@ public class UserService {
         User savedUser = userRepository.save(user);
         categoryService.create(savedUser.getId(), new CategoryRequest("전체"));
 
+        try {
+            mailService.sendMail(savedUser.getEmail());
+        } catch (MessagingException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+
         return savedUser.getId();
     }
 
-    private static void validateConfirmPassword(UserSaveRequest userSaveRequest) {
+    private void validateConfirmPassword(UserSaveRequest userSaveRequest) {
         if(!userSaveRequest.getPassword().equals(userSaveRequest.getConfirmPassword())) {
             throw new CustomException(ErrorCode.NOT_CONFIRM_PASSWORD);
         }
