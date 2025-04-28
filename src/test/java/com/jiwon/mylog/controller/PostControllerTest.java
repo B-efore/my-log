@@ -1,16 +1,17 @@
 package com.jiwon.mylog.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jiwon.mylog.entity.Visibility;
-import com.jiwon.mylog.entity.category.dto.response.CategoryResponse;
-import com.jiwon.mylog.entity.post.PostStatus;
-import com.jiwon.mylog.entity.post.dto.request.PostRequest;
-import com.jiwon.mylog.entity.post.dto.response.PostDetailResponse;
-import com.jiwon.mylog.entity.tag.dto.response.TagResponse;
-import com.jiwon.mylog.entity.user.UserStatus;
-import com.jiwon.mylog.entity.user.dto.response.UserResponse;
-import com.jiwon.mylog.resolver.LoginUserArgumentResolver;
-import com.jiwon.mylog.service.PostService;
+import com.jiwon.mylog.domain.post.controller.PostController;
+import com.jiwon.mylog.global.common.enums.Visibility;
+import com.jiwon.mylog.domain.category.dto.response.CategoryResponse;
+import com.jiwon.mylog.domain.post.entity.PostStatus;
+import com.jiwon.mylog.domain.post.dto.request.PostRequest;
+import com.jiwon.mylog.domain.post.dto.response.PostDetailResponse;
+import com.jiwon.mylog.domain.tag.dto.response.TagResponse;
+import com.jiwon.mylog.domain.user.entity.UserStatus;
+import com.jiwon.mylog.domain.user.dto.response.UserResponse;
+import com.jiwon.mylog.global.security.auth.resolver.LoginUserArgumentResolver;
+import com.jiwon.mylog.domain.post.service.PostService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

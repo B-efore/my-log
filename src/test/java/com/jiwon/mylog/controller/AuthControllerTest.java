@@ -8,11 +8,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jiwon.mylog.entity.user.dto.request.UserSaveRequest;
-import com.jiwon.mylog.exception.ErrorCode;
-import com.jiwon.mylog.security.jwt.JwtService;
-import com.jiwon.mylog.service.AuthService;
-import com.jiwon.mylog.service.UserService;
+import com.jiwon.mylog.global.security.auth.controller.AuthController;
+import com.jiwon.mylog.domain.user.dto.request.UserSaveRequest;
+import com.jiwon.mylog.global.common.error.ErrorCode;
+import com.jiwon.mylog.global.security.jwt.JwtService;
+import com.jiwon.mylog.global.security.auth.service.AuthService;
+import com.jiwon.mylog.domain.user.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;

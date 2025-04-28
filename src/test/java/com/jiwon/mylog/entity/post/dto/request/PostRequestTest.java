@@ -1,5 +1,6 @@
 package com.jiwon.mylog.entity.post.dto.request;
 
+import com.jiwon.mylog.domain.post.dto.request.PostRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;

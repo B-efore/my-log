@@ -1,13 +1,15 @@
 package com.jiwon.mylog.service;
 
-import com.jiwon.mylog.entity.category.Category;
-import com.jiwon.mylog.entity.post.Post;
-import com.jiwon.mylog.entity.post.dto.request.PostRequest;
-import com.jiwon.mylog.entity.post.dto.response.PostDetailResponse;
-import com.jiwon.mylog.entity.user.User;
-import com.jiwon.mylog.repository.CategoryRepository;
-import com.jiwon.mylog.repository.PostRepository;
-import com.jiwon.mylog.repository.UserRepository;
+import com.jiwon.mylog.domain.category.entity.Category;
+import com.jiwon.mylog.domain.post.entity.Post;
+import com.jiwon.mylog.domain.post.service.PostService;
+import com.jiwon.mylog.domain.post.dto.request.PostRequest;
+import com.jiwon.mylog.domain.post.dto.response.PostDetailResponse;
+import com.jiwon.mylog.domain.tag.service.TagService;
+import com.jiwon.mylog.domain.user.entity.User;
+import com.jiwon.mylog.domain.category.repository.CategoryRepository;
+import com.jiwon.mylog.domain.post.repository.PostRepository;
+import com.jiwon.mylog.domain.user.repository.UserRepository;
 import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
