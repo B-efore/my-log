@@ -1,15 +1,20 @@
 package com.jiwon.mylog.global.mail.service;
 
+import com.jiwon.mylog.global.common.error.ErrorCode;
+import com.jiwon.mylog.global.common.error.exception.MailSendFailedException;
 import com.jiwon.mylog.global.redis.RedisUtil;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import java.util.Random;
+
+import java.io.UnsupportedEncodingException;
+import java.security.SecureRandom;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +25,7 @@ public class MailService {
     private final JavaMailSender javaMailSender;
     private final RedisUtil redisUtil;
 
+    @Transactional(readOnly = true)
     public Boolean verifyEmailCode(String email, String code) {
         String codeFindByEmail = redisUtil.getData(email);
         if (codeFindByEmail == null) {
@@ -28,7 +34,8 @@ public class MailService {
         return codeFindByEmail.equals(code);
     }
 
-    public void sendMail(String email) throws MessagingException {
+    @Transactional
+    public void sendMail(String email)  {
         if (redisUtil.existData(email)) {
             redisUtil.deleteData(email);
         }
@@ -40,22 +47,26 @@ public class MailService {
         try {
             javaMailSender.send(message);
         } catch (MailException e) {
-            throw new RuntimeException(e.getMessage());
+            throw new MailSendFailedException(ErrorCode.FAIlED_MAIL_SEND);
         }
     }
 
-    private MimeMessage createEmail(String email, String code) throws MessagingException {
+    private MimeMessage createEmail(String email, String code) {
         MimeMessage message = javaMailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
-        String text = creatText(code);
-        helper.setFrom(senderEmail);
-        helper.setTo(email);
-        helper.setSubject("[Babo] 이메일 인증");
-        helper.setText(text, true);
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
+            String text = createText(code);
+            helper.setFrom(senderEmail, "MyLog");
+            helper.setTo(email);
+            helper.setSubject("[Babo] 이메일 인증");
+            helper.setText(text, true);
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            throw new MailSendFailedException(ErrorCode.FAIlED_MAIL_SEND);
+        }
         return message;
     }
 
-    private String creatText(String code) {
+    private String createText(String code) {
         return """
             <h3>인증 번호를 입력해주세요.</h3>
             <h1>%s</h1>
@@ -65,7 +76,7 @@ public class MailService {
     }
 
     private String createCode() {
-        Random random = new Random();
+        SecureRandom random = new SecureRandom();
         StringBuilder key = new StringBuilder();
 
         for (int i = 0; i < 6; i++) {

@@ -12,6 +12,8 @@ public enum ErrorCode {
     INVALID_EMAIL_OR_PASSWORD(HttpStatus.UNAUTHORIZED, "잘못된 이메일 또는 비밀번호입니다."),
     INVALID_TOKEN(HttpStatus.BAD_REQUEST, "유효하지 않은 토큰입니다."),
 
+    FAIlED_MAIL_SEND(HttpStatus.INTERNAL_SERVER_ERROR, "메일 전송에 실패했습니다."),
+
     NOT_CONFIRM_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
 
     DUPLICATE_EMAIL(HttpStatus.BAD_REQUEST, "이미 사용중인 이메일입니다."),
