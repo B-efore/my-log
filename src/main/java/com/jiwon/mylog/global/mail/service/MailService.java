@@ -58,7 +58,7 @@ public class MailService {
             String text = createText(code);
             helper.setFrom(senderEmail, "MyLog");
             helper.setTo(email);
-            helper.setSubject("[Babo] 이메일 인증");
+            helper.setSubject("[MyLog] 인증번호입니다.");
             helper.setText(text, true);
         } catch (MessagingException | UnsupportedEncodingException e) {
             throw new MailSendFailedException(ErrorCode.FAIlED_MAIL_SEND);

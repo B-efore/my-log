@@ -1,7 +1,14 @@
 package com.jiwon.mylog.global.security.auth.service;
 
+import com.jiwon.mylog.domain.category.dto.request.CategoryRequest;
+import com.jiwon.mylog.domain.category.service.CategoryService;
+import com.jiwon.mylog.domain.user.dto.request.PasswordResetRequest;
+import com.jiwon.mylog.domain.user.dto.request.UserSaveRequest;
 import com.jiwon.mylog.domain.user.entity.User;
 import com.jiwon.mylog.domain.user.dto.request.UserLoginRequest;
+import com.jiwon.mylog.global.common.error.exception.CustomException;
+import com.jiwon.mylog.global.common.error.exception.DuplicateException;
+import com.jiwon.mylog.global.mail.dto.request.MailRequest;
 import com.jiwon.mylog.global.mail.service.MailService;
 import com.jiwon.mylog.global.security.auth.user.CustomUserDetails;
 import com.jiwon.mylog.global.security.jwt.JwtService;
@@ -18,6 +25,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,9 +34,25 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final CategoryService categoryService;
     private final MailService mailService;
     private final JwtService jwtService;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final AuthenticationManager authenticationManager;
+
+    @Transactional
+    public Long save(UserSaveRequest userSaveRequest) {
+
+        validateDuplicateEmail(userSaveRequest);
+        validateConfirmPassword(userSaveRequest.getPassword(), userSaveRequest.getConfirmPassword());
+
+        String encodedPassword = bCryptPasswordEncoder.encode(userSaveRequest.getPassword());
+        User user = userSaveRequest.toEntity(encodedPassword);
+        User savedUser = userRepository.save(user);
+        categoryService.create(savedUser.getId(), new CategoryRequest("전체"));
+
+        return savedUser.getId();
+    }
 
     @Transactional
     public TokenResponse login(UserLoginRequest userLoginRequest) {
@@ -57,14 +81,11 @@ public class AuthService {
     public TokenResponse reissueToken(ReissueTokenRequest request) {
 
         String refreshToken = request.getRefreshToken();
-
-        if (!jwtService.validateToken(refreshToken)) {
-            throw new IllegalArgumentException(ErrorCode.INVALID_TOKEN.getMessage());
-        }
+        validateToken(refreshToken);
 
         Long userId = jwtService.getUserId(refreshToken);
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
+        validateExistUser(userId);
+
         String accessToken = jwtService.createAccessToken(userId);
         return TokenResponse.of(accessToken, refreshToken);
     }
@@ -78,5 +99,47 @@ public class AuthService {
             user.verifyUser();
         }
         return verified;
+    }
+
+    @Transactional
+    public void sendPasswordResetMail(MailRequest mailRequest) {
+        String email = mailRequest.getEmail();
+        if (!userRepository.existsByEmail(email)) {
+            throw new NotFoundException(ErrorCode.NOT_FOUND_USER);
+        }
+        mailService.sendMail(mailRequest.getEmail());
+    }
+
+    @Transactional
+    public void resetPassword(PasswordResetRequest passwordResetRequest) {
+        validateConfirmPassword(passwordResetRequest.getPassword(), passwordResetRequest.getConfirmPassword());
+        String encodedPassword = bCryptPasswordEncoder.encode(passwordResetRequest.getPassword());
+        User user = userRepository.findByEmail(passwordResetRequest.getEmail())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
+        user.updatePassword(encodedPassword);
+    }
+
+    private void validateToken(String refreshToken) {
+        if (!jwtService.validateToken(refreshToken)) {
+            throw new IllegalArgumentException(ErrorCode.INVALID_TOKEN.getMessage());
+        }
+    }
+
+    private void validateExistUser(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException(ErrorCode.NOT_FOUND_USER);
+        }
+    }
+
+    private void validateConfirmPassword(String password, String confirmPassword) {
+        if (!password.equals(confirmPassword)) {
+            throw new CustomException(ErrorCode.NOT_CONFIRM_PASSWORD);
+        }
+    }
+
+    private void validateDuplicateEmail(UserSaveRequest userSaveRequest) {
+        if (userRepository.existsByEmail(userSaveRequest.getEmail())) {
+            throw new DuplicateException(ErrorCode.DUPLICATE_EMAIL);
+        }
     }
 }

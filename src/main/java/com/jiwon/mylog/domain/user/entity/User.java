@@ -84,4 +84,8 @@ public class User extends BaseEntity {
     public void verifyUser() {
         this.status = UserStatus.ACTIVE;
     }
+
+    public void updatePassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
 }

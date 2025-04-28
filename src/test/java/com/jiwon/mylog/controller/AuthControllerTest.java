@@ -8,12 +8,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jiwon.mylog.domain.category.service.CategoryService;
 import com.jiwon.mylog.global.security.auth.controller.AuthController;
 import com.jiwon.mylog.domain.user.dto.request.UserSaveRequest;
 import com.jiwon.mylog.global.common.error.ErrorCode;
 import com.jiwon.mylog.global.security.jwt.JwtService;
 import com.jiwon.mylog.global.security.auth.service.AuthService;
-import com.jiwon.mylog.domain.user.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -40,13 +40,10 @@ class AuthControllerTest {
     private AuthService authService;
 
     @MockitoBean
-    private UserService userService;
-
-    @MockitoBean
     private JwtService jwtService;
 
     private ResultActions signUpRequest(UserSaveRequest request) throws Exception {
-        given(userService.save(any(UserSaveRequest.class))).willReturn(1L);
+        given(authService.save(any(UserSaveRequest.class))).willReturn(1L);
 
         return mockMvc.perform(post("/auth/signup")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -71,15 +68,15 @@ class AuthControllerTest {
         @CsvSource({"test1234얌", "hello-wow", "안녕", "10-유저_name"})
         @ParameterizedTest
         void 올바른_닉네임_회원가입(String name) throws Exception {
-            UserSaveRequest request = new UserSaveRequest(name, "test@example.com", "Password123!");
-            given(userService.save(any(UserSaveRequest.class))).willReturn(1L);
+            UserSaveRequest request = new UserSaveRequest(name, "test@example.com", "Password123!", "Password123!");
+            given(authService.save(any(UserSaveRequest.class))).willReturn(1L);
             validateSuccessResponse(signUpRequest(request));
         }
 
         @CsvSource({"안녕^-^", "happy spring", "'-'", "my10ngname2"})
         @ParameterizedTest
         void 닉네임_검증_실패(String nickname) throws Exception {
-            UserSaveRequest request = new UserSaveRequest(nickname, "test@example.com", "Password123!");
+            UserSaveRequest request = new UserSaveRequest(nickname, "test@example.com", "Password123!", "Password123!");
             validateErrorResponse(signUpRequest(request), "username", "닉네임은 한글, 영문, 숫자, '_', '-' 조합의 2~10자리를 사용하세요.");
         }
     }
@@ -91,14 +88,14 @@ class AuthControllerTest {
         @CsvSource({"user@example.com", "hello_email00@domain.co.kr", "Test123@google.com"})
         @ParameterizedTest
         void 올바른_이메일_회원가입(String email) throws Exception {
-            UserSaveRequest request = new UserSaveRequest("testUser", email, "Password123!");
+            UserSaveRequest request = new UserSaveRequest("testUser", email, "Password123!", "Password123!");
             validateSuccessResponse(signUpRequest(request));
         }
 
         @CsvSource({"'@example.com'", "'user@'", "'Test123google.com'", "'user@examp!e.com'", "' user@example.com'"})
         @ParameterizedTest
         void 이메일_검증_실패(String email) throws Exception {
-            UserSaveRequest request = new UserSaveRequest("testUser", email, "Password123!");
+            UserSaveRequest request = new UserSaveRequest("testUser", email, "Password123!", "Password123!");
             validateErrorResponse(signUpRequest(request), "email", "올바른 이메일 형식을 입력하세요. ex: user@example.com");
         }
     }
@@ -110,14 +107,14 @@ class AuthControllerTest {
         @CsvSource({"He110!^^", "myPassword!@#$00", "aAzZ09!@#$"})
         @ParameterizedTest
         void 올바른_비밀번호_회원가입(String password) throws Exception {
-            UserSaveRequest request = new UserSaveRequest("testUser", "test@example.com", password);
+            UserSaveRequest request = new UserSaveRequest("testUser", "test@example.com", password, password);
             validateSuccessResponse(signUpRequest(request));
         }
 
         @CsvSource({"' whgdmsqlqjs1!'", "'sh0rt!'", "'veryveryveryl0ng!'", "'justEnglish?'", "'!@#$%^&*()-=.,/'", "'1234567890'"})
         @ParameterizedTest
         void 비밀번호_검증_실패(String password) throws Exception {
-            UserSaveRequest request = new UserSaveRequest("testUser", "test@example.com", password);
+            UserSaveRequest request = new UserSaveRequest("testUser", "test@example.com", password, password);
             validateErrorResponse(signUpRequest(request), "password", "비밀번호는 영문 대소문자, 숫자, 특수문자를 혼합해 8~16자를 사용하세요.");
         }
     }
