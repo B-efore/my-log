@@ -37,7 +37,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173")); // 프론트 주소
+        config.setAllowedOrigins(List.of("http://localhost:5173"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
@@ -56,11 +56,10 @@ public class SecurityConfig {
                 .httpBasic(auth -> auth.disable());
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/error", "/auth/**").permitAll()
+                        .requestMatchers("/error", "/auth/**", "/emails/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/posts/**", "/categories/**").permitAll()
-                        .requestMatchers("/users/**").permitAll()
-                        .requestMatchers("/posts/**", "/categories/**", "/comments/**").authenticated());
+                        .requestMatchers("/users/**", "/posts/**", "/categories/**", "/comments/**").authenticated());
 
         http
                 .addFilterBefore(new JwtTokenAuthenticationFilter(jwtService, userDetailsService), UsernamePasswordAuthenticationFilter.class);
