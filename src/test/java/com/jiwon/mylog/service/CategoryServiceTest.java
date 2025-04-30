@@ -1,12 +1,13 @@
 package com.jiwon.mylog.service;
 
-import com.jiwon.mylog.entity.category.dto.request.CategoryRequest;
-import com.jiwon.mylog.entity.user.User;
-import com.jiwon.mylog.exception.DuplicateException;
-import com.jiwon.mylog.exception.ErrorCode;
-import com.jiwon.mylog.exception.NotFoundException;
-import com.jiwon.mylog.repository.CategoryRepository;
-import com.jiwon.mylog.repository.UserRepository;
+import com.jiwon.mylog.domain.category.service.CategoryService;
+import com.jiwon.mylog.domain.category.dto.request.CategoryRequest;
+import com.jiwon.mylog.domain.user.entity.User;
+import com.jiwon.mylog.global.common.error.exception.DuplicateException;
+import com.jiwon.mylog.global.common.error.ErrorCode;
+import com.jiwon.mylog.global.common.error.exception.NotFoundException;
+import com.jiwon.mylog.domain.category.repository.CategoryRepository;
+import com.jiwon.mylog.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

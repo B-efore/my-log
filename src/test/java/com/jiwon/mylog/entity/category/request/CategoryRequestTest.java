@@ -1,6 +1,6 @@
 package com.jiwon.mylog.entity.category.request;
 
-import com.jiwon.mylog.entity.category.dto.request.CategoryRequest;
+import com.jiwon.mylog.domain.category.dto.request.CategoryRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
