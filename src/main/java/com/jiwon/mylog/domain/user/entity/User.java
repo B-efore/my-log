@@ -85,6 +85,12 @@ public class User extends BaseEntity {
         this.status = UserStatus.ACTIVE;
     }
 
+    public void updateInformation(String username, String bio, String profileImageUrl) {
+        this.username = username;
+        this.bio = bio;
+        this.profileImageUrl = profileImageUrl;
+    }
+
     public void updatePassword(String encodedPassword) {
         this.password = encodedPassword;
     }
