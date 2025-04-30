@@ -36,7 +36,7 @@ public class UserSaveRequest {
                 .email(email)
                 .password(encodedPassword)
                 .username(username)
-                .status(UserStatus.PENDING)
+                .status(UserStatus.ACTIVE)
                 .build();
     }
 }

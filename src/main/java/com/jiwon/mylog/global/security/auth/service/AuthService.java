@@ -92,13 +92,7 @@ public class AuthService {
 
     @Transactional
     public boolean verifyEmailCode(String email, String code) {
-        boolean verified = mailService.verifyEmailCode(email, code);
-        if (verified) {
-            User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
-            user.verifyUser();
-        }
-        return verified;
+        return mailService.verifyEmailCode(email, code);
     }
 
     @Transactional
