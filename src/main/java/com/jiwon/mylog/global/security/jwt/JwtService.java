@@ -22,26 +22,27 @@ public class JwtService {
 
     private static final String TOKEN_PREFIX = "Bearer ";
     private static final String ID_KEY = "id";
+    private static final String EMAIL_KEY = "email";
     private final JwtProperties jwtProperties;
 
     public Long getUserId(String token) {
-        return Jwts.parser().verifyWith(getSecretKey()).build().parseSignedClaims(token).getPayload().get("id", Long.class);
+        return Jwts.parser().verifyWith(getSecretKey()).build().parseSignedClaims(token).getPayload().get(ID_KEY, Long.class);
     }
 
     public String getEmail(String token) {
-        return Jwts.parser().verifyWith(getSecretKey()).build().parseSignedClaims(token).getPayload().getSubject();
+        return Jwts.parser().verifyWith(getSecretKey()).build().parseSignedClaims(token).getPayload().get(EMAIL_KEY, String.class);
     }
 
-    public String createAccessToken(Long userId) {
-        return createToken(userId, jwtProperties.getAccessExpiry());
+    public String createAccessToken(Long userId, String email) {
+        return createToken(userId, email, jwtProperties.getAccessExpiry());
     }
 
-    public String createRefreshToken(Long userId) {
-        return createToken(userId, jwtProperties.getRefreshExpiry());
+    public String createRefreshToken(Long userId, String email) {
+        return createToken(userId, email, jwtProperties.getRefreshExpiry());
     }
 
-    private String createToken(Long userId, Long expiredTime) {
-        Claims claims = createClaims(userId);
+    private String createToken(Long userId, String email, Long expiredTime) {
+        Claims claims = createClaims(userId, email);
         String issuer = jwtProperties.getIssuer();
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expiredTime);
@@ -55,9 +56,10 @@ public class JwtService {
                 .compact();
     }
 
-    private Claims createClaims(Long userId) {
+    private Claims createClaims(Long userId, String email) {
         ClaimsBuilder claimsBuilder = Jwts.claims();
         claimsBuilder.add(ID_KEY, userId);
+        claimsBuilder.add(EMAIL_KEY, email);
         return claimsBuilder.build();
     }
 

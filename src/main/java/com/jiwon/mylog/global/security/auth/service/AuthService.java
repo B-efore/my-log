@@ -63,9 +63,10 @@ public class AuthService {
 
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             Long userId = userDetails.getUserId();
+            String email = userLoginRequest.getEmail();
 
-            String accessToken = jwtService.createAccessToken(userId);
-            String refreshToken = jwtService.createRefreshToken(userId);
+            String accessToken = jwtService.createAccessToken(userId, email);
+            String refreshToken = jwtService.createRefreshToken(userId, email);
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -84,9 +85,10 @@ public class AuthService {
         validateToken(refreshToken);
 
         Long userId = jwtService.getUserId(refreshToken);
+        String email = jwtService.getEmail(refreshToken);
         validateExistUser(userId);
 
-        String accessToken = jwtService.createAccessToken(userId);
+        String accessToken = jwtService.createAccessToken(userId, email);
         return TokenResponse.of(accessToken, refreshToken);
     }
 
