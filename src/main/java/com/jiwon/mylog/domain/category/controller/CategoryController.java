@@ -5,6 +5,9 @@ import com.jiwon.mylog.global.security.auth.annotation.LoginUser;
 import com.jiwon.mylog.domain.category.dto.response.CategoryListResponse;
 import com.jiwon.mylog.domain.category.dto.response.CategoryResponse;
 import com.jiwon.mylog.domain.category.dto.request.CategoryRequest;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,11 +24,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/categories")
 @RestController
+@Tag(name = "categories", description = "카테고리 API")
 public class CategoryController {
 
     private final CategoryService categoryService;
 
     @PostMapping
+    @Operation(
+            summary = "카테고리 생성",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "카테고리 생성 성공"),
+                    @ApiResponse(responseCode = "400", description = "중복된 카테고리명이 존재함")
+            }
+    )
     public ResponseEntity<CategoryResponse> create(
             @LoginUser Long userId,
             @Valid @RequestBody CategoryRequest categoryRequest) {
@@ -34,6 +45,14 @@ public class CategoryController {
     }
 
     @PatchMapping("/{categoryId}")
+    @Operation(
+            summary = "카테고리 수정",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "카테고리 수정 성공"),
+                    @ApiResponse(responseCode = "400", description = "중복된 카테고리명이 존재함"),
+                    @ApiResponse(responseCode = "404", description = "해당 카테고리를 찾을 수 없음")
+            }
+    )
     public ResponseEntity<CategoryResponse> update(
             @LoginUser Long userId,
             @PathVariable("categoryId") Long categoryId,
@@ -43,6 +62,13 @@ public class CategoryController {
     }
 
     @DeleteMapping("/{categoryId}")
+    @Operation(
+            summary = "카테고리 삭제",
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "카테고리 삭제 성공"),
+                    @ApiResponse(responseCode = "404", description = "해당 카테고리를 찾을 수 없음")
+            }
+    )
     public ResponseEntity<Void> delete(
             @LoginUser Long userId,
             @PathVariable("categoryId") Long categoryId) {
@@ -51,6 +77,12 @@ public class CategoryController {
     }
 
     @GetMapping
+    @Operation(
+            summary = "특정 유저 카테고리 전체 조회",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "카테고리 조회 성공")
+            }
+    )
     public ResponseEntity<CategoryListResponse> getCategories(
             @LoginUser Long userId) {
         CategoryListResponse response = categoryService.getCategories(userId);
