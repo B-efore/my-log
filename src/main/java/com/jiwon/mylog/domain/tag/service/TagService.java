@@ -19,10 +19,10 @@ public class TagService {
     private final TagRepository tagRepository;
 
     @Transactional
-    public Set<Tag> getTagsById(User user, List<TagRequest> tagRequests) {
+    public List<Tag> getTagsById(User user, List<TagRequest> tagRequests) {
         return tagRequests.stream()
                 .map(req -> getOrCreateTag(user, req))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 
     private Tag getOrCreateTag(User user, TagRequest tagRequest) {
