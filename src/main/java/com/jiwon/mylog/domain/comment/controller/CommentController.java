@@ -5,6 +5,9 @@ import com.jiwon.mylog.global.security.auth.annotation.LoginUser;
 import com.jiwon.mylog.domain.comment.dto.request.CommentCreateRequest;
 import com.jiwon.mylog.domain.comment.dto.request.CommentUpdateRequest;
 import com.jiwon.mylog.domain.comment.dto.response.CommentResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,11 +23,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/comments")
 @RestController
+@Tag(name = "comments", description = "댓글 API")
 public class CommentController {
 
     private final CommentService commentService;
 
     @PostMapping
+    @Operation(
+            summary = "댓글 생성",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "댓글 생성 성공"),
+                    @ApiResponse(responseCode = "404", description = "게시글 또는 댓글 작성자를 찾을 수 없음")
+            }
+    )
     public ResponseEntity<CommentResponse> create(
             @LoginUser Long userId,
             @Valid @RequestBody CommentCreateRequest commentCreateRequest) {
@@ -33,6 +44,14 @@ public class CommentController {
     }
 
     @PatchMapping("/{commentId}")
+    @Operation(
+            summary = "댓글 수정",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "댓글 수정 성공"),
+                    @ApiResponse(responseCode = "403", description = "댓글 수정 권한이 없음"),
+                    @ApiResponse(responseCode = "404", description = "댓글을 찾을 수 없음")
+            }
+    )
     public ResponseEntity<CommentResponse> update(
             @LoginUser Long userId,
             @PathVariable("commentId") Long commentId,
@@ -42,6 +61,14 @@ public class CommentController {
     }
 
     @DeleteMapping("/{commentId}")
+    @Operation(
+            summary = "댓글 삭제",
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "댓글 삭제 성공"),
+                    @ApiResponse(responseCode = "403", description = "댓글 삭제 권한이 없음"),
+                    @ApiResponse(responseCode = "404", description = "댓글을 찾을 수 없음")
+            }
+    )
     public ResponseEntity<Void> delete(
             @LoginUser Long userId,
             @PathVariable("commentId") Long commentId) {

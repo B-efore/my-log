@@ -5,6 +5,9 @@ import com.jiwon.mylog.global.security.auth.annotation.LoginUser;
 import com.jiwon.mylog.domain.post.dto.request.PostRequest;
 import com.jiwon.mylog.domain.post.dto.response.PostDetailResponse;
 import com.jiwon.mylog.domain.post.dto.response.PostSummaryPageResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,11 +27,17 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
+@Tag(name = "posts", description = "게시글 API")
 public class PostController {
 
     private final PostService postService;
 
     @PostMapping("/posts")
+    @Operation(
+            summary = "게시글 생성",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "게시글 생성 성공")
+            })
     public ResponseEntity<PostDetailResponse> createPost(
             @LoginUser Long userId,
             @Valid @RequestBody PostRequest postRequest) {
@@ -37,6 +46,14 @@ public class PostController {
     }
 
     @PatchMapping("/posts/{postId}")
+    @Operation(
+            summary = "게시글 수정",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "게시글 수정 성공"),
+                    @ApiResponse(responseCode = "403", description = "게시글 수정 권한이 없음"),
+                    @ApiResponse(responseCode = "404", description = "해당 게시글을 찾을 수 없음")
+            }
+    )
     public ResponseEntity<PostDetailResponse> updatePost(
             @LoginUser Long userId,
             @PathVariable("postId") Long postId,
@@ -46,6 +63,14 @@ public class PostController {
     }
 
     @DeleteMapping("/posts/{postId}")
+    @Operation(
+            summary = "게시글 삭제",
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "게시글 삭제 성공"),
+                    @ApiResponse(responseCode = "403", description = "게시글 삭제 권한이 없음"),
+                    @ApiResponse(responseCode = "404", description = "해당 게시글을 찾을 수 없음")
+            }
+    )
     public ResponseEntity<Void> deletePost(
             @LoginUser Long userId,
             @PathVariable("postId") Long postId) {
@@ -54,6 +79,13 @@ public class PostController {
     }
 
     @GetMapping("/posts/{postId}")
+    @Operation(
+            summary = "게시글 단건 조회",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "게시글 단건 조회"),
+                    @ApiResponse(responseCode = "404", description = "해당 게시글을 찾을 수 없음")
+            }
+    )
     public ResponseEntity<PostDetailResponse> getPost(
             @PathVariable("postId") Long postId) {
         PostDetailResponse response = postService.getPost(postId);
@@ -61,6 +93,12 @@ public class PostController {
     }
 
     @GetMapping("/users/{userId}/posts")
+    @Operation(
+            summary = "특정 유저의 게시글 전체 조회",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "특정 유저의 게시글 전체 조회 (페이징 적용)")
+            }
+    )
     public ResponseEntity<PostSummaryPageResponse> getAllPosts(
             @PathVariable("userId") Long userId,
             @PageableDefault(size = 10, page = 0,
