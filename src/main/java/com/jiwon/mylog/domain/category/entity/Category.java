@@ -11,6 +11,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,6 +27,13 @@ import java.util.List;
 @Builder
 @Getter
 @Entity
+@Table(
+        name = "category",
+        uniqueConstraints = @UniqueConstraint(
+                name = "category_uk",
+                columnNames = {"user_id", "name"}
+        )
+)
 public class Category {
 
     @Id
