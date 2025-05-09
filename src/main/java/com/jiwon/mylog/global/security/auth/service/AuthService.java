@@ -1,7 +1,5 @@
 package com.jiwon.mylog.global.security.auth.service;
 
-import com.jiwon.mylog.domain.category.dto.request.CategoryRequest;
-import com.jiwon.mylog.domain.category.service.CategoryService;
 import com.jiwon.mylog.domain.user.dto.request.PasswordResetRequest;
 import com.jiwon.mylog.domain.user.dto.request.UserSaveRequest;
 import com.jiwon.mylog.domain.user.entity.User;
@@ -34,7 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final CategoryService categoryService;
     private final MailService mailService;
     private final JwtService jwtService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -48,9 +45,9 @@ public class AuthService {
 
         String encodedPassword = bCryptPasswordEncoder.encode(userSaveRequest.getPassword());
         User user = userSaveRequest.toEntity(encodedPassword);
-        User savedUser = userRepository.save(user);
-        categoryService.create(savedUser.getId(), new CategoryRequest("전체"));
+        user.init();
 
+        User savedUser = userRepository.save(user);
         return savedUser.getId();
     }
 

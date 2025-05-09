@@ -81,6 +81,15 @@ public class User extends BaseEntity {
                 .collect(Collectors.toList());
     }
 
+    public void init() {
+        this.categories.add(
+                Category.builder()
+                        .user(this)
+                        .name("전체")
+                        .build()
+        );
+    }
+
     public void verifyUser() {
         this.status = UserStatus.ACTIVE;
     }
