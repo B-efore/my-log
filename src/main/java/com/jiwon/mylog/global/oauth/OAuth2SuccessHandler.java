@@ -43,13 +43,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         CookieUtil.setRefreshTokenCookie(response, "refreshToken", refreshToken);
 
         clearAuthenticationAttributes(request);
-        getRedirectStrategy().sendRedirect(request, response, getTargetUrl(accessToken));
-    }
-
-    private String getTargetUrl(String token) {
-        return UriComponentsBuilder.fromUriString(getDefaultTargetUrl())
-                .queryParam("token", token)
-                .build()
-                .toUriString();
+        response.sendRedirect("http://localhost:5173/oauth2/callback");
     }
 }

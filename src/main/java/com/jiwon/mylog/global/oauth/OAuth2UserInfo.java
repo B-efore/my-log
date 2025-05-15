@@ -17,6 +17,7 @@ public class OAuth2UserInfo {
     public static OAuth2UserInfo of(String provider, Map<String, Object> attributes) {
         return switch (provider) {
             case "google" -> ofGoogle(attributes);
+            case "kakao" -> ofKakao(attributes);
             default -> throw new RuntimeException();
         };
     }
@@ -27,6 +28,18 @@ public class OAuth2UserInfo {
                 .username((String) attributes.get("name"))
                 .provider("google")
                 .providerId((String) attributes.get("sub"))
+                .build();
+    }
+
+    private static OAuth2UserInfo ofKakao(Map<String, Object> attributes) {
+        Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
+        Map<String, Object> properties = (Map<String, Object>) attributes.get("properties");
+
+        return OAuth2UserInfo.builder()
+                .email(kakaoAccount.get("email").toString())
+                .username(properties.get("nickname").toString())
+                .provider("kakao")
+                .providerId(attributes.get("id").toString())
                 .build();
     }
 
