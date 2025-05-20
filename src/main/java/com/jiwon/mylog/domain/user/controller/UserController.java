@@ -27,7 +27,7 @@ public class UserController {
 
     private final UserService userService;
 
-    @PatchMapping
+    @PatchMapping("/me")
     @Operation(
             summary = "회원 정보 수정",
             responses = {
