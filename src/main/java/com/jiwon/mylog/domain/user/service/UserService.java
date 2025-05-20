@@ -2,7 +2,7 @@ package com.jiwon.mylog.domain.user.service;
 
 import com.jiwon.mylog.domain.user.dto.request.UserUpdateRequest;
 import com.jiwon.mylog.domain.user.dto.response.UserDetailResponse;
-import com.jiwon.mylog.domain.user.dto.response.UserResponse;
+import com.jiwon.mylog.domain.user.dto.response.UserInfoResponse;
 import com.jiwon.mylog.domain.user.entity.User;
 import com.jiwon.mylog.domain.user.repository.UserRepository;
 import com.jiwon.mylog.global.common.error.ErrorCode;
@@ -27,5 +27,12 @@ public class UserService {
                 userUpdateRequest.getProfileImageUrl()
         );
         return UserDetailResponse.fromUser(user);
+    }
+
+    @Transactional(readOnly = true)
+    public UserInfoResponse getUserInfo(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
+        return UserInfoResponse.fromUser(user);
     }
 }
