@@ -42,8 +42,12 @@ public class User extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
     private String password;
+
+    @Builder.Default
+    private String provider = "local";
+
+    private String providerId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -79,6 +83,15 @@ public class User extends BaseEntity {
         return userRoles.stream()
                 .map(UserRole::getRole)
                 .collect(Collectors.toList());
+    }
+
+    public void init() {
+        this.categories.add(
+                Category.builder()
+                        .user(this)
+                        .name("전체")
+                        .build()
+        );
     }
 
     public void verifyUser() {

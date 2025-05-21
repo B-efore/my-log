@@ -7,14 +7,12 @@ import lombok.Getter;
 @Getter
 public class TokenResponse {
 
-    private final String refreshToken;
     private final String accessToken;
     private final String tokenType = "Bearer";
 
-    public static TokenResponse of(String accessToken, String refreshToken) {
+    public static TokenResponse of(String accessToken) {
         return TokenResponse.builder()
                 .accessToken(accessToken)
-                .refreshToken(refreshToken)
                 .build();
     }
 }

@@ -8,6 +8,7 @@ import com.jiwon.mylog.global.security.token.entity.RefreshToken;
 import com.jiwon.mylog.global.security.token.dto.request.TokenRequest;
 import com.jiwon.mylog.global.security.token.repository.TokenRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,5 +32,15 @@ public class TokenService {
                         .build());
 
         tokenRepository.save(refreshToken);
+    }
+
+    @Transactional(readOnly = true)
+    public void validateRefreshToken(Long userId, String refreshToken) {
+        RefreshToken savedToken = tokenRepository.findByUserId(userId)
+                .orElseThrow(() -> new AuthorizationDeniedException("Refresh Token not found"));
+
+        if(!savedToken.getRefreshToken().equals(refreshToken)) {
+            throw new AuthorizationDeniedException("Invalid Token");
+        }
     }
 }

@@ -11,10 +11,12 @@ import com.jiwon.mylog.domain.user.dto.request.UserSaveRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,8 +53,10 @@ public class AuthController {
 
             }
     )
-    public ResponseEntity<TokenResponse> login(@Valid @RequestBody UserLoginRequest userLoginRequest) {
-        TokenResponse tokenResponse = authService.login(userLoginRequest);
+    public ResponseEntity<TokenResponse> login(
+            HttpServletResponse response,
+            @Valid @RequestBody UserLoginRequest userLoginRequest) {
+        TokenResponse tokenResponse = authService.login(response, userLoginRequest);
         return new ResponseEntity<>(tokenResponse, HttpStatus.OK);
     }
 
@@ -65,8 +69,8 @@ public class AuthController {
                     @ApiResponse(responseCode = "404", description = "토큰 정보에 해당하는 유저를 찾을 수 없음")
             }
     )
-    public ResponseEntity<TokenResponse> reissueToken(@RequestBody ReissueTokenRequest reissueTokenRequest) {
-        TokenResponse tokenResponse = authService.reissueToken(reissueTokenRequest);
+    public ResponseEntity<TokenResponse> reissueToken(@CookieValue("refreshToken") String refreshToken) {
+        TokenResponse tokenResponse = authService.reissueToken(refreshToken);
         return new ResponseEntity<>(tokenResponse, HttpStatus.OK);
     }
 

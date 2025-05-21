@@ -1,9 +1,14 @@
 package com.jiwon.mylog.global.common.config;
 
+import com.jiwon.mylog.global.oauth.CustomOAuth2UserService;
+import com.jiwon.mylog.global.oauth.OAuth2SuccessHandler;
 import com.jiwon.mylog.global.security.auth.user.CustomUserDetailsService;
 import com.jiwon.mylog.global.security.jwt.JwtService;
 import com.jiwon.mylog.global.security.jwt.JwtTokenAuthenticationFilter;
+import com.jiwon.mylog.global.security.token.sevice.TokenService;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -20,9 +25,15 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+@Slf4j
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final JwtService jwtService;
+    private final TokenService tokenService;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -32,6 +43,11 @@ public class SecurityConfig {
     @Bean
     AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
            return configuration.getAuthenticationManager();
+    }
+
+    @Bean
+    public OAuth2SuccessHandler oAuth2SuccessHandler() {
+        return new OAuth2SuccessHandler(jwtService, tokenService);
     }
 
     @Bean
@@ -61,6 +77,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/posts/**", "/categories/**").permitAll()
                         .requestMatchers("/users/**", "/posts/**", "/categories/**", "/comments/**").authenticated());
+
+        http
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfoEndPoint -> userInfoEndPoint.userService(customOAuth2UserService))
+                        .successHandler(oAuth2SuccessHandler())
+                );
 
         http
                 .addFilterBefore(new JwtTokenAuthenticationFilter(jwtService, userDetailsService), UsernamePasswordAuthenticationFilter.class);

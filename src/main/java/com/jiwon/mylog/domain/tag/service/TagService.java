@@ -5,9 +5,10 @@ import com.jiwon.mylog.domain.tag.entity.Tag;
 import com.jiwon.mylog.domain.tag.repository.TagRepository;
 import com.jiwon.mylog.domain.user.entity.User;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,21 +21,34 @@ public class TagService {
 
     @Transactional
     public List<Tag> getTagsById(User user, List<TagRequest> tagRequests) {
-        return tagRequests.stream()
-                .map(req -> getOrCreateTag(user, req))
+
+        List<String> names = tagRequests.stream()
+                .map(TagRequest::getName)
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<Tag> existingTags = tagRepository.findAllByUserAndNameIn(user, names);
+
+        List<String> existNames = existingTags.stream()
+                .map(Tag::getName)
+                .collect(Collectors.toList());
+
+        List<Tag> createdTags = names.stream()
+                .filter(name -> !existNames.contains(name))
+                .map(name -> createTag(user, name))
+                .collect(Collectors.toList());
+
+        tagRepository.saveAll(createdTags);
+
+        return Stream.of(existingTags, createdTags)
+                .flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }
 
-    private Tag getOrCreateTag(User user, TagRequest tagRequest) {
-        return tagRepository.findTagByUserAndName(user, tagRequest.getName())
-                .orElseGet(() -> createTag(user, tagRequest.getName()));
-    }
-
     private Tag createTag(User user, String tagName) {
-        Tag createdTag = Tag.builder()
+        return Tag.builder()
                 .name(tagName)
                 .user(user)
                 .build();
-        return tagRepository.save(createdTag);
     }
 }
