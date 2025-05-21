@@ -44,7 +44,8 @@ public class User extends BaseEntity {
 
     private String password;
 
-    private String provider;
+    @Builder.Default
+    private String provider = "local";
 
     private String providerId;
 

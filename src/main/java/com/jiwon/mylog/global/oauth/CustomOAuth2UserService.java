@@ -2,6 +2,8 @@ package com.jiwon.mylog.global.oauth;
 
 import com.jiwon.mylog.domain.user.entity.User;
 import com.jiwon.mylog.domain.user.repository.UserRepository;
+import com.jiwon.mylog.global.common.error.ErrorCode;
+import com.jiwon.mylog.global.common.error.exception.DuplicateException;
 import com.jiwon.mylog.global.security.auth.user.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -30,12 +32,17 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private User getOrSave(OAuth2UserInfo oAuth2UserInfo) {
-        User user = oAuth2UserInfo.toEntity();
-        user.init();
-        return userRepository.findByProviderAndProviderId(
-                        oAuth2UserInfo.getProvider(),
-                        oAuth2UserInfo.getProviderId()
-                )
-                .orElseGet(() -> userRepository.save(user));
+        return userRepository.findByEmail(oAuth2UserInfo.getEmail())
+                .map(existingUser -> {
+                    if (!existingUser.getProvider().equals(oAuth2UserInfo.getProvider())) {
+                        throw new DuplicateException(ErrorCode.DUPLICATE_EMAIL);
+                    }
+                    return existingUser;
+                })
+                .orElseGet(() -> {
+                    User user = oAuth2UserInfo.toEntity();
+                    user.init();
+                    return userRepository.save(user);
+                });
     }
 }
