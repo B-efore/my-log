@@ -72,7 +72,7 @@ public class SecurityConfig {
                 .httpBasic(auth -> auth.disable());
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/error", "/auth/**", "/emails/**").permitAll()
+                        .requestMatchers("/error", "/auth/**", "/emails/**", "/s3/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-resources/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/posts/**", "/categories/**").permitAll()
