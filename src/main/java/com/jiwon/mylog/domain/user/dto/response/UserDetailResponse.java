@@ -21,7 +21,7 @@ public class UserDetailResponse {
                 .email(user.getEmail())
                 .username(user.getUsername())
                 .bio(user.getBio())
-                .profileImageUrl(user.getProfileImageUrl())
+                .profileImageUrl(user.getProfileImage() == null ? "" : user.getProfileImage().getFileKey())
                 .userStatus(user.getStatus())
                 .build();
     }

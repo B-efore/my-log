@@ -17,7 +17,7 @@ public class UserInfoResponse {
                 .userId(user.getId())
                 .username(user.getUsername())
                 .bio(user.getBio())
-                .profileImageUrl(user.getProfileImageUrl())
+                .profileImageUrl(user.getProfileImage() == null ? "" : user.getProfileImage().getFileKey())
                 .build();
     }
 }

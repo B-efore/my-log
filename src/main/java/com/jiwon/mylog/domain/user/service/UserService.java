@@ -17,14 +17,14 @@ public class UserService {
 
     private final UserRepository userRepository;
 
+    // TODO: 프로필 이미지 업데이트는 따로 구현
     @Transactional
     public UserDetailResponse update(Long userId, UserUpdateRequest userUpdateRequest) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
         user.updateInformation(
                 userUpdateRequest.getUsername(),
-                userUpdateRequest.getBio(),
-                userUpdateRequest.getProfileImageUrl()
+                userUpdateRequest.getBio()
         );
         return UserDetailResponse.fromUser(user);
     }

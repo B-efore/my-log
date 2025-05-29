@@ -2,6 +2,7 @@ package com.jiwon.mylog.domain.user.entity;
 
 import com.jiwon.mylog.domain.category.entity.Category;
 import com.jiwon.mylog.domain.comment.entity.Comment;
+import com.jiwon.mylog.domain.image.entity.Image;
 import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.global.common.entity.BaseEntity;
 import com.jiwon.mylog.domain.role.Role;
@@ -15,6 +16,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,8 +55,8 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private UserStatus status;
 
-    @Builder.Default
-    private String profileImageUrl = "";
+    @OneToOne
+    private Image profileImage;
 
     @Builder.Default
     private String bio = "";
@@ -98,10 +100,9 @@ public class User extends BaseEntity {
         this.status = UserStatus.ACTIVE;
     }
 
-    public void updateInformation(String username, String bio, String profileImageUrl) {
+    public void updateInformation(String username, String bio) {
         this.username = username;
         this.bio = bio;
-        this.profileImageUrl = profileImageUrl;
     }
 
     public void updatePassword(String encodedPassword) {

@@ -14,5 +14,4 @@ public class UserUpdateRequest {
             message = "닉네임은 한글, 영문, 숫자, '_', '-' 조합의 2~10자리를 사용하세요.")
     private String username;
     private String bio;
-    private String profileImageUrl;
 }

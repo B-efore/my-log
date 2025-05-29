@@ -1,5 +1,6 @@
 package com.jiwon.mylog.global.aws;
 
+import com.jiwon.mylog.domain.image.dto.PresignedUrlResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,12 @@ public class S3Controller {
     @PostMapping
     public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
         String response = s3Service.uploadFile(file);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/presigned-url")
+    public ResponseEntity<PresignedUrlResponse> generatePutPresignedUrl(@RequestParam String fileName) {
+        PresignedUrlResponse response = s3Service.generatePutPresignedUrl(fileName);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
