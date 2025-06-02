@@ -3,6 +3,7 @@ package com.jiwon.mylog.domain.image.entity;
 import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.domain.user.entity.User;
 import com.jiwon.mylog.global.common.entity.BaseEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -36,7 +37,7 @@ public class Image extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private ImageType imageType;
 
-    @OneToOne(mappedBy = "profileImage")
+    @OneToOne(mappedBy = "profileImage", cascade = CascadeType.ALL, orphanRemoval = true)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -44,11 +45,13 @@ public class Image extends BaseEntity {
     private Post post;
 
     public static Image forUserProfile(User user, String key) {
-        return Image.builder()
+        Image image = Image.builder()
                 .fileKey(key)
                 .imageType(ImageType.PROFILE)
                 .user(user)
                 .build();
+        image.user.updateProfileImage(image);
+        return image;
     }
 
     public static Image forPost(Post post, String key) {

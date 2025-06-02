@@ -15,6 +15,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -56,6 +57,7 @@ public class User extends BaseEntity {
     private UserStatus status;
 
     @OneToOne
+    @JoinColumn(name = "image_id")
     private Image profileImage;
 
     @Builder.Default
@@ -98,6 +100,10 @@ public class User extends BaseEntity {
 
     public void verifyUser() {
         this.status = UserStatus.ACTIVE;
+    }
+
+    public void updateProfileImage(Image image) {
+        this.profileImage = image;
     }
 
     public void updateInformation(String username, String bio) {

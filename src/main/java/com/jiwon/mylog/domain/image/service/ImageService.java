@@ -35,7 +35,7 @@ public class ImageService {
         deleteOldImage(user.getProfileImage());
 
         Image newImage = imageRepository.save(Image.forUserProfile(user, response.getKey()));
-        return ImageResponse.create(response.getPresignedUrl(), fileName, newImage.getImageType().getStatus());
+        return ImageResponse.create(response.getPresignedUrl(), response.getKey(), newImage.getImageType().getStatus());
     }
 
     private void deleteOldImage(Image oldImage) {
