@@ -1,6 +1,8 @@
 package com.jiwon.mylog.domain.post.repository;
 
 import com.jiwon.mylog.domain.post.entity.Post;
+
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,4 +25,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Query("select p from Post p left join fetch p.postTags pt left join fetch pt.tag where p = :post")
     Optional<Post> findWithTags(@Param("post") Post post);
+
+    @Query("select p from Post p where p.user.id = :userId and p.pinned = true")
+    List<Post> findPinnedPostsByUserId(@Param("userId") Long userId);
 }

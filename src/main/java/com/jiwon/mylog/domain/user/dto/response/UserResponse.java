@@ -17,7 +17,7 @@ public class UserResponse {
         return UserResponse.builder()
                 .userId(user.getId())
                 .username(user.getUsername())
-                .profileImageUrl(user.getProfileImageUrl())
+                .profileImageUrl(user.getProfileImage() == null ? "" : user.getProfileImage().getFileKey())
                 .userStatus(user.getStatus())
                 .build();
     }

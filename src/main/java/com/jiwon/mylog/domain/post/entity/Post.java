@@ -2,6 +2,7 @@ package com.jiwon.mylog.domain.post.entity;
 
 
 import com.jiwon.mylog.domain.category.entity.Category;
+import com.jiwon.mylog.domain.image.entity.Image;
 import com.jiwon.mylog.global.common.enums.Visibility;
 import com.jiwon.mylog.global.common.entity.BaseEntity;
 import com.jiwon.mylog.domain.comment.entity.Comment;
@@ -21,7 +22,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -69,6 +69,10 @@ public class Post extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Image> images = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
