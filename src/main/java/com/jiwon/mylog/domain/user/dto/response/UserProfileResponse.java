@@ -6,18 +6,18 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class UserInfoResponse {
+public class UserProfileResponse {
     private final Long userId;
     private final String username;
     private final String bio;
-    private final String profileImageUrl;
+    private final String imageKey;
 
-    public static UserInfoResponse fromUser(User user) {
-        return UserInfoResponse.builder()
+    public static UserProfileResponse fromUser(User user) {
+        return UserProfileResponse.builder()
                 .userId(user.getId())
                 .username(user.getUsername())
                 .bio(user.getBio())
-                .profileImageUrl(user.getProfileImage() == null ? "" : user.getProfileImage().getFileKey())
+                .imageKey(user.getProfileImage() == null ? "" : user.getProfileImage().getFileKey())
                 .build();
     }
 }

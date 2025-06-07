@@ -75,8 +75,8 @@ public class SecurityConfig {
                         .requestMatchers("/error", "/auth/**", "/emails/**", "/s3/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-resources/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/posts/**", "/categories/**").permitAll()
-                        .requestMatchers("/users/**", "/posts/**", "/categories/**", "/comments/**").authenticated());
+                        .requestMatchers(HttpMethod.GET, "/users/**", "/posts/**", "/categories/**").permitAll()
+                        .requestMatchers("/users/**", "/posts/**", "/categories/**", "/comments/**", "/images/**").authenticated());
 
         http
                 .oauth2Login(oauth2 -> oauth2
