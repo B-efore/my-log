@@ -3,6 +3,7 @@ package com.jiwon.mylog.domain.image.service;
 import com.jiwon.mylog.domain.image.dto.ImageResponse;
 import com.jiwon.mylog.domain.image.dto.PresignedUrlResponse;
 import com.jiwon.mylog.domain.image.entity.Image;
+import com.jiwon.mylog.domain.image.entity.ImageType;
 import com.jiwon.mylog.domain.image.repository.ImageRepository;
 import com.jiwon.mylog.domain.user.entity.User;
 import com.jiwon.mylog.domain.user.repository.UserRepository;
@@ -24,6 +25,15 @@ public class ImageService {
     private final S3Service s3Service;
     private final ImageRepository imageRepository;
     private final UserRepository userRepository;
+
+    @Transactional(readOnly = true)
+    public ImageResponse getProfileImage(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
+        Image image = imageRepository.findByUserAndImageType(user, ImageType.PROFILE)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND));
+        return ImageResponse.create(null, image.getFileKey(), image.getImageType().getStatus());
+    }
 
     @Transactional
     public ImageResponse uploadProfileImage(Long userId, String fileName) {
