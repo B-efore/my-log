@@ -108,7 +108,15 @@ public class AuthService {
         if (!userRepository.existsByEmail(email)) {
             throw new NotFoundException(ErrorCode.NOT_FOUND_USER);
         }
-        mailService.sendMail(mailRequest.getEmail());
+        mailService.sendCodeMail(mailRequest.getEmail());
+    }
+
+    @Transactional
+    public void findAccountId(MailRequest mailRequest) {
+        String email = mailRequest.getEmail();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
+        mailService.sendAccountIdMail(email, user.getAccountId());
     }
 
     @Transactional

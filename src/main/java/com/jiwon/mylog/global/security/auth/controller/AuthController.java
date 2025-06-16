@@ -5,7 +5,6 @@ import com.jiwon.mylog.domain.user.dto.request.UserLoginRequest;
 import com.jiwon.mylog.global.mail.dto.request.MailRequest;
 import com.jiwon.mylog.global.mail.dto.request.MailVerifyRequest;
 import com.jiwon.mylog.global.security.auth.service.AuthService;
-import com.jiwon.mylog.global.security.token.dto.request.ReissueTokenRequest;
 import com.jiwon.mylog.global.security.token.dto.response.TokenResponse;
 import com.jiwon.mylog.domain.user.dto.request.UserSaveRequest;
 import io.swagger.v3.oas.annotations.Operation;
@@ -90,6 +89,12 @@ public class AuthController {
         } else {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @PostMapping("/accountId")
+    public ResponseEntity<?> findAccountId(@Valid @RequestBody MailRequest request) {
+        authService.findAccountId(request);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("/password/find")
