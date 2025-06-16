@@ -1,6 +1,7 @@
 package com.jiwon.mylog.domain.tag.service;
 
 import com.jiwon.mylog.domain.tag.dto.request.TagRequest;
+import com.jiwon.mylog.domain.tag.dto.response.TagResponse;
 import com.jiwon.mylog.domain.tag.entity.Tag;
 import com.jiwon.mylog.domain.tag.repository.TagRepository;
 import com.jiwon.mylog.domain.user.entity.User;
@@ -18,6 +19,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class TagService {
 
     private final TagRepository tagRepository;
+
+    @Transactional(readOnly = true)
+    public List<TagResponse> getAllTags(Long userId) {
+        List<Tag> tags = tagRepository.findAllByUserId(userId);
+        return tags.stream()
+                .map(TagResponse::fromTag)
+                .collect(Collectors.toList());
+    }
 
     @Transactional
     public List<Tag> getTagsById(User user, List<TagRequest> tagRequests) {
