@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
 
     INVALID_INPUT(HttpStatus.BAD_REQUEST, "입력값이 올바르지 않습니다."),
-    INVALID_EMAIL_OR_PASSWORD(HttpStatus.UNAUTHORIZED, "잘못된 이메일 또는 비밀번호입니다."),
+    INVALID_ACCOUNT_ID_OR_PASSWORD(HttpStatus.UNAUTHORIZED, "잘못된 아이디 또는 비밀번호입니다."),
     INVALID_TOKEN(HttpStatus.BAD_REQUEST, "유효하지 않은 토큰입니다."),
 
     FAIlED_MAIL_SEND(HttpStatus.INTERNAL_SERVER_ERROR, "메일 전송에 실패했습니다."),
@@ -19,6 +19,7 @@ public enum ErrorCode {
 
     NOT_CONFIRM_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
 
+    DUPLICATE_ACCOUNT_ID(HttpStatus.BAD_REQUEST, "이미 사용중인 아이디입니다."),
     DUPLICATE_EMAIL(HttpStatus.BAD_REQUEST, "이미 사용중인 이메일입니다."),
     DUPLICATE_CATEGORY(HttpStatus.BAD_REQUEST, "이미 존재하는 카테고리입니다."),
 

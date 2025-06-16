@@ -10,11 +10,10 @@ import com.jiwon.mylog.global.mail.dto.request.MailRequest;
 import com.jiwon.mylog.global.mail.service.MailService;
 import com.jiwon.mylog.global.security.auth.user.CustomUserDetails;
 import com.jiwon.mylog.global.security.jwt.JwtService;
-import com.jiwon.mylog.global.security.token.dto.request.ReissueTokenRequest;
 import com.jiwon.mylog.global.security.token.dto.request.TokenRequest;
 import com.jiwon.mylog.global.security.token.dto.response.TokenResponse;
 import com.jiwon.mylog.global.common.error.ErrorCode;
-import com.jiwon.mylog.global.common.error.exception.InvalidEmailOrPasswordException;
+import com.jiwon.mylog.global.common.error.exception.InvalidAccountIdOrPasswordException;
 import com.jiwon.mylog.global.common.error.exception.NotFoundException;
 import com.jiwon.mylog.domain.user.repository.UserRepository;
 import com.jiwon.mylog.global.security.token.sevice.TokenService;
@@ -45,7 +44,8 @@ public class AuthService {
     @Transactional
     public Long save(UserSaveRequest userSaveRequest) {
 
-        validateDuplicateEmail(userSaveRequest);
+        validateDuplicateAccountId(userSaveRequest.getAccountId());
+        validateDuplicateEmail(userSaveRequest.getEmail());
         validateConfirmPassword(userSaveRequest.getPassword(), userSaveRequest.getConfirmPassword());
 
         String encodedPassword = bCryptPasswordEncoder.encode(userSaveRequest.getPassword());
@@ -60,15 +60,15 @@ public class AuthService {
     public TokenResponse login(HttpServletResponse response, UserLoginRequest userLoginRequest) {
         try {
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                    userLoginRequest.getEmail(), userLoginRequest.getPassword()
+                    userLoginRequest.getAccountId(), userLoginRequest.getPassword()
             ));
 
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             Long userId = userDetails.getUserId();
-            String email = userLoginRequest.getEmail();
+            String accountId = userLoginRequest.getAccountId();
 
-            String accessToken = jwtService.createAccessToken(userId, email);
-            String refreshToken = jwtService.createRefreshToken(userId, email);
+            String accessToken = jwtService.createAccessToken(userId, accountId);
+            String refreshToken = jwtService.createRefreshToken(userId, accessToken);
             tokenService.saveToken(new TokenRequest(userId, refreshToken));
 
             CookieUtil.setRefreshTokenCookie(response, "refreshToken", refreshToken);
@@ -77,7 +77,7 @@ public class AuthService {
 
             return TokenResponse.of(accessToken);
         } catch (BadCredentialsException e) {
-            throw new InvalidEmailOrPasswordException(ErrorCode.INVALID_EMAIL_OR_PASSWORD);
+            throw new InvalidAccountIdOrPasswordException(ErrorCode.INVALID_ACCOUNT_ID_OR_PASSWORD);
         } catch (AuthenticationException e) {
             throw new IllegalArgumentException(e.getMessage());
         }
@@ -89,11 +89,11 @@ public class AuthService {
         validateToken(refreshToken);
 
         Long userId = jwtService.getUserId(refreshToken);
-        String email = jwtService.getEmail(refreshToken);
+        String accountId = jwtService.getAccountId(refreshToken);
         validateExistUser(userId);
         tokenService.validateRefreshToken(userId, refreshToken);
 
-        String accessToken = jwtService.createAccessToken(userId, email);
+        String accessToken = jwtService.createAccessToken(userId, accountId);
         return TokenResponse.of(accessToken);
     }
 
@@ -138,8 +138,14 @@ public class AuthService {
         }
     }
 
-    private void validateDuplicateEmail(UserSaveRequest userSaveRequest) {
-        if (userRepository.existsByEmail(userSaveRequest.getEmail())) {
+    private void validateDuplicateAccountId(String accountId) {
+        if (userRepository.existsByAccountId(accountId)) {
+            throw new DuplicateException(ErrorCode.DUPLICATE_ACCOUNT_ID);
+        }
+    }
+
+    private void validateDuplicateEmail(String email) {
+        if (userRepository.existsByEmail(email)) {
             throw new DuplicateException(ErrorCode.DUPLICATE_EMAIL);
         }
     }

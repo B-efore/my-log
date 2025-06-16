@@ -22,7 +22,6 @@ public class UserService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
 
-    // TODO: 프로필 이미지 업데이트는 따로 구현
     @Transactional
     public UserProfileResponse update(Long userId, UserUpdateRequest userUpdateRequest) {
         User user = userRepository.findById(userId)

@@ -18,6 +18,11 @@ public class UserSaveRequest {
             message = "닉네임은 한글, 영문, 숫자, '_', '-' 조합의 2~10자리를 사용하세요.")
     private String username;
 
+    @NotBlank(message = "아이디는 필수 입력값입니다.")
+    @Pattern(regexp = "^[a-zA-Z0-9_-]{6,20}$",
+            message = "아이디는 영문, 숫자, '_', '-' 조합의 6~20자리를 사용하세요.")
+    private String accountId;
+
     @NotBlank(message = "이메일은 필수 입력값입니다.")
     @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
             message = "올바른 이메일 형식을 입력하세요. ex: user@example.com")
@@ -34,6 +39,7 @@ public class UserSaveRequest {
     public User toEntity(String encodedPassword) {
         return User.builder()
                 .email(email)
+                .accountId(accountId)
                 .password(encodedPassword)
                 .username(username)
                 .status(UserStatus.ACTIVE)

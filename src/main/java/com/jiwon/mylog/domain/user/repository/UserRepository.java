@@ -1,6 +1,5 @@
 package com.jiwon.mylog.domain.user.repository;
 
-import com.jiwon.mylog.domain.user.dto.response.UserMainResponse;
 import com.jiwon.mylog.domain.user.entity.User;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,10 +11,15 @@ import org.springframework.stereotype.Repository;
 public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
 
+    boolean existsByAccountId(String accountId);
+
     @Query(value = "select u from User u left join fetch u.userRoles where u.email = :email")
     Optional<User> findByEmail(@Param("email") String email);
 
-    @Query(value = "select u from User u left join fetch u.profileImage i where i.user.id = :userId")
+    @Query("select u from User u left join fetch u.userRoles where u.accountId = :accountId")
+    Optional<User> findByAccountId(@Param("accountId") String accountId);
+
+    @Query(value = "select u from User u left join fetch u.profileImage where u.id = :userId")
     Optional<User> findUserWithProfileImage(@Param("userId") Long userId);
 
 //    @Query(value = "select u from User u left join fetch u.userRoles where u.provider = :provider and u.providerId = :providerId")
