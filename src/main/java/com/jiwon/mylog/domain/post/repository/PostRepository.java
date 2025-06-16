@@ -26,6 +26,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("select p from Post p left join fetch p.postTags pt left join fetch pt.tag where p = :post")
     Optional<Post> findWithTags(@Param("post") Post post);
 
-    @Query("select p from Post p where p.user.id = :userId and p.pinned = true")
+    @Query("select p from Post p where p.user.id = :userId and p.pinned = true and p.deletedAt is null")
     List<Post> findPinnedPostsByUserId(@Param("userId") Long userId);
 }

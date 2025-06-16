@@ -2,7 +2,7 @@ package com.jiwon.mylog.domain.user.entity;
 
 import com.jiwon.mylog.domain.category.entity.Category;
 import com.jiwon.mylog.domain.comment.entity.Comment;
-import com.jiwon.mylog.domain.image.entity.Image;
+import com.jiwon.mylog.domain.image.entity.ProfileImage;
 import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.global.common.entity.BaseEntity;
 import com.jiwon.mylog.domain.role.Role;
@@ -56,9 +56,9 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private UserStatus status;
 
-    @OneToOne
-    @JoinColumn(name = "image_id")
-    private Image profileImage;
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "profile_image_id")
+    private ProfileImage profileImage;
 
     @Builder.Default
     private String bio = "";
@@ -102,8 +102,12 @@ public class User extends BaseEntity {
         this.status = UserStatus.ACTIVE;
     }
 
-    public void updateProfileImage(Image image) {
-        this.profileImage = image;
+    public void updateProfileImage(ProfileImage profileImage) {
+        this.profileImage = profileImage;
+    }
+
+    public void deleteProfileImage() {
+        this.profileImage = null;
     }
 
     public void updateInformation(String username, String bio) {
