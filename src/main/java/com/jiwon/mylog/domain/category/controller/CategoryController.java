@@ -22,14 +22,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
-@RequestMapping("/categories")
 @RestController
 @Tag(name = "categories", description = "카테고리 API")
 public class CategoryController {
 
     private final CategoryService categoryService;
 
-    @PostMapping
+    @PostMapping("/categories")
     @Operation(
             summary = "카테고리 생성",
             responses = {
@@ -44,7 +43,7 @@ public class CategoryController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @PatchMapping("/{categoryId}")
+    @PatchMapping("/categories/{categoryId}")
     @Operation(
             summary = "카테고리 수정",
             responses = {
@@ -76,7 +75,7 @@ public class CategoryController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping
+    @GetMapping("/users/{userId}/categories")
     @Operation(
             summary = "특정 유저 카테고리 전체 조회",
             responses = {
@@ -84,7 +83,7 @@ public class CategoryController {
             }
     )
     public ResponseEntity<CategoryListResponse> getCategories(
-            @LoginUser Long userId) {
+            @PathVariable Long userId) {
         CategoryListResponse response = categoryService.getCategories(userId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

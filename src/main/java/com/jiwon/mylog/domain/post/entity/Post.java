@@ -3,6 +3,7 @@ package com.jiwon.mylog.domain.post.entity;
 
 import com.jiwon.mylog.domain.category.entity.Category;
 import com.jiwon.mylog.domain.image.entity.Image;
+import com.jiwon.mylog.domain.image.entity.PostImage;
 import com.jiwon.mylog.global.common.enums.Visibility;
 import com.jiwon.mylog.global.common.entity.BaseEntity;
 import com.jiwon.mylog.domain.comment.entity.Comment;
@@ -72,7 +73,7 @@ public class Post extends BaseEntity {
 
     @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Image> images = new ArrayList<>();
+    private List<PostImage> images = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
