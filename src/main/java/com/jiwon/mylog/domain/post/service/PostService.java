@@ -81,7 +81,22 @@ public class PostService {
     public PostSummaryPageResponse getAllPosts(Long userId, Pageable pageable) {
         Page<Post> postPage = postRepository.findAllByUser(userId, pageable);
         List<PostSummaryResponse> posts = postPage.stream()
-                .map(post -> PostSummaryResponse.fromPost(post))
+                .map(PostSummaryResponse::fromPost)
+                .toList();
+
+        return PostSummaryPageResponse.from(
+                posts,
+                postPage.getNumber(),
+                postPage.getSize(),
+                postPage.getTotalPages(),
+                (int) postPage.getTotalElements());
+    }
+
+    @Transactional(readOnly = true)
+    public PostSummaryPageResponse getPostsByCategoryAndTags(Long userId, Long categoryId, List<Long> tagIds, Pageable pageable) {
+        Page<Post> postPage = postRepository.findByCategoryAndTags(userId, categoryId, tagIds, pageable);
+        List<PostSummaryResponse> posts = postPage.stream()
+                .map(PostSummaryResponse::fromPost)
                 .toList();
 
         return PostSummaryPageResponse.from(
