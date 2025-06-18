@@ -83,7 +83,7 @@ public class CategoryController {
             }
     )
     public ResponseEntity<CategoryListResponse> getCategories(
-            @PathVariable Long userId) {
+            @PathVariable("userId") Long userId) {
         CategoryListResponse response = categoryService.getCategories(userId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
