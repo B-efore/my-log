@@ -30,7 +30,6 @@ public class TokenService {
                         .user(user)
                         .refreshToken(tokenRequest.getRefreshToken())
                         .build());
-
         tokenRepository.save(refreshToken);
     }
 

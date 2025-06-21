@@ -29,7 +29,7 @@ public class RefreshToken {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 512)
     private String refreshToken;
 
     public RefreshToken update(String newRefreshToken) {

@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface TagRepository extends JpaRepository<Tag, Long> {
+public interface TagRepository extends JpaRepository<Tag, Long>, TagRepositoryCustom {
     List<Tag> findAllByUserAndNameIn(User user, List<String> names);
 
     @Query("select t from Tag t where t.user.id = :userId")

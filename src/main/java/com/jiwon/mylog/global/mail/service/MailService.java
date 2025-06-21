@@ -1,7 +1,7 @@
 package com.jiwon.mylog.global.mail.service;
 
 import com.jiwon.mylog.global.common.error.ErrorCode;
-import com.jiwon.mylog.global.common.error.exception.MailSendFailedException;
+import com.jiwon.mylog.global.common.error.exception.MailException;
 import com.jiwon.mylog.global.redis.RedisUtil;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -10,7 +10,6 @@ import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -26,47 +25,51 @@ public class MailService {
     private final RedisUtil redisUtil;
 
     @Transactional(readOnly = true)
-    public Boolean verifyEmailCode(String email, String code) {
+    public void verifyEmailCode(String email, String code) {
         String codeFindByEmail = redisUtil.getData(email);
         if (codeFindByEmail == null) {
-            return false;
+            throw new MailException(ErrorCode.NOT_FOUND_MAIL_CODE);
         }
-        return codeFindByEmail.equals(code);
+        if (!codeFindByEmail.equals(code)) {
+            throw new MailException(ErrorCode.INVALID_MAIL_CODE);
+        }
+        redisUtil.deleteData(email);
     }
 
     @Transactional
-    public void sendMail(String email)  {
+    public void sendCodeMail(String email)  {
         if (redisUtil.existData(email)) {
             redisUtil.deleteData(email);
         }
 
+        String subject = "[MyLog] 인증번호입니다.";
         String code = createCode();
-        MimeMessage message = createEmail(email, code);
+        String text = createCodeText(code);
+        MimeMessage message = createEmail(email, subject, text);
         redisUtil.setDataExpire(email, code, 60 * 5L);
 
         try {
             javaMailSender.send(message);
-        } catch (MailException e) {
-            throw new MailSendFailedException(ErrorCode.FAIlED_MAIL_SEND);
+        } catch (org.springframework.mail.MailException e) {
+            throw new MailException(ErrorCode.FAIlED_MAIL_SEND);
         }
     }
 
-    private MimeMessage createEmail(String email, String code) {
+    private MimeMessage createEmail(String email, String subject, String text) {
         MimeMessage message = javaMailSender.createMimeMessage();
         try {
             MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
-            String text = createText(code);
             helper.setFrom(senderEmail, "MyLog");
             helper.setTo(email);
-            helper.setSubject("[MyLog] 인증번호입니다.");
+            helper.setSubject(subject);
             helper.setText(text, true);
         } catch (MessagingException | UnsupportedEncodingException e) {
-            throw new MailSendFailedException(ErrorCode.FAIlED_MAIL_SEND);
+            throw new MailException(ErrorCode.FAIlED_MAIL_SEND);
         }
         return message;
     }
 
-    private String createText(String code) {
+    private String createCodeText(String code) {
         return """
             <h3>인증 번호를 입력해주세요.</h3>
             <h1>%s</h1>

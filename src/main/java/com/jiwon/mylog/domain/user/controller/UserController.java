@@ -62,7 +62,7 @@ public class UserController {
                     @ApiResponse(responseCode = "200", description = "회원 정보 조회 성공"),
                     @ApiResponse(responseCode = "404", description = "회원 정보를 찾을 수 없음")
             })
-    public ResponseEntity<UserMainResponse> getUserMain(@PathVariable Long userId) {
+    public ResponseEntity<UserMainResponse> getUserMain(@PathVariable("userId") Long userId) {
         UserMainResponse response = userService.getUserMain(userId);
         return new ResponseEntity<>(response, HttpStatus.OK);
 

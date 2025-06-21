@@ -1,5 +1,6 @@
 package com.jiwon.mylog.domain.category.service;
 
+import com.jiwon.mylog.domain.category.dto.response.CategoryCountListResponse;
 import com.jiwon.mylog.domain.category.entity.Category;
 import com.jiwon.mylog.domain.category.dto.response.CategoryListResponse;
 import com.jiwon.mylog.domain.category.dto.response.CategoryResponse;
@@ -47,10 +48,15 @@ public class CategoryService {
         categoryRepository.delete(category);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public CategoryListResponse getCategories(Long userId) {
         List<Category> categories = categoryRepository.findAllByUserId(userId);
         return CategoryListResponse.fromCategories(categories);
+    }
+
+    @Transactional(readOnly = true)
+    public CategoryCountListResponse getCategoriesWithCount(Long userId) {
+        return categoryRepository.findAllWithCountByUserId(userId);
     }
 
     private Category getCategory(Long userId, Long categoryId) {

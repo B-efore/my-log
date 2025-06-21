@@ -17,7 +17,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Formula;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,9 +42,6 @@ public class Category {
     @Column(nullable = false, length = 10)
     private String name;
 
-//    @Formula("(select count(*) from post p where p.category_id = id)")
-//    private int postCount;
-
     @OneToMany(mappedBy = "category")
     private List<Post> posts = new ArrayList<>();
 
@@ -55,7 +51,6 @@ public class Category {
     public static Category create(CategoryRequest request, User user) {
         return Category.builder()
                 .name(request.getName())
-//                .postCount(0)
                 .user(user)
                 .build();
     }

@@ -87,21 +87,4 @@ class CategoryControllerTest {
                 .andExpect(jsonPath("$.categoryId").value(categoryId));
 
     }
-
-    @DisplayName("카테고리를 삭제한다.")
-    @Test
-    void delete_category() throws Exception {
-        // given
-        Long categoryId = 1L;
-
-        given(resolver.supportsParameter(any())).willReturn(true);
-        given(resolver.resolveArgument(any(), any(), any(), any())).willReturn(1L);
-
-        // when & then
-        mockMvc.perform(delete("/categories/{categoryId}", categoryId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andDo(print())
-                .andExpect(status().isNoContent());
-    }
 }

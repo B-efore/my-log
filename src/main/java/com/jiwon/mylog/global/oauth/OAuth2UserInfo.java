@@ -3,6 +3,8 @@ package com.jiwon.mylog.global.oauth;
 import com.jiwon.mylog.domain.user.entity.User;
 import com.jiwon.mylog.domain.user.entity.UserStatus;
 import java.util.Map;
+import java.util.UUID;
+
 import lombok.Builder;
 import lombok.Getter;
 
@@ -46,10 +48,16 @@ public class OAuth2UserInfo {
     public User toEntity() {
         return User.builder()
                 .email(email)
+                .accountId(generateAccountId(email))
                 .username(username)
                 .provider(provider)
                 .providerId(providerId)
                 .status(UserStatus.ACTIVE)
                 .build();
+    }
+
+    private String generateAccountId(String email) {
+        String prefix = email.split("@")[0];
+        return prefix + "_" + UUID.randomUUID().toString().substring(0, 4);
     }
 }

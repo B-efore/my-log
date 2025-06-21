@@ -1,6 +1,7 @@
 package com.jiwon.mylog.domain.tag.service;
 
 import com.jiwon.mylog.domain.tag.dto.request.TagRequest;
+import com.jiwon.mylog.domain.tag.dto.response.TagCountListResponse;
 import com.jiwon.mylog.domain.tag.dto.response.TagResponse;
 import com.jiwon.mylog.domain.tag.entity.Tag;
 import com.jiwon.mylog.domain.tag.repository.TagRepository;
@@ -26,6 +27,11 @@ public class TagService {
         return tags.stream()
                 .map(TagResponse::fromTag)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public TagCountListResponse getAllTagsWithCount(Long userId) {
+        return tagRepository.findAllWithCountByUserId(userId);
     }
 
     @Transactional
