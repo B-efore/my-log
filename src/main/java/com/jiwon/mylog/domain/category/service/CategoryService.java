@@ -48,15 +48,15 @@ public class CategoryService {
         categoryRepository.delete(category);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public CategoryListResponse getCategories(Long userId) {
         List<Category> categories = categoryRepository.findAllByUserId(userId);
         return CategoryListResponse.fromCategories(categories);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public CategoryCountListResponse getCategoriesWithCount(Long userId) {
-        return categoryRepository.findAllWithPostCountByUserId(userId);
+        return categoryRepository.findAllWithCountByUserId(userId);
     }
 
     private Category getCategory(Long userId, Long categoryId) {

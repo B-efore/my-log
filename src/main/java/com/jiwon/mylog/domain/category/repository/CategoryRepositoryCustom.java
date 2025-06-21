@@ -3,5 +3,5 @@ package com.jiwon.mylog.domain.category.repository;
 import com.jiwon.mylog.domain.category.dto.response.CategoryCountListResponse;
 
 public interface CategoryRepositoryCustom {
-    CategoryCountListResponse findAllWithPostCountByUserId(Long userId);
+    CategoryCountListResponse findAllWithCountByUserId(Long userId);
 }

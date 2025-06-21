@@ -18,7 +18,7 @@ public class CategoryRepositoryImpl implements CategoryRepositoryCustom{
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public CategoryCountListResponse findAllWithPostCountByUserId(Long userId) {
+    public CategoryCountListResponse findAllWithCountByUserId(Long userId) {
         QPost post = QPost.post;
         QCategory category = QCategory.category;
 
