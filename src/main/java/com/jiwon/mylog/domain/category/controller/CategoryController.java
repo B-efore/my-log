@@ -1,5 +1,6 @@
 package com.jiwon.mylog.domain.category.controller;
 
+import com.jiwon.mylog.domain.category.dto.response.CategoryCountListResponse;
 import com.jiwon.mylog.domain.category.service.CategoryService;
 import com.jiwon.mylog.global.security.auth.annotation.LoginUser;
 import com.jiwon.mylog.domain.category.dto.response.CategoryListResponse;
@@ -85,6 +86,19 @@ public class CategoryController {
     public ResponseEntity<CategoryListResponse> getCategories(
             @PathVariable("userId") Long userId) {
         CategoryListResponse response = categoryService.getCategories(userId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/users/{userId}/categories/with-counts")
+    @Operation(
+            summary = "특정 유저 카테고리 전체 조회 (게시글 수 포함)",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "카테고리 조회 성공")
+            }
+    )
+    public ResponseEntity<CategoryCountListResponse> getCategoriesWithCount(
+            @PathVariable("userId") Long userId) {
+        CategoryCountListResponse response = categoryService.getCategoriesWithCount(userId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
