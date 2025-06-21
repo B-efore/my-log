@@ -41,7 +41,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 })
                 .orElseGet(() -> {
                     User user = oAuth2UserInfo.toEntity();
-                    user.init();
                     return userRepository.save(user);
                 });
     }

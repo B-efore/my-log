@@ -51,7 +51,6 @@ public class AuthService {
 
         String encodedPassword = bCryptPasswordEncoder.encode(userSaveRequest.getPassword());
         User user = userSaveRequest.toEntity(encodedPassword);
-        user.init();
 
         User savedUser = userRepository.save(user);
         return savedUser.getId();
