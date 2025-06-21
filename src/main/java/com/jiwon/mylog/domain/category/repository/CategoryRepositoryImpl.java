@@ -18,27 +18,24 @@ public class CategoryRepositoryImpl implements CategoryRepositoryCustom{
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public CategoryCountListResponse findAllWithCountByUserId(Long userId) {
+    public List<CategoryCountResponse> findAllWithCountByUserId(Long userId) {
         QPost post = QPost.post;
         QCategory category = QCategory.category;
 
-        List<CategoryCountResponse> categories = jpaQueryFactory
+        return jpaQueryFactory
                 .select(
                         Projections.constructor(CategoryCountResponse.class,
-                                category.id,
-                                category.name,
+                                post.category.id.coalesce(-1L),
+                                post.category.name.coalesce("미분류"),
                                 post.count()
                         )
                 )
-                .from(category)
-                .leftJoin(post).on(
-                        post.category.eq(category)
-                                .and(post.deletedAt.isNull())
+                .from(post)
+                .leftJoin(post.category, category)
+                .where(post.user.id.eq(userId)
+                        .and(post.deletedAt.isNull())
                 )
-                .where(category.user.id.eq(userId))
-                .groupBy(category.id, category.name)
+                .groupBy(post.category.id, post.category.name)
                 .fetch();
-
-        return new CategoryCountListResponse(categories);
     }
 }
