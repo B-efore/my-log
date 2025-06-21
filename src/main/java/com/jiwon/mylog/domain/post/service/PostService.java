@@ -94,7 +94,15 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public PostSummaryPageResponse getPostsByCategoryAndTags(Long userId, Long categoryId, List<Long> tagIds, Pageable pageable) {
-        Page<Post> postPage = postRepository.findByCategoryAndTags(userId, categoryId, tagIds, pageable);
+
+        Page<Post> postPage;
+
+        if (categoryId.equals(0L)) {
+            postPage = postRepository.findByTags(userId, tagIds, pageable);
+        } else {
+            postPage = postRepository.findByCategoryAndTags(userId, categoryId, tagIds, pageable);
+        }
+
         List<PostSummaryResponse> posts = postPage.stream()
                 .map(PostSummaryResponse::fromPost)
                 .toList();
@@ -121,6 +129,8 @@ public class PostService {
     }
 
     private Category getCategoryById(Long userId, Long categoryId) {
+        if (categoryId == null) return null;
+
         return categoryRepository.findByUserIdAndId(userId, categoryId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_CATEGORY));
     }

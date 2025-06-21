@@ -33,7 +33,7 @@ public class PostSummaryResponse {
                 .contentPreview(post.getContentPreview())
                 .postStatus(post.getPostStatus())
                 .visibility(post.getVisibility())
-                .category(CategoryResponse.fromCategory(post.getCategory()))
+                .category(post.getCategory() == null ? null : CategoryResponse.fromCategory(post.getCategory()))
                 .tags(post.getPostTags().stream()
                         .map(postTag -> TagResponse.fromTag(postTag.getTag()))
                         .toList())
