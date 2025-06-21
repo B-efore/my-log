@@ -1,7 +1,7 @@
 package com.jiwon.mylog.global.mail.service;
 
 import com.jiwon.mylog.global.common.error.ErrorCode;
-import com.jiwon.mylog.global.common.error.exception.MailSendFailedException;
+import com.jiwon.mylog.global.common.error.exception.MailException;
 import com.jiwon.mylog.global.redis.RedisUtil;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -10,7 +10,6 @@ import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -26,24 +25,15 @@ public class MailService {
     private final RedisUtil redisUtil;
 
     @Transactional(readOnly = true)
-    public Boolean verifyEmailCode(String email, String code) {
+    public void verifyEmailCode(String email, String code) {
         String codeFindByEmail = redisUtil.getData(email);
         if (codeFindByEmail == null) {
-            return false;
+            throw new MailException(ErrorCode.NOT_FOUND_MAIL_CODE);
         }
-        return codeFindByEmail.equals(code);
-    }
-
-    @Transactional
-    public void sendAccountIdMail(String email, String accountId) {
-        String subject = "[MyLog] 아이디 찾기";
-        String text = createAccountIdText(accountId);
-        MimeMessage message = createEmail(email, subject, text);
-        try {
-            javaMailSender.send(message);
-        } catch (MailException e) {
-            throw new MailSendFailedException(ErrorCode.FAIlED_MAIL_SEND);
+        if (!codeFindByEmail.equals(code)) {
+            throw new MailException(ErrorCode.INVALID_MAIL_CODE);
         }
+        redisUtil.deleteData(email);
     }
 
     @Transactional
@@ -60,8 +50,8 @@ public class MailService {
 
         try {
             javaMailSender.send(message);
-        } catch (MailException e) {
-            throw new MailSendFailedException(ErrorCode.FAIlED_MAIL_SEND);
+        } catch (org.springframework.mail.MailException e) {
+            throw new MailException(ErrorCode.FAIlED_MAIL_SEND);
         }
     }
 
@@ -74,7 +64,7 @@ public class MailService {
             helper.setSubject(subject);
             helper.setText(text, true);
         } catch (MessagingException | UnsupportedEncodingException e) {
-            throw new MailSendFailedException(ErrorCode.FAIlED_MAIL_SEND);
+            throw new MailException(ErrorCode.FAIlED_MAIL_SEND);
         }
         return message;
     }
@@ -86,14 +76,6 @@ public class MailService {
             <p>본 인증 코드는 5분간 유효합니다.</p>
             <h3>감사합니다.</h3>
             """.formatted(code);
-    }
-
-    private String createAccountIdText(String accountId) {
-        return """
-                <h3>회원님의 아이디는 아래와 같습니다.</h3>
-                <h1>%s</h1>
-                <h3>감사합니다.</h3>
-                """.formatted(accountId);
     }
 
     private String createCode() {

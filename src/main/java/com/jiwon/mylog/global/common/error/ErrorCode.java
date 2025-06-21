@@ -13,6 +13,8 @@ public enum ErrorCode {
     INVALID_TOKEN(HttpStatus.BAD_REQUEST, "유효하지 않은 토큰입니다."),
 
     FAIlED_MAIL_SEND(HttpStatus.INTERNAL_SERVER_ERROR, "메일 전송에 실패했습니다."),
+    INVALID_MAIL_CODE(HttpStatus.BAD_REQUEST, "인증 코드가 유효하지 않습니다."),
+    NOT_FOUND_MAIL_CODE(HttpStatus.NOT_FOUND, "인증 코드를 찾을 수 없습니다."),
 
     S3_FAILED_FILE_UPLOAD(HttpStatus.INTERNAL_SERVER_ERROR, "S3 파일 업로드에 실패했습니다"),
     S3_FAILED_FILE_DELETE(HttpStatus.INTERNAL_SERVER_ERROR, "S3 파일 삭제에 실패했습니다."),

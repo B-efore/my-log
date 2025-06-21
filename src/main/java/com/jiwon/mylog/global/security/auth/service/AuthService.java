@@ -2,6 +2,7 @@ package com.jiwon.mylog.global.security.auth.service;
 
 import com.jiwon.mylog.domain.user.dto.request.PasswordResetRequest;
 import com.jiwon.mylog.domain.user.dto.request.UserSaveRequest;
+import com.jiwon.mylog.domain.user.dto.response.FindIdResponse;
 import com.jiwon.mylog.domain.user.entity.User;
 import com.jiwon.mylog.domain.user.dto.request.UserLoginRequest;
 import com.jiwon.mylog.global.common.error.exception.CustomException;
@@ -98,11 +99,6 @@ public class AuthService {
     }
 
     @Transactional
-    public boolean verifyEmailCode(String email, String code) {
-        return mailService.verifyEmailCode(email, code);
-    }
-
-    @Transactional
     public void sendPasswordResetMail(MailRequest mailRequest) {
         String email = mailRequest.getEmail();
         if (!userRepository.existsByEmail(email)) {
@@ -111,12 +107,17 @@ public class AuthService {
         mailService.sendCodeMail(mailRequest.getEmail());
     }
 
-    @Transactional
-    public void findAccountId(MailRequest mailRequest) {
+    @Transactional(readOnly = true)
+    public FindIdResponse findAccountId(MailRequest mailRequest) {
         String email = mailRequest.getEmail();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
-        mailService.sendAccountIdMail(email, user.getAccountId());
+
+        if (user.getProvider().equals("local")) {
+            return FindIdResponse.toLocal(user.getAccountId());
+        } else {
+            return FindIdResponse.toSocial(user.getProvider());
+        }
     }
 
     @Transactional

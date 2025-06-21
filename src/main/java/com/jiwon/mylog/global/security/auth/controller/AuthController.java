@@ -2,8 +2,8 @@ package com.jiwon.mylog.global.security.auth.controller;
 
 import com.jiwon.mylog.domain.user.dto.request.PasswordResetRequest;
 import com.jiwon.mylog.domain.user.dto.request.UserLoginRequest;
+import com.jiwon.mylog.domain.user.dto.response.FindIdResponse;
 import com.jiwon.mylog.global.mail.dto.request.MailRequest;
-import com.jiwon.mylog.global.mail.dto.request.MailVerifyRequest;
 import com.jiwon.mylog.global.security.auth.service.AuthService;
 import com.jiwon.mylog.global.security.token.dto.response.TokenResponse;
 import com.jiwon.mylog.domain.user.dto.request.UserSaveRequest;
@@ -73,28 +73,17 @@ public class AuthController {
         return new ResponseEntity<>(tokenResponse, HttpStatus.OK);
     }
 
-    @PostMapping("/verify")
+    @PostMapping("/accountId")
     @Operation(
-            summary = "메일 인증번호 검증",
+            summary = "아이디 찾기",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "인증 성공"),
-                    @ApiResponse(responseCode = "400", description = "인증 실패")
+                    @ApiResponse(responseCode = "200", description = "아이디 찾기 성공"),
+                    @ApiResponse(responseCode = "404", description = "존재하지 않는 회원")
             }
     )
-    public ResponseEntity<String> verifyCode(@RequestBody MailVerifyRequest request) {
-        boolean verified = authService.verifyEmailCode(request.getEmail(), request.getCode());
-        String response = verified ? "인증이 완료되었습니다." : "인증에 실패했습니다.";
-        if (verified) {
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @PostMapping("/accountId")
-    public ResponseEntity<?> findAccountId(@Valid @RequestBody MailRequest request) {
-        authService.findAccountId(request);
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<FindIdResponse> findAccountId(@Valid @RequestBody MailRequest request) {
+        FindIdResponse response = authService.findAccountId(request);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping("/password/find")
