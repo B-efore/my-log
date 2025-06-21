@@ -40,6 +40,7 @@ public class TagRepositoryImpl implements TagRepositoryCustom{
                 )
                 .where(tag.user.id.eq(userId))
                 .groupBy(tag.id, tag.name)
+                .having(post.count().gt(0))
                 .orderBy(post.count().desc())
                 .fetch();
 
