@@ -22,11 +22,22 @@ public class QCategory extends EntityPathBase<Category> {
 
     public static final QCategory category = new QCategory("category");
 
+    public final com.jiwon.mylog.global.common.entity.QBaseEntity _super = new com.jiwon.mylog.global.common.entity.QBaseEntity(this);
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> deletedAt = _super.deletedAt;
+
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final StringPath name = createString("name");
 
     public final ListPath<com.jiwon.mylog.domain.post.entity.Post, com.jiwon.mylog.domain.post.entity.QPost> posts = this.<com.jiwon.mylog.domain.post.entity.Post, com.jiwon.mylog.domain.post.entity.QPost>createList("posts", com.jiwon.mylog.domain.post.entity.Post.class, com.jiwon.mylog.domain.post.entity.QPost.class, PathInits.DIRECT2);
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
 
     public final com.jiwon.mylog.domain.user.entity.QUser user;
 

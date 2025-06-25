@@ -2,7 +2,6 @@ package com.jiwon.mylog.domain.post.entity;
 
 
 import com.jiwon.mylog.domain.category.entity.Category;
-import com.jiwon.mylog.domain.image.entity.Image;
 import com.jiwon.mylog.domain.image.entity.PostImage;
 import com.jiwon.mylog.global.common.enums.Visibility;
 import com.jiwon.mylog.global.common.entity.BaseEntity;
@@ -125,6 +124,8 @@ public class Post extends BaseEntity {
 
     public void delete() {
         super.delete();
+        this.postTags.forEach(postTag -> postTag.setPost(null));
+        this.postTags.clear();
     }
 
     public boolean isDeleted() {

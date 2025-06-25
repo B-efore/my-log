@@ -9,4 +9,5 @@ import java.util.List;
 @Getter
 public class CategoryCountListResponse {
     private final List<CategoryCountResponse> categories;
+    private final Long totalCount;
 }

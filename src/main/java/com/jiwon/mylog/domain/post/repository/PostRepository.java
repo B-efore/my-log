@@ -13,11 +13,11 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long>, PostRepositoryCustom {
-    @Query(value = "select p from Post p join fetch p.category left join fetch p.postTags pt left join fetch pt.tag t where p.deletedAt is null and p.user.id = :userId",
+    @Query(value = "select p from Post p left join fetch p.category left join fetch p.postTags pt left join fetch pt.tag t where p.deletedAt is null and p.user.id = :userId",
             countQuery = "select count(p) from Post p where p.user.id = :userId")
     Page<Post> findAllByUser(@Param("userId") Long userId, Pageable pageable);
 
-    @Query("select p from Post p join fetch p.user join fetch p.category where p.id = :id")
+    @Query("select p from Post p join fetch p.user left join fetch p.category where p.id = :id")
     Optional<Post> findWithUserAndCategory(@Param("id") Long id);
 
     @Query("select p from Post p left join fetch p.comments where p = :post")
