@@ -1,6 +1,5 @@
 package com.jiwon.mylog.domain.category.repository;
 
-import com.jiwon.mylog.domain.category.dto.response.CategoryCountListResponse;
 import com.jiwon.mylog.domain.category.dto.response.CategoryCountResponse;
 import com.jiwon.mylog.domain.category.entity.QCategory;
 import com.jiwon.mylog.domain.post.entity.QPost;
@@ -21,21 +20,37 @@ public class CategoryRepositoryImpl implements CategoryRepositoryCustom{
     public List<CategoryCountResponse> findAllWithCountByUserId(Long userId) {
         QPost post = QPost.post;
         QCategory category = QCategory.category;
-
-        return jpaQueryFactory
+        List<CategoryCountResponse> categories = jpaQueryFactory
                 .select(
                         Projections.constructor(CategoryCountResponse.class,
-                                post.category.id.coalesce(-1L),
-                                post.category.name.coalesce("미분류"),
+                                category.id,
+                                category.name,
                                 post.count()
                         )
                 )
+                .from(category)
+                .leftJoin(post).on(post.category.eq(category)
+                        .and(post.deletedAt.isNull())
+                        .and(post.user.id.eq(userId))
+                )
+                .where(category.user.id.eq(userId))
+                .groupBy(post.category.id, post.category.name)
+                .orderBy(category.createdAt.asc())
+                .fetch();
+
+        Long uncategorizedCount = jpaQueryFactory
+                .select(post.count())
                 .from(post)
-                .leftJoin(post.category, category)
-                .where(post.user.id.eq(userId)
+                .where(post.category.isNull()
+                        .and(post.user.id.eq(userId))
                         .and(post.deletedAt.isNull())
                 )
-                .groupBy(post.category.id, post.category.name)
-                .fetch();
+                .fetchOne();
+
+        if (uncategorizedCount > 0) {
+            categories.add(new CategoryCountResponse(-1L, "미분류", uncategorizedCount));
+        }
+
+        return categories;
     }
 }

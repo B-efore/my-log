@@ -3,6 +3,7 @@ package com.jiwon.mylog.domain.category.entity;
 import com.jiwon.mylog.domain.category.dto.request.CategoryRequest;
 import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.domain.user.entity.User;
+import com.jiwon.mylog.global.common.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -33,7 +34,7 @@ import java.util.List;
                 columnNames = {"user_id", "name"}
         )
 )
-public class Category {
+public class Category extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
