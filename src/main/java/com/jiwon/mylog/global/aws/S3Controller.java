@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
-@RequestMapping("/s3")
+@RequestMapping("/api/s3")
 @RestController
 @Tag(name = "s3", description = "amazon s3 API")
 public class S3Controller {

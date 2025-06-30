@@ -53,7 +53,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173"));
+        config.setAllowedOrigins(List.of("http://localhost:5173", "http://mylogjw.kro.kr", "https://mylogjw.kro.kr"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
@@ -72,14 +72,18 @@ public class SecurityConfig {
                 .httpBasic(auth -> auth.disable());
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/error", "/auth/**", "/emails/**", "/s3/**").permitAll()
+                        .requestMatchers("/error", "/api/auth/**", "/api/emails/**", "/api/s3/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-resources/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/users/**", "/posts/**", "/categories/**", "/images/**").permitAll()
-                        .requestMatchers("/users/**", "/posts/**", "/categories/**", "/comments/**", "/images/**").authenticated());
+                        .requestMatchers(HttpMethod.GET, "/api/users/**", "/api/posts/**", "/api/categories/**", "/api/images/**").permitAll()
+                        .requestMatchers("/api/users/**", "/api/posts/**", "/api/categories/**", "/api/comments/**", "/api/images/**").authenticated());
 
         http
                 .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(auth -> auth
+                                .baseUri("/api/oauth2/authorization")
+                        )
+                        .defaultSuccessUrl("https://mylogjw.kro.kr/oauth2/callback", true)
                         .userInfoEndpoint(userInfoEndPoint -> userInfoEndPoint.userService(customOAuth2UserService))
                         .successHandler(oAuth2SuccessHandler())
                 );

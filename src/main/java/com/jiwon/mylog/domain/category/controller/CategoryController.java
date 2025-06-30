@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
+@RequestMapping("/api")
 @RestController
 @Tag(name = "categories", description = "카테고리 API")
 public class CategoryController {

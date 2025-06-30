@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
-@RequestMapping("/images")
+@RequestMapping("/api/images")
 @RestController
 public class ImageController {
 
@@ -26,7 +26,7 @@ public class ImageController {
     @PostMapping("/profile")
     public ResponseEntity<ImageResponse> uploadProfile(
             @LoginUser Long userId,
-            @RequestParam String fileName) {
+            @RequestParam("fileName") String fileName) {
         ImageResponse response = imageService.uploadProfileImage(userId, fileName);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
