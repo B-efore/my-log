@@ -34,7 +34,7 @@ public class CategoryRepositoryImpl implements CategoryRepositoryCustom{
                         .and(post.user.id.eq(userId))
                 )
                 .where(category.user.id.eq(userId))
-                .groupBy(post.category.id, post.category.name)
+                .groupBy(category.id, category.name)
                 .orderBy(category.createdAt.asc())
                 .fetch();
 
