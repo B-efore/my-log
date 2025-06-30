@@ -63,7 +63,7 @@ class PostControllerTest {
         given(postService.createPost(any(Long.class), any(PostRequest.class))).willReturn(response);
 
         // when & then
-        mockMvc.perform(post("/posts")
+        mockMvc.perform(post("/api/posts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
         )

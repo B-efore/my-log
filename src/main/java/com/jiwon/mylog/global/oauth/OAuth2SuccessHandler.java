@@ -37,6 +37,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         CookieUtil.setRefreshTokenCookie(response, "refreshToken", refreshToken);
 
         clearAuthenticationAttributes(request);
-        response.sendRedirect("http://localhost:5173/oauth2/callback");
+        response.sendRedirect("https://mylogjw.kro.kr/oauth2/callback");
     }
 }

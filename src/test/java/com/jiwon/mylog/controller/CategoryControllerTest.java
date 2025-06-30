@@ -53,7 +53,7 @@ class CategoryControllerTest {
         given(categoryService.create(any(Long.class), any(CategoryRequest.class))).willReturn(response);
 
         // when & then
-        mockMvc.perform(post("/categories")
+        mockMvc.perform(post("/api/categories")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
         )
@@ -77,7 +77,7 @@ class CategoryControllerTest {
         given(categoryService.update(any(Long.class), eq(categoryId), any(CategoryRequest.class))).willReturn(response);
 
         // when & then
-        mockMvc.perform(patch("/categories/{categoryId}", categoryId)
+        mockMvc.perform(patch("/api/categories/{categoryId}", categoryId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                 )
