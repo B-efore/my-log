@@ -28,8 +28,18 @@ jobs:
       - name: Check secrets file
         run: ls -R src/main/resources/secrets
 
-      - name: Build
-        run: ./gradlew clean build -Dspring.profiles.active=prod
+      - name: Build without test
+        run: ./gradlew clean build -x test -Dspring.profiles.active=prod
+
+      - name: Run Tests
+        run: ./gradlew test -Dspring.profiles.active=prod
+
+      - name: Upload Test Report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: build/reports/tests/test
 
       - name: Copy to EC2
         uses: appleboy/scp-action@v1
