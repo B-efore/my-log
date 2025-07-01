@@ -28,6 +28,9 @@ jobs:
       - name: Check secrets file
         run: ls -R src/main/resources/secrets
 
+      - name: Debug Profile
+        run: cat src/main/resources/secrets/application-prod.yml
+
       - name: Build without test
         run: ./gradlew clean build -x test -Dspring.profiles.active=prod
 
