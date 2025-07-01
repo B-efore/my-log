@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -22,7 +24,7 @@ jobs:
           cache: gradle
 
       - name: Build
-        run: ./gradlew clean build
+        run: ./gradlew clean build -Dspring.profiles.active=prod
 
       - name: Copy to EC2
         uses: appleboy/scp-action@v1
