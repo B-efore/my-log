@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
+    private final OAuth2Properties oAuth2Properties;
     private final JwtService jwtService;
     private final TokenService tokenService;
 
@@ -37,6 +39,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         CookieUtil.setRefreshTokenCookie(response, "refreshToken", refreshToken);
 
         clearAuthenticationAttributes(request);
-        response.sendRedirect("https://mylogjw.kro.kr/oauth2/callback");
+        response.sendRedirect(oAuth2Properties.getRedirectUrl());
     }
 }

@@ -1,6 +1,7 @@
 package com.jiwon.mylog.global.common.config;
 
 import com.jiwon.mylog.global.oauth.CustomOAuth2UserService;
+import com.jiwon.mylog.global.oauth.OAuth2Properties;
 import com.jiwon.mylog.global.oauth.OAuth2SuccessHandler;
 import com.jiwon.mylog.global.security.auth.user.CustomUserDetailsService;
 import com.jiwon.mylog.global.security.jwt.JwtService;
@@ -9,6 +10,7 @@ import com.jiwon.mylog.global.security.token.sevice.TokenService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -31,6 +33,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final OAuth2Properties oAuth2Properties;
     private final JwtService jwtService;
     private final TokenService tokenService;
     private final CustomOAuth2UserService customOAuth2UserService;
@@ -47,7 +50,7 @@ public class SecurityConfig {
 
     @Bean
     public OAuth2SuccessHandler oAuth2SuccessHandler() {
-        return new OAuth2SuccessHandler(jwtService, tokenService);
+        return new OAuth2SuccessHandler(oAuth2Properties, jwtService, tokenService);
     }
 
     @Bean
@@ -81,9 +84,9 @@ public class SecurityConfig {
         http
                 .oauth2Login(oauth2 -> oauth2
                         .authorizationEndpoint(auth -> auth
-                                .baseUri("/api/oauth2/authorization")
+                                .baseUri(oAuth2Properties.getAuthorizationBaseUri())
                         )
-                        .defaultSuccessUrl("https://mylogjw.kro.kr/oauth2/callback", true)
+                        .defaultSuccessUrl(oAuth2Properties.getDefaultSuccessUrl(), true)
                         .userInfoEndpoint(userInfoEndPoint -> userInfoEndPoint.userService(customOAuth2UserService))
                         .successHandler(oAuth2SuccessHandler())
                 );
