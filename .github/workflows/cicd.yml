@@ -25,6 +25,9 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      - name: Check secrets file
+        run: ls -R src/main/resources/secrets
+
       - name: Build
         run: ./gradlew clean build -Dspring.profiles.active=prod
 
