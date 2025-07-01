@@ -5,6 +5,7 @@ import com.jiwon.mylog.global.common.error.ErrorCode;
 import com.jiwon.mylog.global.common.error.exception.AmazonS3Exception;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -15,6 +16,7 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -78,6 +80,10 @@ public class S3Service {
     }
 
     private String generateKey(String fileName) {
-        return UUID.randomUUID() + "_" + fileName;
+        String extension = StringUtils.getFilenameExtension(fileName);
+        if (extension == null || extension.isBlank()) {
+            throw new IllegalArgumentException("잘못된 확장자입니다.");
+        }
+        return UUID.randomUUID() + "." + extension;
     }
 }
