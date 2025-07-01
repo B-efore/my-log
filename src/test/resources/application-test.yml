@@ -1,0 +1,91 @@
+# ?? ?? ??
+spring:
+
+  # ?????? ??
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb;MODE=MYSQL;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password:
+
+  # ??? ??
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+
+  # ?? ??
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: test@gmail.com
+    password: test
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+      auth-code-expiration-millis: 300000
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: test
+            client-secret: test
+            redirect-uri: test
+            scope:
+              - email
+              - profile
+          kakao:
+            client-id: test
+            client-secret: test
+            client-authentication-method: client_secret_post
+            client-name: kakao
+            redirect-uri: test
+            authorization-grant-type: authorization_code
+            scope:
+              - profile_nickname
+              - account_email
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+
+  # JPA ??
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        show_sql: true
+#        format_sql: true
+
+
+# AWS ??
+aws:
+  access: test
+  secret: test
+  s3:
+    bucket: test
+    region: ap-northeast-2
+
+# JWT ??
+jwt:
+  issuer: test
+  secretKey: testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttest
+  accessExpiry: 3_600_000
+  refreshExpiry: 1_209_600_000
+
+oauth2:
+  authorization-base-uri: test
+  default-success-url: test
+  redirect-url: test
