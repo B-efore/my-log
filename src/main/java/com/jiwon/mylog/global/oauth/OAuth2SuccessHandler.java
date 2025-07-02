@@ -28,6 +28,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     public void onAuthenticationSuccess(
             HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
 
+        log.info("OAUth2 SuccessHandler 진입");
+
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long userId = userDetails.getUserId();
         String accountId = userDetails.getUsername();
@@ -35,6 +37,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String refreshToken = jwtService.createRefreshToken(userId, accountId);
         TokenRequest tokenRequest = new TokenRequest(userId, refreshToken);
         tokenService.saveToken(tokenRequest);
+
+        log.info("userId: {}", userId);
 
         CookieUtil.setRefreshTokenCookie(response, "refreshToken", refreshToken);
 
