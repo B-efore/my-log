@@ -10,6 +10,7 @@ import lombok.Getter;
 public class UserResponse {
     private final Long userId;
     private final String username;
+    private final String bio;
     private final String profileImageUrl;
     private final UserStatus userStatus;
 
@@ -17,6 +18,7 @@ public class UserResponse {
         return UserResponse.builder()
                 .userId(user.getId())
                 .username(user.getUsername())
+                .bio(user.getBio())
                 .profileImageUrl(user.getProfileImage() == null ? "" : user.getProfileImage().getFileKey())
                 .userStatus(user.getStatus())
                 .build();
