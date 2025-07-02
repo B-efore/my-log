@@ -27,6 +27,7 @@ jobs:
           echo "${{ secrets.APPLICATION_YML }}" > src/main/resources/application.yml
           echo "Configuration file created successfully"
           ls -la src/main/resources/
+          cat src/main/resources/application.yml
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
