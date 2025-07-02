@@ -24,7 +24,7 @@ jobs:
       - name: Create configuration
         run: |
           mkdir -p src/main/resources
-          echo "${{ secrets.APPLICATION_YML }}" > src/main/resources/application.yml
+          echo "${{ secrets.APPLICATION_YML }}" | base64 --decode > src/main/resources/application.yml
           echo "Configuration file created successfully"
           ls -la src/main/resources/
           cat src/main/resources/application.yml
