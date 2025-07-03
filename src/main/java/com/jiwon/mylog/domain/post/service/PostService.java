@@ -66,15 +66,8 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public PostDetailResponse getPost(Long postId) {
-        Post post = getPostWithDetails(postId);
-        validateNotDeleted(post);
-        return PostDetailResponse.fromPost(post);
-    }
-
-    private void validateNotDeleted(Post post) {
-        if (post.isDeleted()) {
-           throw new NotFoundException(ErrorCode.NOT_FOUND_POST);
-        }
+        return postRepository.findPostDetail(postId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_POST));
     }
 
     @Transactional(readOnly = true)
