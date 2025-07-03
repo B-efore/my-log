@@ -4,12 +4,15 @@ import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.domain.post.repository.PostRepository;
 import com.jiwon.mylog.domain.user.dto.request.UserUpdateRequest;
 import com.jiwon.mylog.domain.user.dto.response.UserMainResponse;
+import com.jiwon.mylog.domain.user.dto.response.UserProfilePageResponse;
 import com.jiwon.mylog.domain.user.dto.response.UserProfileResponse;
 import com.jiwon.mylog.domain.user.entity.User;
 import com.jiwon.mylog.domain.user.repository.UserRepository;
 import com.jiwon.mylog.global.common.error.ErrorCode;
 import com.jiwon.mylog.global.common.error.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,5 +50,20 @@ public class UserService {
         List<Post> pinnedPosts = postRepository.findPinnedPostsByUserId(userId);
         return UserMainResponse.fromUser(user, pinnedPosts);
 
+    }
+
+    @Transactional(readOnly = true)
+    public UserProfilePageResponse searchWithUsername(String username, Pageable pageable) {
+        Page<User> userPage = userRepository.findByUsernameContaining(username, pageable);
+        List<UserProfileResponse> users = userPage.stream()
+                .map(UserProfileResponse::fromUser)
+                .toList();
+
+        return UserProfilePageResponse.from(
+                users,
+                userPage.getNumber(),
+                userPage.getSize(),
+                userPage.getTotalPages(),
+                (int) userPage.getTotalElements());
     }
 }
