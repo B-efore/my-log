@@ -67,7 +67,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, JwtService jwtService, CustomUserDetailsService userDetailsService) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtService jwtService) throws Exception {
         http
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
@@ -92,7 +92,7 @@ public class SecurityConfig {
                 );
 
         http
-                .addFilterBefore(new JwtTokenAuthenticationFilter(jwtService, userDetailsService), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtTokenAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
 
         http
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

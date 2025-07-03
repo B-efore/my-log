@@ -90,6 +90,7 @@ class PostControllerTest {
                 .views(0)
                 .user(user)
                 .category(category)
+                .pinned(false)
                 .build();
     }
 

@@ -2,11 +2,13 @@ package com.jiwon.mylog.domain.user.dto.response;
 
 import com.jiwon.mylog.domain.user.entity.User;
 import com.jiwon.mylog.domain.user.entity.UserStatus;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
 @Builder
 @Getter
+@AllArgsConstructor
 public class UserResponse {
     private final Long userId;
     private final String username;

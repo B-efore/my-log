@@ -6,11 +6,14 @@ import com.jiwon.mylog.domain.comment.entity.Comment;
 import com.jiwon.mylog.domain.comment.entity.CommentStatus;
 import com.jiwon.mylog.domain.user.dto.response.UserResponse;
 import java.time.LocalDateTime;
+
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 @Builder
+@AllArgsConstructor
 public class CommentResponse {
     private final Long commentId;
     private final Long parentId;
