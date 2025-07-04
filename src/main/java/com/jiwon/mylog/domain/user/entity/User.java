@@ -2,6 +2,7 @@ package com.jiwon.mylog.domain.user.entity;
 
 import com.jiwon.mylog.domain.category.entity.Category;
 import com.jiwon.mylog.domain.comment.entity.Comment;
+import com.jiwon.mylog.domain.follow.entity.Follow;
 import com.jiwon.mylog.domain.image.entity.ProfileImage;
 import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.global.common.entity.BaseEntity;
@@ -85,6 +86,12 @@ public class User extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Tag> tags = new ArrayList<>();
+
+    @OneToMany(mappedBy = "fromUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Follow> followings = new ArrayList<>();
+
+    @OneToMany(mappedBy = "toUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Follow> followers = new ArrayList<>();
 
     public List<Role> getUserRoles() {
         return userRoles.stream()
