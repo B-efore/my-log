@@ -4,7 +4,6 @@ import com.jiwon.mylog.domain.category.dto.response.CategoryResponse;
 import com.jiwon.mylog.domain.category.entity.QCategory;
 import com.jiwon.mylog.domain.comment.dto.response.CommentResponse;
 import com.jiwon.mylog.domain.comment.entity.QComment;
-import com.jiwon.mylog.domain.image.entity.QImage;
 import com.jiwon.mylog.domain.image.entity.QProfileImage;
 import com.jiwon.mylog.domain.post.dto.response.PostDetailResponse;
 import com.jiwon.mylog.domain.post.entity.Post;
@@ -12,12 +11,15 @@ import com.jiwon.mylog.domain.post.entity.QPost;
 import com.jiwon.mylog.domain.tag.dto.response.TagResponse;
 import com.jiwon.mylog.domain.tag.entity.QPostTag;
 import com.jiwon.mylog.domain.tag.entity.QTag;
+import com.jiwon.mylog.domain.user.dto.response.ActivityResponse;
+import com.jiwon.mylog.domain.user.dto.response.UserActivityResponse;
 import com.jiwon.mylog.domain.user.dto.response.UserResponse;
 import com.jiwon.mylog.domain.user.entity.QUser;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.DateTemplate;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,10 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -136,6 +142,35 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
         return Optional.of(postDetailResponse);
     }
 
+    @Override
+    public UserActivityResponse findUserActivities(Long userId, LocalDate start, LocalDate end) {
+        DateTemplate<Date> formattedDate = Expressions.dateTemplate(
+                Date.class,
+                "FUNCTION('DATE', {0})",
+                POST.createdAt
+        );
+
+        List<ActivityResponse> activities = jpaQueryFactory
+                .select(Projections.constructor(ActivityResponse.class,
+                                formattedDate,
+                                POST.id.count()
+                        )
+                )
+                .from(POST)
+                .join(POST.user, USER)
+                .where(POST.user.id.eq(userId),
+                        POST.createdAt.between(
+                                LocalDateTime.of(start, LocalTime.MIN),
+                                LocalDateTime.of(end, LocalTime.MAX)
+                        )
+                )
+                .groupBy(formattedDate)
+                .orderBy(formattedDate.asc())
+                .fetch();
+
+        return new UserActivityResponse(activities);
+    }
+
     private PageImpl<Post> createResult(Pageable pageable, BooleanBuilder builder) {
         List<Post> posts = createPostsQuery(builder, pageable);
         Long total = createCountQuery(builder);
@@ -187,5 +222,5 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
                             .and(POST_TAG.tag.id.in(tagIds))
                     )
                     .exists();
-        }
+    }
 }

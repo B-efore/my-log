@@ -1,6 +1,7 @@
 package com.jiwon.mylog.domain.user.controller;
 
 import com.jiwon.mylog.domain.user.dto.request.UserUpdateRequest;
+import com.jiwon.mylog.domain.user.dto.response.UserActivityResponse;
 import com.jiwon.mylog.domain.user.dto.response.UserMainResponse;
 import com.jiwon.mylog.domain.user.dto.response.UserProfilePageResponse;
 import com.jiwon.mylog.domain.user.dto.response.UserProfileResponse;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +25,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDate;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/users")
@@ -71,6 +75,15 @@ public class UserController {
         UserMainResponse response = userService.getUserMain(userId);
         return new ResponseEntity<>(response, HttpStatus.OK);
 
+    }
+
+    @GetMapping("/{userId}/activity")
+    public ResponseEntity<?> getUserActivity(
+            @PathVariable("userId") Long userId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
+        UserActivityResponse response = userService.getUserActivity(userId, startDate, endDate);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/search")
