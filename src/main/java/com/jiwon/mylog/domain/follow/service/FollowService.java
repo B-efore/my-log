@@ -80,8 +80,8 @@ public class FollowService {
     public FollowCountResponse getFollowCounts(Long userId) {
         List<Object[]> counts = followRepository.countFollowsByUserId(userId);
         Object[] row = counts.get(0);
-        Long followersCount = row[0] != null ? ((Number) row[0]).longValue() : 0L;
-        Long followingsCount = row[1] != null ? ((Number) row[1]).longValue() : 0L;
+        Long followingsCount = row[0] != null ? ((Number) row[0]).longValue() : 0L;
+        Long followersCount = row[1] != null ? ((Number) row[1]).longValue() : 0L;
         return new FollowCountResponse(followingsCount, followersCount);
     }
 }
