@@ -3,6 +3,7 @@ package com.jiwon.mylog.domain.user.service;
 import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.domain.post.repository.PostRepository;
 import com.jiwon.mylog.domain.user.dto.request.UserUpdateRequest;
+import com.jiwon.mylog.domain.user.dto.response.UserActivityResponse;
 import com.jiwon.mylog.domain.user.dto.response.UserMainResponse;
 import com.jiwon.mylog.domain.user.dto.response.UserProfilePageResponse;
 import com.jiwon.mylog.domain.user.dto.response.UserProfileResponse;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -65,5 +67,12 @@ public class UserService {
                 userPage.getSize(),
                 userPage.getTotalPages(),
                 (int) userPage.getTotalElements());
+    }
+
+    public UserActivityResponse getUserActivity(Long userId, LocalDate startDate, LocalDate endDate) {
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException(ErrorCode.NOT_FOUND_USER);
+        }
+        return postRepository.findUserActivities(userId, startDate, endDate);
     }
 }

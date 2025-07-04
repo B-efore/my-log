@@ -69,7 +69,7 @@ public class ImageService {
     }
 
     private void validateImage(String fileName) {
-        String extension = StringUtils.getFilenameExtension(fileName);
+        String extension = StringUtils.getFilenameExtension(fileName).toLowerCase();
         if (extension.isBlank() || Arrays.stream(EXTENSIONS).noneMatch(e -> e.equalsIgnoreCase(extension))) {
             throw new IllegalArgumentException("잘못된 확장자입니다.");
         }
