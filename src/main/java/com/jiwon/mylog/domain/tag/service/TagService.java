@@ -1,7 +1,7 @@
 package com.jiwon.mylog.domain.tag.service;
 
 import com.jiwon.mylog.domain.tag.dto.request.TagRequest;
-import com.jiwon.mylog.domain.tag.dto.response.TagCountListResponse;
+import com.jiwon.mylog.domain.tag.dto.response.TagCountPageResponse;
 import com.jiwon.mylog.domain.tag.dto.response.TagResponse;
 import com.jiwon.mylog.domain.tag.entity.Tag;
 import com.jiwon.mylog.domain.tag.repository.TagRepository;
@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,8 +31,8 @@ public class TagService {
     }
 
     @Transactional(readOnly = true)
-    public TagCountListResponse getAllTagsWithCount(Long userId) {
-        return tagRepository.findAllWithCountByUserId(userId);
+    public TagCountPageResponse getAllTagsWithCount(Long userId, Pageable pageable) {
+        return tagRepository.findAllWithCountByUserId(userId, pageable);
     }
 
     @Transactional
@@ -55,15 +56,19 @@ public class TagService {
 
         tagRepository.saveAll(createdTags);
 
-        return Stream.of(existingTags, createdTags)
+        List<Tag> result = Stream.of(existingTags, createdTags)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
+        result.forEach(Tag::incrementUsage);
+        return result;
     }
 
     private Tag createTag(User user, String tagName) {
-        return Tag.builder()
+        Tag tag = Tag.builder()
                 .name(tagName)
+                .usageCount(0L)
                 .user(user)
                 .build();
+        return tag;
     }
 }

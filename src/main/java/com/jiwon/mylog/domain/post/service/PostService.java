@@ -23,7 +23,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -63,6 +62,8 @@ public class PostService {
     @Transactional
     public PostDetailResponse updatePost(Long userId, Long postId, PostRequest postRequest) {
         Post post = getPostWithDetails(postId);
+        post.getPostTags().stream()
+                        .forEach(postTag -> postTag.getTag().decrementUsage());
 
         validateOwner(post, userId);
 
@@ -80,7 +81,8 @@ public class PostService {
     })
     @Transactional
     public void deletePost(Long userId, Long postId) {
-        Post post = getPostById(postId);
+        Post post = postRepository.findWithTags(postId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_POST));
         validateOwner(post, userId);
         post.delete();
     }

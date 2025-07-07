@@ -8,5 +8,5 @@ import lombok.Getter;
 public class TagCountResponse {
     private final Long id;
     private final String name;
-    private final Long postCount;
+    private final Long usageCount;
 }
