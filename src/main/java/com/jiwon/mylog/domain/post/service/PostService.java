@@ -17,6 +17,10 @@ import com.jiwon.mylog.domain.user.repository.UserRepository;
 import java.util.List;
 
 import com.jiwon.mylog.domain.tag.service.TagService;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import java.util.Set;
@@ -35,6 +39,13 @@ public class PostService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
 
+    @Caching(
+            put = @CachePut(value = "post::detail", key = "#result.postId", unless = "#result.postId == null"),
+            evict = {
+                    @CacheEvict(value = "post::list", allEntries = true),
+                    @CacheEvict(value = "post::filter", allEntries = true)
+            }
+    )
     @Transactional
     public PostDetailResponse createPost(Long userId, PostRequest postRequest) {
         User user = getUserById(userId);
@@ -44,6 +55,11 @@ public class PostService {
         return PostDetailResponse.fromPost(postRepository.save(post));
     }
 
+    @Caching(put = @CachePut(value = "post::detail", key = "#postId", unless = "#postId == null"),
+            evict = {
+            @CacheEvict(value = "post::list", allEntries = true),
+            @CacheEvict(value = "post::filter", allEntries = true)
+    })
     @Transactional
     public PostDetailResponse updatePost(Long userId, Long postId, PostRequest postRequest) {
         Post post = getPostWithDetails(postId);
@@ -57,6 +73,11 @@ public class PostService {
         return PostDetailResponse.fromPost(post);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "post::detail", key = "#postId"),
+            @CacheEvict(value = "post::list", allEntries = true),
+            @CacheEvict(value = "post::filter", allEntries = true)
+    })
     @Transactional
     public void deletePost(Long userId, Long postId) {
         Post post = getPostById(postId);
@@ -64,12 +85,21 @@ public class PostService {
         post.delete();
     }
 
+    @Cacheable(value = "post::detail",
+            key = "#postId",
+            unless = "#result == null",
+            condition = "#postId != null && #postId > 0"
+    )
     @Transactional(readOnly = true)
     public PostDetailResponse getPost(Long postId) {
         return postRepository.findPostDetail(postId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_POST));
     }
 
+    @Cacheable(value = "post::list",
+            key = "'user:' + #userId + ':page:' + #pageable.pageNumber + ':size:' + #pageable.pageSize",
+            condition = "#userId != null && #pageable != null"
+    )
     @Transactional(readOnly = true)
     public PostSummaryPageResponse getAllPosts(Long userId, Pageable pageable) {
         Page<Post> postPage = postRepository.findAllByUser(userId, pageable);
@@ -85,12 +115,13 @@ public class PostService {
                 (int) postPage.getTotalElements());
     }
 
+    @Cacheable(value = "post::filter", keyGenerator = "postCacheKeyGenerator")
     @Transactional(readOnly = true)
     public PostSummaryPageResponse getPostsByCategoryAndTags(Long userId, Long categoryId, List<Long> tagIds, Pageable pageable) {
 
         Page<Post> postPage;
 
-        if (categoryId.equals(0L)) {
+        if (categoryId == null || categoryId.equals(0L)) {
             postPage = postRepository.findByTags(userId, tagIds, pageable);
         } else {
             postPage = postRepository.findByCategoryAndTags(userId, categoryId, tagIds, pageable);
