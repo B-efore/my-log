@@ -1,14 +1,14 @@
 name: Spring Boot CI/CD
 
 on:
-  push:
-    branches: ["main"]
   pull_request:
+    types: [closed]
     branches: ["main"]
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
 
     steps:
       - name: Checkout code
