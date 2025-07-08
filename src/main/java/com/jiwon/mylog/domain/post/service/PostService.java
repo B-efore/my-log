@@ -2,8 +2,9 @@ package com.jiwon.mylog.domain.post.service;
 
 import com.jiwon.mylog.domain.category.entity.Category;
 import com.jiwon.mylog.domain.post.dto.request.PostRequest;
+import com.jiwon.mylog.domain.post.dto.response.MainPostResponse;
 import com.jiwon.mylog.domain.post.dto.response.PostDetailResponse;
-import com.jiwon.mylog.domain.post.dto.response.PostSummaryPageResponse;
+import com.jiwon.mylog.domain.post.dto.response.PageResponse;
 import com.jiwon.mylog.domain.post.dto.response.PostSummaryResponse;
 import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.domain.post.repository.PostRepository;
@@ -23,7 +24,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -42,6 +42,7 @@ public class PostService {
     @Caching(
             put = @CachePut(value = "post::detail", key = "#result.postId", unless = "#result.postId == null"),
             evict = {
+                    @CacheEvict(value = "post::main", allEntries = true),
                     @CacheEvict(value = "post::list", allEntries = true),
                     @CacheEvict(value = "post::filter", allEntries = true)
             }
@@ -57,12 +58,15 @@ public class PostService {
 
     @Caching(put = @CachePut(value = "post::detail", key = "#postId", unless = "#postId == null"),
             evict = {
+            @CacheEvict(value = "post::main", allEntries = true),
             @CacheEvict(value = "post::list", allEntries = true),
             @CacheEvict(value = "post::filter", allEntries = true)
     })
     @Transactional
     public PostDetailResponse updatePost(Long userId, Long postId, PostRequest postRequest) {
         Post post = getPostWithDetails(postId);
+        post.getPostTags().stream()
+                        .forEach(postTag -> postTag.getTag().decrementUsage());
 
         validateOwner(post, userId);
 
@@ -75,12 +79,14 @@ public class PostService {
 
     @Caching(evict = {
             @CacheEvict(value = "post::detail", key = "#postId"),
+            @CacheEvict(value = "post::main", allEntries = true),
             @CacheEvict(value = "post::list", allEntries = true),
             @CacheEvict(value = "post::filter", allEntries = true)
     })
     @Transactional
     public void deletePost(Long userId, Long postId) {
-        Post post = getPostById(postId);
+        Post post = postRepository.findWithTags(postId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_POST));
         validateOwner(post, userId);
         post.delete();
     }
@@ -96,28 +102,45 @@ public class PostService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_POST));
     }
 
+    @Cacheable(value = "post::main",
+            key = "'page:' + #pageable.pageNumber + ':size:' + #pageable.pageSize",
+            condition = "#pageable != null")
+    @Transactional(readOnly = true)
+    public PageResponse getPosts(Pageable pageable) {
+        Page<Post> postPage = postRepository.findAll(pageable);
+        List<MainPostResponse> posts = postPage.stream()
+                .map(MainPostResponse::fromPost)
+                .toList();
+        return PageResponse.from(
+                posts,
+                postPage.getNumber(),
+                postPage.getSize(),
+                postPage.getTotalPages(),
+                postPage.getTotalElements());
+    }
+
     @Cacheable(value = "post::list",
             key = "'user:' + #userId + ':page:' + #pageable.pageNumber + ':size:' + #pageable.pageSize",
             condition = "#userId != null && #pageable != null"
     )
     @Transactional(readOnly = true)
-    public PostSummaryPageResponse getAllPosts(Long userId, Pageable pageable) {
+    public PageResponse getUserPosts(Long userId, Pageable pageable) {
         Page<Post> postPage = postRepository.findAllByUser(userId, pageable);
         List<PostSummaryResponse> posts = postPage.stream()
                 .map(PostSummaryResponse::fromPost)
                 .toList();
 
-        return PostSummaryPageResponse.from(
+        return PageResponse.from(
                 posts,
                 postPage.getNumber(),
                 postPage.getSize(),
                 postPage.getTotalPages(),
-                (int) postPage.getTotalElements());
+                postPage.getTotalElements());
     }
 
     @Cacheable(value = "post::filter", keyGenerator = "postCacheKeyGenerator")
     @Transactional(readOnly = true)
-    public PostSummaryPageResponse getPostsByCategoryAndTags(Long userId, Long categoryId, List<Long> tagIds, Pageable pageable) {
+    public PageResponse getPostsByCategoryAndTags(Long userId, Long categoryId, List<Long> tagIds, Pageable pageable) {
 
         Page<Post> postPage;
 
@@ -131,7 +154,7 @@ public class PostService {
                 .map(PostSummaryResponse::fromPost)
                 .toList();
 
-        return PostSummaryPageResponse.from(
+        return PageResponse.from(
                 posts,
                 postPage.getNumber(),
                 postPage.getSize(),

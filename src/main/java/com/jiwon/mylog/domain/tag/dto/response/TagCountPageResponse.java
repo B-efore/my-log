@@ -1,25 +1,26 @@
-package com.jiwon.mylog.domain.post.dto.response;
+package com.jiwon.mylog.domain.tag.dto.response;
 
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-@Getter
+import java.util.List;
+
 @Builder
 @AllArgsConstructor
-public class PostSummaryPageResponse {
-    private final List<PostSummaryResponse> posts;
+@Getter
+public class TagCountPageResponse {
+    private final List<TagCountResponse> tags;
     private final int page;
     private final int size;
     private final int totalPages;
     private final int totalElements;
 
-    public static PostSummaryPageResponse from(
-            List<PostSummaryResponse> posts,
+    public static TagCountPageResponse from(
+            List<TagCountResponse> tags,
             int page, int size, int totalPages, int totalElements) {
-        return PostSummaryPageResponse.builder()
-                .posts(posts)
+        return TagCountPageResponse.builder()
+                .tags(tags)
                 .page(page)
                 .size(size)
                 .totalPages(totalPages)

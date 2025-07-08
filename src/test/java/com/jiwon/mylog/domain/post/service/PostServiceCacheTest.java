@@ -53,7 +53,7 @@ class PostServiceCacheTest {
         Pageable pageable = PageRequest.of(0, 10);
         PostRequest postRequest = new PostRequest("title", "content", "preview", "공개", 1L, List.of(), true);
 
-        postService.getAllPosts(userId, pageable);
+        postService.getUserPosts(userId, pageable);
         postService.getPostsByCategoryAndTags(userId, categoryId, List.of(), pageable);
 
         // when
@@ -61,7 +61,7 @@ class PostServiceCacheTest {
         Long postId = post.getPostId();
 
         postService.getPost(postId);
-        postService.getAllPosts(userId, pageable); // 캐시 다시 생성
+        postService.getUserPosts(userId, pageable); // 캐시 다시 생성
         postService.getPostsByCategoryAndTags(userId, categoryId, List.of(), pageable); // 캐시 다시 생성
 
         // then
@@ -83,13 +83,13 @@ class PostServiceCacheTest {
         Pageable pageable = PageRequest.of(0, 10);
         PostRequest postRequest = new PostRequest("title", "content", "preview", "공개", 1L, List.of(), true);
 
-        postService.getAllPosts(userId, pageable); // 캐시 생성
+        postService.getUserPosts(userId, pageable); // 캐시 생성
         postService.getPostsByCategoryAndTags(userId, categoryId, List.of(), pageable); // 캐시 생성
 
         // when
         PostDetailResponse post = postService.updatePost(userId, postId, postRequest);
         postService.getPost(postId);
-        postService.getAllPosts(userId, pageable); // 캐시 다시 생성
+        postService.getUserPosts(userId, pageable); // 캐시 다시 생성
         postService.getPostsByCategoryAndTags(userId, categoryId, List.of(), pageable); // 캐시 다시 생성
 
         // then
@@ -151,13 +151,13 @@ class PostServiceCacheTest {
         Pageable pageable2 = PageRequest.of(1, 10);
 
         // when
-        postService.getAllPosts(userId1, pageable1);
-        postService.getAllPosts(userId1, pageable2);
-        postService.getAllPosts(userId2, pageable1);
+        postService.getUserPosts(userId1, pageable1);
+        postService.getUserPosts(userId1, pageable2);
+        postService.getUserPosts(userId2, pageable1);
 
-        postService.getAllPosts(userId1, pageable1);
-        postService.getAllPosts(userId1, pageable2);
-        postService.getAllPosts(userId2, pageable1);
+        postService.getUserPosts(userId1, pageable1);
+        postService.getUserPosts(userId1, pageable2);
+        postService.getUserPosts(userId2, pageable1);
 
         // then
         verify(postRepository, times(1)).findAllByUser(userId1, pageable1);

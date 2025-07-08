@@ -40,10 +40,21 @@ public class Tag {
 
     private String name;
 
+    @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 0")
+    private Long usageCount = 0L;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostTag> postTags = new ArrayList<>();
+
+    public void incrementUsage() {
+        this.usageCount++;
+    }
+
+    public void decrementUsage() {
+        this.usageCount = Math.max(0, this.usageCount - 1);
+    }
 }

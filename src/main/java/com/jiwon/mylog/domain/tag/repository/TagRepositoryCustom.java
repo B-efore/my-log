@@ -1,7 +1,8 @@
 package com.jiwon.mylog.domain.tag.repository;
 
-import com.jiwon.mylog.domain.tag.dto.response.TagCountListResponse;
+import com.jiwon.mylog.domain.tag.dto.response.TagCountPageResponse;
+import org.springframework.data.domain.Pageable;
 
 public interface TagRepositoryCustom{
-    TagCountListResponse findAllWithCountByUserId(Long userId);
+    TagCountPageResponse findAllWithCountByUserId(Long userId, Pageable pageable);
 }

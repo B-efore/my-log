@@ -1,9 +1,12 @@
 package com.jiwon.mylog.domain.tag.controller;
 
-import com.jiwon.mylog.domain.tag.dto.response.TagCountListResponse;
+import com.jiwon.mylog.domain.tag.dto.response.TagCountPageResponse;
 import com.jiwon.mylog.domain.tag.dto.response.TagResponse;
 import com.jiwon.mylog.domain.tag.service.TagService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,8 +30,11 @@ public class TagController {
     }
 
     @GetMapping("/users/{userId}/tags/with-counts")
-    public ResponseEntity<?> getAllTagsWithCount(@PathVariable("userId") Long userId) {
-        TagCountListResponse response = tagService.getAllTagsWithCount(userId);
+    public ResponseEntity<?> getAllTagsWithCount(
+            @PathVariable("userId") Long userId,
+            @PageableDefault(size = 10, page = 0,
+                    sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        TagCountPageResponse response = tagService.getAllTagsWithCount(userId, pageable);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
