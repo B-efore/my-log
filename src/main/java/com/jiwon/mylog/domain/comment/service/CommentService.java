@@ -13,6 +13,7 @@ import com.jiwon.mylog.global.common.error.exception.NotFoundException;
 import com.jiwon.mylog.domain.post.repository.PostRepository;
 import com.jiwon.mylog.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,12 +25,13 @@ public class CommentService {
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
 
+    @CacheEvict(value = "post::detail", key = "#postId")
     @Transactional
-    public CommentResponse create(Long userId, CommentCreateRequest request) {
+    public CommentResponse create(Long userId, Long postId, CommentCreateRequest request) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
-        Post post = postRepository.findById(request.getPostId())
+        Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_POST));
 
         Comment parent = null;
@@ -43,16 +45,18 @@ public class CommentService {
         return CommentResponse.fromComment(savedComment);
     }
 
+    @CacheEvict(value = "post::detail", key = "#postId")
     @Transactional
-    public CommentResponse update(Long userId, Long commentId, CommentUpdateRequest request) {
+    public CommentResponse update(Long userId, Long postId, Long commentId, CommentUpdateRequest request) {
         Comment comment = getComment(commentId);
         validateOwner(userId, comment);
         comment.update(request);
         return CommentResponse.fromComment(comment);
     }
 
+    @CacheEvict(value = "post::detail", key = "#postId")
     @Transactional
-    public void delete(Long userId, Long commentId) {
+    public void delete(Long userId, Long postId, Long commentId) {
         Comment comment = getComment(commentId);
         validateOwner(userId, comment);
         comment.delete();

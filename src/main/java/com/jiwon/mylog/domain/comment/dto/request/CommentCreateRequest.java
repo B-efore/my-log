@@ -12,9 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CommentCreateRequest {
 
-    @NotNull(message = "게시글 ID는 필수값입니다.")
-    private Long postId;
-
     private Long parentId;
 
     @NotBlank(message = "내용은 필수 입력값입니다.")

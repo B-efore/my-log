@@ -21,14 +21,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
-@RequestMapping("/api/comments")
+@RequestMapping("/api")
 @RestController
 @Tag(name = "comments", description = "댓글 API")
 public class CommentController {
 
     private final CommentService commentService;
 
-    @PostMapping
+    @PostMapping("/posts/{postId}/comments")
     @Operation(
             summary = "댓글 생성",
             responses = {
@@ -38,12 +38,13 @@ public class CommentController {
     )
     public ResponseEntity<CommentResponse> create(
             @LoginUser Long userId,
+            @PathVariable("postId") Long postId,
             @Valid @RequestBody CommentCreateRequest commentCreateRequest) {
-        CommentResponse response = commentService.create(userId, commentCreateRequest);
+        CommentResponse response = commentService.create(userId, postId, commentCreateRequest);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @PatchMapping("/{commentId}")
+    @PatchMapping("/posts/{postId}/comments/{commentId}")
     @Operation(
             summary = "댓글 수정",
             responses = {
@@ -54,13 +55,14 @@ public class CommentController {
     )
     public ResponseEntity<CommentResponse> update(
             @LoginUser Long userId,
+            @PathVariable("postId") Long postId,
             @PathVariable("commentId") Long commentId,
             @Valid @RequestBody CommentUpdateRequest commentUpdateRequest) {
-        CommentResponse response = commentService.update(userId, commentId, commentUpdateRequest);
+        CommentResponse response = commentService.update(userId, postId, commentId, commentUpdateRequest);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{commentId}")
+    @DeleteMapping("/posts/{postId}/comments/{commentId}")
     @Operation(
             summary = "댓글 삭제",
             responses = {
@@ -71,8 +73,9 @@ public class CommentController {
     )
     public ResponseEntity<Void> delete(
             @LoginUser Long userId,
+            @PathVariable("postId") Long postId,
             @PathVariable("commentId") Long commentId) {
-        commentService.delete(userId, commentId);
+        commentService.delete(userId, postId, commentId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

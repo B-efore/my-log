@@ -128,7 +128,8 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
                                         USER.status
                                 ),
                                 COMMENT.createdAt,
-                                COMMENT.updatedAt
+                                COMMENT.updatedAt,
+                                COMMENT.deletedAt
                         )
                 )
                 .from(COMMENT)
