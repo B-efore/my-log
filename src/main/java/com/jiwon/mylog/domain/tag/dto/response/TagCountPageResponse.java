@@ -1,7 +1,5 @@
 package com.jiwon.mylog.domain.tag.dto.response;
 
-import com.jiwon.mylog.domain.post.dto.response.PostSummaryPageResponse;
-import com.jiwon.mylog.domain.post.dto.response.PostSummaryResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

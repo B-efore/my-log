@@ -4,12 +4,11 @@ import com.jiwon.mylog.domain.post.service.PostService;
 import com.jiwon.mylog.global.security.auth.annotation.LoginUser;
 import com.jiwon.mylog.domain.post.dto.request.PostRequest;
 import com.jiwon.mylog.domain.post.dto.response.PostDetailResponse;
-import com.jiwon.mylog.domain.post.dto.response.PostSummaryPageResponse;
+import com.jiwon.mylog.domain.post.dto.response.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -98,6 +97,14 @@ public class PostController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @GetMapping("/posts")
+    public ResponseEntity<PageResponse> getPosts(
+            @PageableDefault(size = 10, page = 0,
+                    sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
+        PageResponse response = postService.getPosts(pageable);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     @GetMapping("/users/{userId}/posts")
     @Operation(
             summary = "특정 유저의 게시글 전체 조회",
@@ -105,11 +112,11 @@ public class PostController {
                     @ApiResponse(responseCode = "200", description = "특정 유저의 게시글 전체 조회 (페이징 적용)")
             }
     )
-    public ResponseEntity<PostSummaryPageResponse> getAllPosts(
+    public ResponseEntity<PageResponse> getUserPosts(
             @PathVariable("userId") Long userId,
             @PageableDefault(size = 10, page = 0,
                     sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
-        PostSummaryPageResponse response = postService.getAllPosts(userId, pageable);
+        PageResponse response = postService.getUserPosts(userId, pageable);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -121,13 +128,13 @@ public class PostController {
                     @ApiResponse(responseCode = "404", description = "존재하지 않는 사용자 혹은 카테고리")
             }
     )
-    public ResponseEntity<PostSummaryPageResponse> getPostsByCategoryAndTags(
+    public ResponseEntity<PageResponse> getPostsByCategoryAndTags(
             @PathVariable("userId") Long userId,
             @PathVariable("categoryId") Long categoryId,
             @RequestParam(value = "tags", required = false) List<Long> tags,
             @PageableDefault(size = 10, page = 0,
                     sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
-        PostSummaryPageResponse response = postService.getPostsByCategoryAndTags(userId, categoryId, tags, pageable);
+        PageResponse response = postService.getPostsByCategoryAndTags(userId, categoryId, tags, pageable);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

@@ -8,18 +8,18 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor
-public class PostSummaryPageResponse {
-    private final List<PostSummaryResponse> posts;
+public class PageResponse<T> {
+    private final List<T> objects;
     private final int page;
     private final int size;
     private final int totalPages;
-    private final int totalElements;
+    private final long totalElements;
 
-    public static PostSummaryPageResponse from(
-            List<PostSummaryResponse> posts,
-            int page, int size, int totalPages, int totalElements) {
-        return PostSummaryPageResponse.builder()
-                .posts(posts)
+    public static <T> PageResponse<T> from(
+            List<T> objects,
+            int page, int size, int totalPages, long totalElements) {
+        return PageResponse.<T>builder()
+                .objects(objects)
                 .page(page)
                 .size(size)
                 .totalPages(totalPages)
