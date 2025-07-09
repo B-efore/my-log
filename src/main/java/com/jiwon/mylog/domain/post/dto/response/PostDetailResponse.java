@@ -25,6 +25,7 @@ public class PostDetailResponse {
     private Long postId;
     private String title;
     private String content;
+    private String contentPreview;
     private int views;
     private PostStatus postStatus;
     private Visibility visibility;
@@ -36,10 +37,11 @@ public class PostDetailResponse {
     private List<TagResponse> tags;
     private List<CommentResponse> comments;
 
-    public PostDetailResponse(Long postId, String title, String content, int views, PostStatus postStatus, Visibility visibility, LocalDateTime createdAt, boolean pinned, UserResponse user, CategoryResponse category) {
+    public PostDetailResponse(Long postId, String title, String content, String contentPreview, int views, PostStatus postStatus, Visibility visibility, LocalDateTime createdAt, boolean pinned, UserResponse user, CategoryResponse category) {
         this.postId = postId;
         this.title = title;
         this.content = content;
+        this.contentPreview = contentPreview;
         this.views = views;
         this.postStatus = postStatus;
         this.visibility = visibility;
@@ -54,6 +56,7 @@ public class PostDetailResponse {
                 .postId(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
+                .contentPreview(post.getContentPreview())
                 .views(post.getViews())
                 .postStatus(post.getPostStatus())
                 .visibility(post.getVisibility())
