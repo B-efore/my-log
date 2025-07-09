@@ -204,10 +204,17 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
                 .and(POST.user.id.eq(userId))
                 .and(POST.deletedAt.isNull());
 
+        // 미분류 게시글
+        if (categoryId != null && categoryId == -1L) {
+            builder.and(POST.category.id.isNull());
+        }
+
+        // 카테고리 필터
         if (categoryId != null && categoryId > 0) {
             builder.and(POST.category.id.eq(categoryId));
         }
 
+        // 태그 필터
         if (tagIds != null && !tagIds.isEmpty()) {
             builder.and(createTagExistsCondition(tagIds));
         }
