@@ -100,7 +100,9 @@ public class PostService {
      * @param tags
      */
     private void increaseRelatedPostInfo(Category category, List<Tag> tags) {
-        category.incrementUsage();
+        if (category != null) {
+            category.incrementUsage();
+        }
         tags.forEach(Tag::incrementUsage);
     }
 
@@ -109,7 +111,9 @@ public class PostService {
      * @param post
      */
     private void decreaseRelatedPostInfo(Post post) {
-        post.getCategory().decrementUsage();
+        if (post.getCategory() != null) {
+            post.getCategory().decrementUsage();
+        }
         post.getPostTags().forEach(postTag -> postTag.getTag().decrementUsage());
     }
 
