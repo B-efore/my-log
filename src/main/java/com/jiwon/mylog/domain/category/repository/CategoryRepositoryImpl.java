@@ -25,14 +25,10 @@ public class CategoryRepositoryImpl implements CategoryRepositoryCustom{
                         Projections.constructor(CategoryCountResponse.class,
                                 category.id,
                                 category.name,
-                                post.count()
+                                category.postCount
                         )
                 )
                 .from(category)
-                .leftJoin(post).on(post.category.eq(category)
-                        .and(post.deletedAt.isNull())
-                        .and(post.user.id.eq(userId))
-                )
                 .where(category.user.id.eq(userId))
                 .groupBy(category.id, category.name)
                 .orderBy(category.createdAt.asc())
