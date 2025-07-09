@@ -56,11 +56,9 @@ public class TagService {
 
         tagRepository.saveAll(createdTags);
 
-        List<Tag> result = Stream.of(existingTags, createdTags)
+        return Stream.of(existingTags, createdTags)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
-        result.forEach(Tag::incrementUsage);
-        return result;
     }
 
     private Tag createTag(User user, String tagName) {

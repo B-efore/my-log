@@ -124,12 +124,6 @@ public class Post extends BaseEntity {
 
     public void delete() {
         super.delete();
-        this.postTags.forEach(postTag -> {
-            postTag.getTag().decrementUsage();
-            postTag.setTag(null);
-            postTag.setPost(null);
-        });
-        this.postTags.clear();
     }
 
     public boolean isDeleted() {

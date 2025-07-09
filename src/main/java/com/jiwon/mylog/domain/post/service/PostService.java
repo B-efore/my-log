@@ -1,6 +1,7 @@
 package com.jiwon.mylog.domain.post.service;
 
 import com.jiwon.mylog.domain.category.entity.Category;
+import com.jiwon.mylog.domain.comment.entity.Comment;
 import com.jiwon.mylog.domain.post.dto.request.PostRequest;
 import com.jiwon.mylog.domain.post.dto.response.MainPostResponse;
 import com.jiwon.mylog.domain.post.dto.response.PostDetailResponse;
@@ -52,6 +53,8 @@ public class PostService {
         User user = getUserById(userId);
         Category category = getCategoryById(userId, postRequest.getCategoryId());
         List<Tag> tags = tagService.getTagsById(user, postRequest.getTagRequests());
+        increaseRelatedPostInfo(category, tags);
+
         Post post = Post.create(postRequest, user, category, tags);
         return PostDetailResponse.fromPost(postRepository.save(post));
     }
@@ -65,15 +68,14 @@ public class PostService {
     @Transactional
     public PostDetailResponse updatePost(Long userId, Long postId, PostRequest postRequest) {
         Post post = getPostWithDetails(postId);
-        post.getPostTags().stream()
-                        .forEach(postTag -> postTag.getTag().decrementUsage());
-
         validateOwner(post, userId);
 
+        decreaseRelatedPostInfo(post);
         Category category = getCategoryById(userId, postRequest.getCategoryId());
         List<Tag> tags = tagService.getTagsById(post.getUser(), postRequest.getTagRequests());
-        post.update(postRequest, category, tags);
+        increaseRelatedPostInfo(category, tags);
 
+        post.update(postRequest, category, tags);
         return PostDetailResponse.fromPost(post);
     }
 
@@ -85,10 +87,44 @@ public class PostService {
     })
     @Transactional
     public void deletePost(Long userId, Long postId) {
-        Post post = postRepository.findWithTags(postId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_POST));
+        Post post = getPostWithDetails(postId);
         validateOwner(post, userId);
+        decreaseRelatedPostInfo(post);
+        deleteRelatedPostInfo(post);
         post.delete();
+    }
+
+    /**
+     * 포스트와 연관된 카테고리, 태그 게시글 카운트 증가
+     * @param category
+     * @param tags
+     */
+    private void increaseRelatedPostInfo(Category category, List<Tag> tags) {
+        category.incrementUsage();
+        tags.forEach(Tag::incrementUsage);
+    }
+
+    /**
+     * 포스트와 연관된 카테고리, 태그 게시글 카운트 감소
+     * @param post
+     */
+    private void decreaseRelatedPostInfo(Post post) {
+        post.getCategory().decrementUsage();
+        post.getPostTags().forEach(postTag -> postTag.getTag().decrementUsage());
+    }
+
+    /**
+     * 포스트와 연관된 정보 삭제 (포스트태그, 댓글)
+     * @param post
+     */
+    private void deleteRelatedPostInfo(Post post){
+        post.getPostTags().forEach(postTag -> {
+            postTag.setTag(null);
+            postTag.setPost(null);
+        });
+        post.getPostTags().clear();
+
+        post.getComments().forEach(Comment::delete);
     }
 
     @Cacheable(value = "post::detail",
@@ -168,11 +204,6 @@ public class PostService {
         postRepository.findWithTags(post);
         postRepository.findWithComments(post);
         return post;
-    }
-
-    private Post getPostById(Long postId) {
-        return postRepository.findById(postId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_POST));
     }
 
     private Category getCategoryById(Long userId, Long categoryId) {

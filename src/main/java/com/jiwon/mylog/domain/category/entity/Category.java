@@ -43,6 +43,9 @@ public class Category extends BaseEntity {
     @Column(nullable = false, length = 10)
     private String name;
 
+    @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 0")
+    private Long postCount = 0L;
+
     @OneToMany(mappedBy = "category")
     private List<Post> posts = new ArrayList<>();
 
@@ -53,10 +56,19 @@ public class Category extends BaseEntity {
         return Category.builder()
                 .name(request.getName())
                 .user(user)
+                .postCount(0L)
                 .build();
     }
 
     public void updateName(String name) {
         this.name = name;
+    }
+
+    public void incrementUsage() {
+        this.postCount++;
+    }
+
+    public void decrementUsage() {
+        this.postCount = Math.max(0, this.postCount - 1);
     }
 }
