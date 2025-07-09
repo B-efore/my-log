@@ -69,6 +69,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
                         POST.id,
                         POST.title,
                         POST.content,
+                        POST.contentPreview,
                         POST.views,
                         POST.postStatus,
                         POST.visibility,
