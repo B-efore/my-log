@@ -28,6 +28,7 @@ public class TestDataFactory {
         return Category.builder()
                 .user(user)
                 .name(name)
+                .postCount(0L)
                 .build();
     }
 
