@@ -1,5 +1,6 @@
 package com.jiwon.mylog.domain.user.dto.request;
 
+import com.jiwon.mylog.domain.user.entity.Role;
 import com.jiwon.mylog.domain.user.entity.User;
 import com.jiwon.mylog.domain.user.entity.UserStatus;
 import jakarta.validation.constraints.NotBlank;
@@ -43,6 +44,7 @@ public class UserSaveRequest {
                 .password(encodedPassword)
                 .username(username)
                 .status(UserStatus.ACTIVE)
+                .role(Role.ROLE_USER)
                 .build();
     }
 }

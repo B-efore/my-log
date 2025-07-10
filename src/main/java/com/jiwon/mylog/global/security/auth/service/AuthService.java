@@ -26,10 +26,13 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collection;
 
 @AllArgsConstructor
 @Service
@@ -66,9 +69,10 @@ public class AuthService {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             Long userId = userDetails.getUserId();
             String accountId = userLoginRequest.getAccountId();
+            String role = userDetails.getAuthorities().iterator().next().getAuthority();
 
-            String accessToken = jwtService.createAccessToken(userId, accountId);
-            String refreshToken = jwtService.createRefreshToken(userId, accessToken);
+            String accessToken = jwtService.createAccessToken(userId, accountId, role);
+            String refreshToken = jwtService.createRefreshToken(userId, accessToken, role);
             tokenService.saveToken(new TokenRequest(userId, refreshToken));
 
             CookieUtil.setRefreshTokenCookie(response, "refreshToken", refreshToken);
@@ -90,10 +94,11 @@ public class AuthService {
 
         Long userId = jwtService.getUserId(refreshToken);
         String accountId = jwtService.getAccountId(refreshToken);
+        String userRole = jwtService.getUserRole(refreshToken);
         validateExistUser(userId);
         tokenService.validateRefreshToken(userId, refreshToken);
 
-        String accessToken = jwtService.createAccessToken(userId, accountId);
+        String accessToken = jwtService.createAccessToken(userId, accountId, userRole);
         return TokenResponse.of(accessToken);
     }
 

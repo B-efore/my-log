@@ -26,6 +26,8 @@ public class JwtService {
     private static final String TOKEN_PREFIX = "Bearer ";
     private static final String ID_KEY = "id";
     private static final String ACCOUNT_ID_KEY = "accountId";
+    private static final String ROLE_KEY = "role";
+
     private final JwtProperties jwtProperties;
 
     public Long getUserId(String token) {
@@ -36,16 +38,20 @@ public class JwtService {
         return Jwts.parser().verifyWith(getSecretKey()).build().parseSignedClaims(token).getPayload().get(ACCOUNT_ID_KEY, String.class);
     }
 
-    public String createAccessToken(Long userId, String accountId) {
-        return createToken(userId, accountId, jwtProperties.getAccessExpiry());
+    public String getUserRole(String token) {
+        return Jwts.parser().verifyWith(getSecretKey()).build().parseSignedClaims(token).getPayload().get(ROLE_KEY, String.class);
     }
 
-    public String createRefreshToken(Long userId, String accountId) {
-        return createToken(userId, accountId, jwtProperties.getRefreshExpiry());
+    public String createAccessToken(Long userId, String accountId, String role) {
+        return createToken(userId, accountId, role, jwtProperties.getAccessExpiry());
     }
 
-    private String createToken(Long userId, String accountId, Long expiredTime) {
-        Claims claims = createClaims(userId, accountId);
+    public String createRefreshToken(Long userId, String accountId, String role) {
+        return createToken(userId, accountId, role, jwtProperties.getRefreshExpiry());
+    }
+
+    private String createToken(Long userId, String accountId, String role, Long expiredTime) {
+        Claims claims = createClaims(userId, accountId, role);
         String issuer = jwtProperties.getIssuer();
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expiredTime);
@@ -59,10 +65,11 @@ public class JwtService {
                 .compact();
     }
 
-    private Claims createClaims(Long userId, String accountId) {
+    private Claims createClaims(Long userId, String accountId, String role) {
         ClaimsBuilder claimsBuilder = Jwts.claims();
         claimsBuilder.add(ID_KEY, userId);
         claimsBuilder.add(ACCOUNT_ID_KEY, accountId);
+        claimsBuilder.add(ROLE_KEY, role);
         return claimsBuilder.build();
     }
 
