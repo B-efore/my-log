@@ -32,12 +32,13 @@ public class PostDetailResponse {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
     private boolean pinned;
+    private boolean isNotice;
     private UserResponse user;
     private CategoryResponse category;
     private List<TagResponse> tags;
     private List<CommentResponse> comments;
 
-    public PostDetailResponse(Long postId, String title, String content, String contentPreview, int views, PostStatus postStatus, Visibility visibility, LocalDateTime createdAt, boolean pinned, UserResponse user, CategoryResponse category) {
+    public PostDetailResponse(Long postId, String title, String content, String contentPreview, int views, PostStatus postStatus, Visibility visibility, LocalDateTime createdAt, boolean pinned, boolean isNotice, UserResponse user, CategoryResponse category) {
         this.postId = postId;
         this.title = title;
         this.content = content;
@@ -47,6 +48,7 @@ public class PostDetailResponse {
         this.visibility = visibility;
         this.createdAt = createdAt;
         this.pinned = pinned;
+        this.isNotice = isNotice;
         this.user = user;
         this.category = category;
     }
@@ -67,6 +69,7 @@ public class PostDetailResponse {
                         .toList())
                 .createdAt(post.getCreatedAt())
                 .pinned(post.isPinned())
+                .isNotice(post.isNotice())
                 .comments(post.getComments().stream()
                         .map(comment -> CommentResponse.fromComment(comment))
                         .toList())

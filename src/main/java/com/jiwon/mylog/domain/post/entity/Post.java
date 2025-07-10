@@ -56,6 +56,9 @@ public class Post extends BaseEntity {
     @Builder.Default
     private boolean pinned = false;
 
+    @Builder.Default
+    private boolean isNotice = false;
+
     @Enumerated(value = EnumType.STRING)
     private PostStatus postStatus;
 
@@ -82,7 +85,7 @@ public class Post extends BaseEntity {
     @OneToMany(mappedBy = "post")
     private List<Comment> comments = new ArrayList<>();
 
-    public static Post create(PostRequest request, User user, Category category, List<Tag> tags) {
+    public static Post create(PostRequest request, boolean isNotice, User user, Category category, List<Tag> tags) {
         Post post = Post.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
@@ -92,6 +95,7 @@ public class Post extends BaseEntity {
                 .user(user)
                 .category(category)
                 .pinned(request.isPinned())
+                .isNotice(isNotice)
                 .build();
         post.setTags(tags);
         return post;

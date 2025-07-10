@@ -57,7 +57,7 @@ class PostServiceCacheTest {
         postService.getPostsByCategoryAndTags(userId, categoryId, List.of(), pageable);
 
         // when
-        PostDetailResponse post = postService.createPost(userId, postRequest);
+        PostDetailResponse post = postService.createPost(userId, postRequest, false);
         Long postId = post.getPostId();
 
         postService.getPost(postId);
@@ -87,7 +87,7 @@ class PostServiceCacheTest {
         postService.getPostsByCategoryAndTags(userId, categoryId, List.of(), pageable); // 캐시 생성
 
         // when
-        PostDetailResponse post = postService.updatePost(userId, postId, postRequest);
+        PostDetailResponse post = postService.updatePost(userId, postId, postRequest, false);
         postService.getPost(postId);
         postService.getUserPosts(userId, pageable); // 캐시 다시 생성
         postService.getPostsByCategoryAndTags(userId, categoryId, List.of(), pageable); // 캐시 다시 생성

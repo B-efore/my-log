@@ -14,8 +14,16 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long>, PostRepositoryCustom {
 
-    @Query(value = "select p from Post p join fetch p.user u left join fetch u.profileImage where p.deletedAt is null and p.visibility = 'PUBLIC' order by p.createdAt desc",
-            countQuery = "select count(p) from Post p where p.deletedAt is null and p.visibility = 'PUBLIC'")
+    @Query(value = "select p from Post p where p.deletedAt is null and p.isNotice = true order by p.createdAt desc",
+            countQuery = "select count(p) from Post p where p.deletedAt is null and p.isNotice = true")
+    Page<Post> findAllNotice(Pageable pageable);
+
+    @Query(value = "select p from Post p " +
+            "join fetch p.user u " +
+            "left join fetch u.profileImage " +
+            "where p.deletedAt is null and p.visibility = 'PUBLIC' and p.isNotice = false " +
+            "order by p.createdAt desc",
+            countQuery = "select count(p) from Post p where p.deletedAt is null and p.visibility = 'PUBLIC' and p.isNotice = false")
     Page<Post> findAll(Pageable pageable);
 
     @Query(value = "select p from Post p left join fetch p.category left join fetch p.postTags pt left join fetch pt.tag t where p.deletedAt is null and p.user.id = :userId",

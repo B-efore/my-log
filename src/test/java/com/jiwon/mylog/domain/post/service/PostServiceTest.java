@@ -66,7 +66,7 @@ class PostServiceTest {
                 false);
 
         // when
-        PostDetailResponse response = postService.createPost(savedUser.getId(), postRequest);
+        PostDetailResponse response = postService.createPost(savedUser.getId(), postRequest, false);
 
         // then
         Post post = postRepository.findById(response.getPostId()).get();
@@ -97,7 +97,7 @@ class PostServiceTest {
                 oldTagRequest,
                 false);
 
-        PostDetailResponse oldPostResponse = postService.createPost(savedUser.getId(), oldPostRequest);
+        PostDetailResponse oldPostResponse = postService.createPost(savedUser.getId(), oldPostRequest, false);
 
         em.flush();
         em.clear();
@@ -111,7 +111,7 @@ class PostServiceTest {
                 false);
 
         // when
-        PostDetailResponse newPostResponse = postService.updatePost(savedUser.getId(), oldPostResponse.getPostId(), newPostRequest);
+        PostDetailResponse newPostResponse = postService.updatePost(savedUser.getId(), oldPostResponse.getPostId(), newPostRequest, false);
 
         em.flush();
         em.clear();
@@ -146,7 +146,7 @@ class PostServiceTest {
                 savedCategory.getId(),
                 tagRequest,
                 false);
-        PostDetailResponse response = postService.createPost(savedUser.getId(), postRequest);
+        PostDetailResponse response = postService.createPost(savedUser.getId(), postRequest, false);
 
         em.flush();
         em.clear();
