@@ -6,7 +6,6 @@ import com.jiwon.mylog.domain.follow.entity.Follow;
 import com.jiwon.mylog.domain.image.entity.ProfileImage;
 import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.global.common.entity.BaseEntity;
-import com.jiwon.mylog.domain.role.Role;
 import com.jiwon.mylog.domain.tag.entity.Tag;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -22,7 +21,6 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -67,9 +65,8 @@ public class User extends BaseEntity {
     @Builder.Default
     private String bio = "";
 
-    @Builder.Default
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserRole> userRoles = new ArrayList<>();
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -92,12 +89,6 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "toUser", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Follow> followers = new ArrayList<>();
-
-    public List<Role> getUserRoles() {
-        return userRoles.stream()
-                .map(UserRole::getRole)
-                .collect(Collectors.toList());
-    }
 
     public void verifyUser() {
         this.status = UserStatus.ACTIVE;

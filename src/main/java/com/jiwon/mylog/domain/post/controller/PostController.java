@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -46,7 +47,7 @@ public class PostController {
     public ResponseEntity<PostDetailResponse> createPost(
             @LoginUser Long userId,
             @Valid @RequestBody PostRequest postRequest) {
-        PostDetailResponse response = postService.createPost(userId, postRequest);
+        PostDetailResponse response = postService.createPost(userId, postRequest, false);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
@@ -63,7 +64,7 @@ public class PostController {
             @LoginUser Long userId,
             @PathVariable("postId") Long postId,
             @Valid @RequestBody PostRequest postRequest) {
-        PostDetailResponse response = postService.updatePost(userId, postId, postRequest);
+        PostDetailResponse response = postService.updatePost(userId, postId, postRequest, false);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -81,6 +82,17 @@ public class PostController {
             @PathVariable("postId") Long postId) {
         postService.deletePost(userId, postId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("/posts/notices")
+    @Operation(
+            summary = "공지글 페이징 조회"
+    )
+    public ResponseEntity<PageResponse> getAllNotices(
+            @PageableDefault(size = 10, page = 0,
+                    sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
+        PageResponse response = postService.getAllNotices(pageable);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/posts/{postId}")

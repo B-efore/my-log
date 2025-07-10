@@ -60,7 +60,7 @@ class PostControllerTest {
 
         given(resolver.supportsParameter(any())).willReturn(true);
         given(resolver.resolveArgument(any(), any(), any(), any())).willReturn(1L);
-        given(postService.createPost(any(Long.class), any(PostRequest.class))).willReturn(response);
+        given(postService.createPost(any(Long.class), any(PostRequest.class), any(Boolean.class))).willReturn(response);
 
         // when & then
         mockMvc.perform(post("/api/posts")

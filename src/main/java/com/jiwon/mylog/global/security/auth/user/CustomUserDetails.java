@@ -2,6 +2,7 @@ package com.jiwon.mylog.global.security.auth.user;
 
 import com.jiwon.mylog.domain.user.entity.User;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -22,9 +23,7 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return user.getUserRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName()))
-                .toList();
+        return List.of(new SimpleGrantedAuthority(user.getRole().value()));
     }
 
     @Override

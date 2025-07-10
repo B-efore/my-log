@@ -8,6 +8,8 @@ import com.jiwon.mylog.global.security.jwt.JwtService;
 import com.jiwon.mylog.global.security.jwt.JwtTokenAuthenticationFilter;
 import com.jiwon.mylog.global.security.token.sevice.TokenService;
 import java.util.List;
+
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +19,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -30,6 +33,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Slf4j
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -75,11 +79,16 @@ public class SecurityConfig {
                 .httpBasic(auth -> auth.disable());
         http
                 .authorizeHttpRequests(auth -> auth
+                        // 기본
                         .requestMatchers("/error", "/api/auth/**", "/api/emails/**", "/api/s3/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-resources/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // 단순 조회 (권한X)
                         .requestMatchers(HttpMethod.GET, "/api/users/**", "/api/posts/**", "/api/categories/**", "/api/images/**").permitAll()
-                        .requestMatchers("/api/users/**", "/api/posts/**", "/api/categories/**", "/api/comments/**", "/api/images/**").authenticated());
+                        // 블로그 사용자
+                        .requestMatchers("/api/users/**", "/api/posts/**", "/api/categories/**", "/api/comments/**", "/api/images/**").authenticated()
+                        // 관리자 전용
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN"));
 
         http
                 .oauth2Login(oauth2 -> oauth2
@@ -93,6 +102,18 @@ public class SecurityConfig {
 
         http
                 .addFilterBefore(new JwtTokenAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
+
+        http
+                .exceptionHandling(exceptions -> exceptions
+                        // 인증
+                        .authenticationEntryPoint(((request, response, authException) -> {
+                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                        }))
+                        // 접근 권한
+                        .accessDeniedHandler(((request, response, accessDeniedException) -> {
+                            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
+                        }))
+                );
 
         http
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

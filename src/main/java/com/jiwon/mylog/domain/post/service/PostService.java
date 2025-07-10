@@ -4,6 +4,7 @@ import com.jiwon.mylog.domain.category.entity.Category;
 import com.jiwon.mylog.domain.comment.entity.Comment;
 import com.jiwon.mylog.domain.post.dto.request.PostRequest;
 import com.jiwon.mylog.domain.post.dto.response.MainPostResponse;
+import com.jiwon.mylog.domain.post.dto.response.NoticePostResponse;
 import com.jiwon.mylog.domain.post.dto.response.PostDetailResponse;
 import com.jiwon.mylog.domain.post.dto.response.PageResponse;
 import com.jiwon.mylog.domain.post.dto.response.PostSummaryResponse;
@@ -43,30 +44,34 @@ public class PostService {
     @Caching(
             put = @CachePut(value = "post::detail", key = "#result.postId", unless = "#result.postId == null"),
             evict = {
-                    @CacheEvict(value = "post::main", allEntries = true),
-                    @CacheEvict(value = "post::list", allEntries = true),
-                    @CacheEvict(value = "post::filter", allEntries = true)
+                    @CacheEvict(value = "post::notice", allEntries = true, condition = "#isNotice"),
+                    @CacheEvict(value = "post::main", allEntries = true, condition = "!#isNotice"),
+                    @CacheEvict(value = "post::list", allEntries = true, condition = "!#isNotice"),
+                    @CacheEvict(value = "post::filter", allEntries = true, condition = "!#isNotice")
             }
     )
     @Transactional
-    public PostDetailResponse createPost(Long userId, PostRequest postRequest) {
+    public PostDetailResponse createPost(Long userId, PostRequest postRequest, boolean isNotice) {
         User user = getUserById(userId);
         Category category = getCategoryById(userId, postRequest.getCategoryId());
         List<Tag> tags = tagService.getTagsById(user, postRequest.getTagRequests());
         increaseRelatedPostInfo(category, tags);
 
-        Post post = Post.create(postRequest, user, category, tags);
+        Post post = Post.create(postRequest, isNotice, user, category, tags);
         return PostDetailResponse.fromPost(postRepository.save(post));
     }
 
-    @Caching(put = @CachePut(value = "post::detail", key = "#postId", unless = "#postId == null"),
+    @Caching(
+            put = @CachePut(value = "post::detail", key = "#postId", unless = "#postId == null"),
             evict = {
-            @CacheEvict(value = "post::main", allEntries = true),
-            @CacheEvict(value = "post::list", allEntries = true),
-            @CacheEvict(value = "post::filter", allEntries = true)
-    })
+                    @CacheEvict(value = "post::notice", allEntries = true, condition = "#isNotice"),
+                    @CacheEvict(value = "post::main", allEntries = true, condition = "!#isNotice"),
+                    @CacheEvict(value = "post::list", allEntries = true, condition = "!#isNotice"),
+                    @CacheEvict(value = "post::filter", allEntries = true, condition = "!#isNotice")
+            }
+    )
     @Transactional
-    public PostDetailResponse updatePost(Long userId, Long postId, PostRequest postRequest) {
+    public PostDetailResponse updatePost(Long userId, Long postId, PostRequest postRequest, boolean isNotice) {
         Post post = getPostWithDetails(postId);
         validateOwner(post, userId);
 
@@ -129,6 +134,24 @@ public class PostService {
         post.getPostTags().clear();
 
         post.getComments().forEach(Comment::delete);
+    }
+
+    @Cacheable(value = "post::notice",
+            key = "'page:' + #pageable.pageNumber + ':size:' + #pageable.pageSize",
+            condition = "#pageable != null"
+    )
+    @Transactional(readOnly = true)
+    public PageResponse getAllNotices(Pageable pageable) {
+        Page<Post> noticePage = postRepository.findAllNotice(pageable);
+        List<NoticePostResponse> notices = noticePage.stream()
+                .map(NoticePostResponse::fromPost)
+                .toList();
+        return PageResponse.from(
+                notices,
+                noticePage.getNumber(),
+                noticePage.getSize(),
+                noticePage.getTotalPages(),
+                noticePage.getTotalElements());
     }
 
     @Cacheable(value = "post::detail",
@@ -211,7 +234,7 @@ public class PostService {
     }
 
     private Category getCategoryById(Long userId, Long categoryId) {
-        if (categoryId == null) return null;
+        if (categoryId == null || categoryId <= 0) return null;
 
         return categoryRepository.findByUserIdAndId(userId, categoryId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_CATEGORY));
