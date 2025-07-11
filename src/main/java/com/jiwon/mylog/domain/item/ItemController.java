@@ -28,8 +28,7 @@ public class ItemController {
 
     @GetMapping("/items")
     public ResponseEntity<PageResponse> getAllItems(
-            @PageableDefault(size = 10, page = 0,
-            sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = 10, page = 0) Pageable pageable) {
         PageResponse response = itemService.getAllItems(pageable);
         return ResponseEntity.ok(response);
     }
