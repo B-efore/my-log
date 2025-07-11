@@ -86,7 +86,7 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-resources/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // 단순 조회 (권한X)
-                        .requestMatchers(HttpMethod.GET, "/api/users/**", "/api/posts/**", "/api/categories/**", "/api/images/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/users/**", "/api/posts/**", "/api/categories/**", "/api/images/**", "/api/points/**", "/api/items/**").permitAll()
                         // 블로그 사용자
                         .requestMatchers("/api/users/**", "/api/posts/**", "/api/categories/**", "/api/comments/**", "/api/images/**").authenticated()
                         // 관리자 전용

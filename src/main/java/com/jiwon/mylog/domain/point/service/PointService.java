@@ -1,5 +1,6 @@
 package com.jiwon.mylog.domain.point.service;
 
+import com.jiwon.mylog.domain.point.dto.PointResponse;
 import com.jiwon.mylog.domain.point.entity.Point;
 import com.jiwon.mylog.domain.point.entity.PointHistory;
 import com.jiwon.mylog.domain.point.entity.PointType;
@@ -17,6 +18,13 @@ public class PointService {
 
     private final PointRepository pointRepository;
     private final PointHistoryRepository pointHistoryRepository;
+
+    @Transactional(readOnly = true)
+    public PointResponse getMyCurrentPoint(Long userId) {
+        Point point = pointRepository.findByUserId(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND));
+        return new PointResponse(point.getCurrentAmount());
+    }
 
     @Transactional
     public void earnPoint(Long userId, int amount, String description) {
