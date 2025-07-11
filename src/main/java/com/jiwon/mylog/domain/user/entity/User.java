@@ -4,6 +4,7 @@ import com.jiwon.mylog.domain.category.entity.Category;
 import com.jiwon.mylog.domain.comment.entity.Comment;
 import com.jiwon.mylog.domain.follow.entity.Follow;
 import com.jiwon.mylog.domain.image.entity.ProfileImage;
+import com.jiwon.mylog.domain.point.entity.Point;
 import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.global.common.entity.BaseEntity;
 import com.jiwon.mylog.domain.tag.entity.Tag;
@@ -15,7 +16,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -58,8 +58,7 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private UserStatus status;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "profile_image_id")
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private ProfileImage profileImage;
 
     @Builder.Default
@@ -67,6 +66,9 @@ public class User extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Point point;
 
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -92,6 +94,11 @@ public class User extends BaseEntity {
 
     public void verifyUser() {
         this.status = UserStatus.ACTIVE;
+    }
+
+    public void initUserPoint(Point point) {
+        this.point = point;
+        point.setUser(this);
     }
 
     public void updateProfileImage(ProfileImage profileImage) {
