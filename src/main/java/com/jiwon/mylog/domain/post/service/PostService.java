@@ -2,6 +2,7 @@ package com.jiwon.mylog.domain.post.service;
 
 import com.jiwon.mylog.domain.category.entity.Category;
 import com.jiwon.mylog.domain.comment.entity.Comment;
+import com.jiwon.mylog.domain.event.dto.PostCreatedEvent;
 import com.jiwon.mylog.domain.post.dto.request.PostRequest;
 import com.jiwon.mylog.domain.post.dto.response.MainPostResponse;
 import com.jiwon.mylog.domain.post.dto.response.NoticePostResponse;
@@ -24,6 +25,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PostService {
 
+    private final ApplicationEventPublisher eventPublisher;
     private final TagService tagService;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
@@ -55,10 +58,14 @@ public class PostService {
         User user = getUserById(userId);
         Category category = getCategoryById(userId, postRequest.getCategoryId());
         List<Tag> tags = tagService.getTagsById(user, postRequest.getTagRequests());
-        increaseRelatedPostInfo(category, tags);
 
         Post post = Post.create(postRequest, isNotice, user, category, tags);
-        return PostDetailResponse.fromPost(postRepository.save(post));
+        Post savedPost = postRepository.save(post);
+
+        increaseRelatedPostInfo(category, tags);
+        eventPublisher.publishEvent(new PostCreatedEvent(userId, savedPost.getId()));
+
+        return PostDetailResponse.fromPost(savedPost);
     }
 
     @Caching(

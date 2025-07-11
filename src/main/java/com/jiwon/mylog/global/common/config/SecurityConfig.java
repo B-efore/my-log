@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -37,6 +38,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final ApplicationEventPublisher eventPublisher;
     private final OAuth2Properties oAuth2Properties;
     private final JwtService jwtService;
     private final TokenService tokenService;
@@ -54,7 +56,7 @@ public class SecurityConfig {
 
     @Bean
     public OAuth2SuccessHandler oAuth2SuccessHandler() {
-        return new OAuth2SuccessHandler(oAuth2Properties, jwtService, tokenService);
+        return new OAuth2SuccessHandler(eventPublisher, oAuth2Properties, jwtService, tokenService);
     }
 
     @Bean

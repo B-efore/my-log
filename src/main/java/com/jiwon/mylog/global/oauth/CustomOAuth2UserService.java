@@ -1,5 +1,6 @@
 package com.jiwon.mylog.global.oauth;
 
+import com.jiwon.mylog.domain.point.entity.Point;
 import com.jiwon.mylog.domain.user.entity.User;
 import com.jiwon.mylog.domain.user.repository.UserRepository;
 import com.jiwon.mylog.global.common.error.ErrorCode;
@@ -41,6 +42,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 })
                 .orElseGet(() -> {
                     User user = oAuth2UserInfo.toEntity();
+                    Point point = new Point();
+                    user.initUserPoint(point);
                     return userRepository.save(user);
                 });
     }

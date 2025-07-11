@@ -1,5 +1,7 @@
 package com.jiwon.mylog.global.security.auth.service;
 
+import com.jiwon.mylog.domain.point.entity.Point;
+import com.jiwon.mylog.domain.event.dto.DailyLoginEvent;
 import com.jiwon.mylog.domain.user.dto.request.PasswordResetRequest;
 import com.jiwon.mylog.domain.user.dto.request.UserSaveRequest;
 import com.jiwon.mylog.domain.user.dto.response.FindIdResponse;
@@ -21,23 +23,22 @@ import com.jiwon.mylog.global.security.token.sevice.TokenService;
 import com.jiwon.mylog.global.utils.CookieUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-
 @AllArgsConstructor
 @Service
 public class AuthService {
 
+    private final ApplicationEventPublisher eventPublisher;
     private final UserRepository userRepository;
     private final MailService mailService;
     private final JwtService jwtService;
@@ -54,6 +55,9 @@ public class AuthService {
 
         String encodedPassword = bCryptPasswordEncoder.encode(userSaveRequest.getPassword());
         User user = userSaveRequest.toEntity(encodedPassword);
+
+        Point point = new Point();
+        user.initUserPoint(point);
 
         User savedUser = userRepository.save(user);
         return savedUser.getId();
@@ -78,6 +82,8 @@ public class AuthService {
             CookieUtil.setRefreshTokenCookie(response, "refreshToken", refreshToken);
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            eventPublisher.publishEvent(new DailyLoginEvent(userId));
 
             return TokenResponse.of(accessToken);
         } catch (BadCredentialsException e) {
