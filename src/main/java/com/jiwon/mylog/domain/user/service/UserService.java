@@ -4,6 +4,7 @@ import com.jiwon.mylog.domain.item.entity.Item;
 import com.jiwon.mylog.domain.item.entity.UserItem;
 import com.jiwon.mylog.domain.item.repository.ItemRepository;
 import com.jiwon.mylog.domain.item.repository.UserItemRepository;
+import com.jiwon.mylog.domain.point.service.PointService;
 import com.jiwon.mylog.global.common.entity.PageResponse;
 import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.domain.post.repository.PostRepository;
@@ -14,6 +15,7 @@ import com.jiwon.mylog.domain.user.dto.response.UserResponse;
 import com.jiwon.mylog.domain.user.entity.User;
 import com.jiwon.mylog.domain.user.repository.UserRepository;
 import com.jiwon.mylog.global.common.error.ErrorCode;
+import com.jiwon.mylog.global.common.error.exception.DuplicateException;
 import com.jiwon.mylog.global.common.error.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -32,6 +34,7 @@ public class UserService {
     private final PostRepository postRepository;
     private final ItemRepository itemRepository;
     private final UserItemRepository userItemRepository;
+    private final PointService pointService;
 
     @Transactional(readOnly = true)
     public UserResponse getUserProfile(Long userId) {
@@ -85,10 +88,17 @@ public class UserService {
 
     @Transactional
     public void purchaseItem(Long userId, Long itemId) {
+
+        if (userItemRepository.existsByUserIdAndItemId(userId, itemId)) {
+            throw new DuplicateException(ErrorCode.DUPLICATE);
+        }
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND));
+
+        pointService.spendPoint(userId, 1, item.getName() + "구매");
 
         UserItem userItem = UserItem.create(user, item, 1);
         userItemRepository.save(userItem);
