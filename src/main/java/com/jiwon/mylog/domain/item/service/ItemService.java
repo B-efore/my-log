@@ -1,5 +1,9 @@
-package com.jiwon.mylog.domain.item;
+package com.jiwon.mylog.domain.item.service;
 
+import com.jiwon.mylog.domain.item.dto.ItemRequest;
+import com.jiwon.mylog.domain.item.dto.ItemResponse;
+import com.jiwon.mylog.domain.item.entity.Item;
+import com.jiwon.mylog.domain.item.repository.ItemRepository;
 import com.jiwon.mylog.domain.post.dto.response.PageResponse;
 import com.jiwon.mylog.global.common.error.ErrorCode;
 import com.jiwon.mylog.global.common.error.exception.NotFoundException;

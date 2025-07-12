@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -78,6 +79,14 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/activity")
+    @Operation(
+            summary = "유저 활동 내역 조회 (활동 날짜 - 횟수)",
+            description = "일정 기간 동안의 유저 활동 일자와 활동 횟수를 조회한다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "유저 활동 내역 조회 성공"),
+                    @ApiResponse(responseCode = "404", description = "회원 정보를 찾을 수 없음")
+            }
+    )
     public ResponseEntity<?> getUserActivity(
             @PathVariable("userId") Long userId,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
@@ -87,11 +96,25 @@ public class UserController {
     }
 
     @GetMapping("/search")
+    @Operation(
+            summary = "회원 조회 (유저 이름으로 검색)",
+            description = "회원 이름을 통해 회원을 조회한다."
+    )
     public ResponseEntity<UserProfilePageResponse> searchWithUsername(
             @RequestParam String username,
             @PageableDefault(size = 10, page = 0,
             sort = "username", direction = Sort.Direction.ASC) Pageable pageable) {
         UserProfilePageResponse response = userService.searchWithUsername(username, pageable);
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/me/items/{itemId}")
+    @Operation(
+            summary = "회원 아이템 구매",
+            description = "회원에 아이템을 추가한다."
+    )
+    public ResponseEntity<?> purchaseItem(@LoginUser Long userId, @PathVariable("itemId") Long itemId) {
+        userService.purchaseItem(userId, itemId);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }

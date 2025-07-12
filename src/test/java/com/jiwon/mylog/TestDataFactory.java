@@ -2,6 +2,7 @@ package com.jiwon.mylog;
 
 import com.jiwon.mylog.domain.category.entity.Category;
 import com.jiwon.mylog.domain.image.entity.ProfileImage;
+import com.jiwon.mylog.domain.item.entity.Item;
 import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.domain.user.entity.User;
 import com.jiwon.mylog.domain.user.entity.UserStatus;
@@ -38,6 +39,14 @@ public class TestDataFactory {
                 .content(content)
                 .user(user)
                 .category(category)
+                .build();
+    }
+
+    public static Item createItem() {
+        return Item.builder()
+                .name("name")
+                .description("description")
+                .price(0)
                 .build();
     }
 }

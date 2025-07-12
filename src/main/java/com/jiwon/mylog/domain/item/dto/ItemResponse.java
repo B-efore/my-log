@@ -1,5 +1,6 @@
-package com.jiwon.mylog.domain.item;
+package com.jiwon.mylog.domain.item.dto;
 
+import com.jiwon.mylog.domain.item.entity.Item;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

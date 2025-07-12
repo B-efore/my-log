@@ -1,5 +1,9 @@
 package com.jiwon.mylog.domain.user.service;
 
+import com.jiwon.mylog.domain.item.entity.Item;
+import com.jiwon.mylog.domain.item.entity.UserItem;
+import com.jiwon.mylog.domain.item.repository.ItemRepository;
+import com.jiwon.mylog.domain.item.repository.UserItemRepository;
 import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.domain.post.repository.PostRepository;
 import com.jiwon.mylog.domain.user.dto.request.UserUpdateRequest;
@@ -26,6 +30,8 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PostRepository postRepository;
+    private final ItemRepository itemRepository;
+    private final UserItemRepository userItemRepository;
 
     @Transactional
     public UserProfileResponse update(Long userId, UserUpdateRequest userUpdateRequest) {
@@ -69,10 +75,22 @@ public class UserService {
                 (int) userPage.getTotalElements());
     }
 
+    @Transactional(readOnly = true)
     public UserActivityResponse getUserActivity(Long userId, LocalDate startDate, LocalDate endDate) {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException(ErrorCode.NOT_FOUND_USER);
         }
         return postRepository.findUserActivities(userId, startDate, endDate);
+    }
+
+    @Transactional
+    public void purchaseItem(Long userId, Long itemId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND));
+
+        UserItem userItem = UserItem.create(user, item, 1);
+        userItemRepository.save(userItem);
     }
 }
