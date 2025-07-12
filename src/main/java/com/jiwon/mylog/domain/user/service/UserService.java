@@ -98,7 +98,7 @@ public class UserService {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND));
 
-        pointService.spendPoint(userId, 1, item.getName() + "구매");
+        pointService.spendPoint(userId, item.getPrice(), item.getName() + "구매");
 
         UserItem userItem = UserItem.create(user, item, 1);
         userItemRepository.save(userItem);
