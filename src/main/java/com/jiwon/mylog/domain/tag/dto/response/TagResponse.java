@@ -9,12 +9,12 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 public class TagResponse {
-    private final Long id;
+    private final Long tagId;
     private final String name;
 
     public static TagResponse fromTag(Tag tag) {
         return TagResponse.builder()
-                .id(tag.getId())
+                .tagId(tag.getId())
                 .name(tag.getName())
                 .build();
     }

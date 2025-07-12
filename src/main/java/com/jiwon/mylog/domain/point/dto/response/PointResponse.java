@@ -1,4 +1,4 @@
-package com.jiwon.mylog.domain.point.dto;
+package com.jiwon.mylog.domain.point.dto.response;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

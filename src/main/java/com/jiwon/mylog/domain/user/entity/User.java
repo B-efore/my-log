@@ -4,6 +4,7 @@ import com.jiwon.mylog.domain.category.entity.Category;
 import com.jiwon.mylog.domain.comment.entity.Comment;
 import com.jiwon.mylog.domain.follow.entity.Follow;
 import com.jiwon.mylog.domain.image.entity.ProfileImage;
+import com.jiwon.mylog.domain.item.entity.UserItem;
 import com.jiwon.mylog.domain.point.entity.Point;
 import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.global.common.entity.BaseEntity;
@@ -64,8 +65,10 @@ public class User extends BaseEntity {
     @Builder.Default
     private String bio = "";
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
-    private Role role;
+    @Column(nullable = false)
+    private Role role = Role.ROLE_USER;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Point point;
@@ -86,19 +89,26 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Tag> tags = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "fromUser", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Follow> followings = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "toUser", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Follow> followers = new ArrayList<>();
 
-    public void verifyUser() {
-        this.status = UserStatus.ACTIVE;
-    }
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserItem> items = new ArrayList<>();
 
     public void initUserPoint(Point point) {
         this.point = point;
         point.setUser(this);
+    }
+
+    public void updateProfile(String username, String bio) {
+        this.username = username;
+        this.bio = bio;
     }
 
     public void updateProfileImage(ProfileImage profileImage) {
@@ -107,11 +117,6 @@ public class User extends BaseEntity {
 
     public void deleteProfileImage() {
         this.profileImage = null;
-    }
-
-    public void updateInformation(String username, String bio) {
-        this.username = username;
-        this.bio = bio;
     }
 
     public void updatePassword(String encodedPassword) {

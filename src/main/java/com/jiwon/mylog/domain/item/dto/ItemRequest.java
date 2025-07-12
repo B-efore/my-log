@@ -1,4 +1,4 @@
-package com.jiwon.mylog.domain.item;
+package com.jiwon.mylog.domain.item.dto;
 
 
 import jakarta.validation.constraints.NotBlank;

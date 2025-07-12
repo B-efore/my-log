@@ -1,10 +1,10 @@
 package com.jiwon.mylog.domain.user.controller;
 
-import com.jiwon.mylog.domain.user.dto.request.UserUpdateRequest;
-import com.jiwon.mylog.domain.user.dto.response.UserActivityResponse;
+import com.jiwon.mylog.global.common.entity.PageResponse;
+import com.jiwon.mylog.domain.user.dto.request.UserProfileRequest;
+import com.jiwon.mylog.domain.user.dto.response.UserActivitiesResponse;
 import com.jiwon.mylog.domain.user.dto.response.UserMainResponse;
-import com.jiwon.mylog.domain.user.dto.response.UserProfilePageResponse;
-import com.jiwon.mylog.domain.user.dto.response.UserProfileResponse;
+import com.jiwon.mylog.domain.user.dto.response.UserResponse;
 import com.jiwon.mylog.domain.user.service.UserService;
 import com.jiwon.mylog.global.security.auth.annotation.LoginUser;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -36,20 +37,6 @@ public class UserController {
 
     private final UserService userService;
 
-    @PatchMapping("/me")
-    @Operation(
-            summary = "회원 정보 수정",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "회원 정보 수정 성공"),
-                    @ApiResponse(responseCode = "404", description = "회원 정보를 찾을 수 없음")
-            })
-    public ResponseEntity<UserProfileResponse> update(
-            @LoginUser Long userId,
-            @Valid @RequestBody UserUpdateRequest request) {
-        UserProfileResponse response = userService.update(userId, request);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
     @GetMapping("/me")
     @Operation(
             summary = "내 정보 조회",
@@ -58,9 +45,24 @@ public class UserController {
                     @ApiResponse(responseCode = "200", description = "회원 정보 조회 성공"),
                     @ApiResponse(responseCode = "404", description = "회원 정보를 찾을 수 없음")
             })
-    public ResponseEntity<UserProfileResponse> getMyProfile(@LoginUser Long userId) {
-        UserProfileResponse response = userService.getUserProfile(userId);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    public ResponseEntity<UserResponse> getMyProfile(@LoginUser Long userId) {
+        UserResponse response = userService.getUserProfile(userId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/me")
+    @Operation(
+            summary = "회원 정보 수정",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "회원 정보 수정 성공"),
+                    @ApiResponse(responseCode = "400", description = "잘못된 요청 정보"),
+                    @ApiResponse(responseCode = "404", description = "회원 정보를 찾을 수 없음")
+            })
+    public ResponseEntity<UserResponse> updateMyProfile(
+            @LoginUser Long userId,
+            @Valid @RequestBody UserProfileRequest request) {
+        UserResponse response = userService.updateUserProfile(userId, request);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{userId}")
@@ -73,25 +75,47 @@ public class UserController {
             })
     public ResponseEntity<UserMainResponse> getUserMain(@PathVariable("userId") Long userId) {
         UserMainResponse response = userService.getUserMain(userId);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(response);
 
     }
 
     @GetMapping("/{userId}/activity")
-    public ResponseEntity<?> getUserActivity(
+    @Operation(
+            summary = "유저 활동 내역 조회 (활동 날짜 - 횟수)",
+            description = "일정 기간 동안의 유저 활동 일자와 활동 횟수를 조회한다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "유저 활동 내역 조회 성공"),
+                    @ApiResponse(responseCode = "404", description = "회원 정보를 찾을 수 없음")
+            }
+    )
+    public ResponseEntity<UserActivitiesResponse> getUserActivity(
             @PathVariable("userId") Long userId,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
-        UserActivityResponse response = userService.getUserActivity(userId, startDate, endDate);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        UserActivitiesResponse response = userService.getUserActivity(userId, startDate, endDate);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<UserProfilePageResponse> searchWithUsername(
+    @Operation(
+            summary = "회원 조회 (유저 이름으로 검색)",
+            description = "회원 이름을 통해 회원을 조회한다."
+    )
+    public ResponseEntity<PageResponse> searchWithUsername(
             @RequestParam String username,
             @PageableDefault(size = 10, page = 0,
             sort = "username", direction = Sort.Direction.ASC) Pageable pageable) {
-        UserProfilePageResponse response = userService.searchWithUsername(username, pageable);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        PageResponse response = userService.searchWithUsername(username, pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/me/items/{itemId}")
+    @Operation(
+            summary = "회원 아이템 구매",
+            description = "회원에 아이템을 추가한다."
+    )
+    public ResponseEntity<Void> purchaseItem(@LoginUser Long userId, @PathVariable("itemId") Long itemId) {
+        userService.purchaseItem(userId, itemId);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }

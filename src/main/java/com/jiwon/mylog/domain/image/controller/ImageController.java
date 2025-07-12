@@ -1,10 +1,10 @@
 package com.jiwon.mylog.domain.image.controller;
 
-import com.jiwon.mylog.domain.image.dto.ImageResponse;
+import com.jiwon.mylog.domain.image.dto.response.ImageResponse;
 import com.jiwon.mylog.domain.image.service.ImageService;
-import com.jiwon.mylog.global.common.error.ErrorCode;
-import com.jiwon.mylog.global.common.error.exception.ForbiddenException;
 import com.jiwon.mylog.global.security.auth.annotation.LoginUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,13 +17,22 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
-@RequestMapping("/api/images")
+@RequestMapping("/api")
 @RestController
 public class ImageController {
 
     private final ImageService imageService;
 
-    @PostMapping("/profile")
+    @PostMapping("/users/me/profile")
+    @Operation(
+            summary = "로그인한 유저 프로필 업로드",
+            description = "로그인 한 유저의 프로필 이미지를 업로드한다. (Presigned-Url 발급)",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "프로필 이미지 업로드 성공"),
+                    @ApiResponse(responseCode = "400", description = "잘못된 이미지 요청"),
+                    @ApiResponse(responseCode = "404", description = "해당 유저를 찾을 수 없음")
+            }
+    )
     public ResponseEntity<ImageResponse> uploadProfile(
             @LoginUser Long userId,
             @RequestParam("fileName") String fileName) {
@@ -31,20 +40,23 @@ public class ImageController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @DeleteMapping("/profile/{userId}")
-    public ResponseEntity<Void> deleteProfile(@LoginUser Long loginUserId, @PathVariable("userId") Long userId) {
-
-        if(!loginUserId.equals(userId)) {
-            throw new ForbiddenException(ErrorCode.FORBIDDEN);
-        }
-
-        imageService.deleteProfileImage(userId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-    @GetMapping("/profile/{userId}")
+    @GetMapping("/users/{userId}/profile")
     public ResponseEntity<ImageResponse> getProfile(@PathVariable("userId") Long userId) {
         ImageResponse response = imageService.getProfileImage(userId);
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/users/me/profile")
+    @Operation(
+            summary = "로그인한 유저 프로필 삭제",
+            description = "로그인 한 유저의 프로필 이미지를 삭제한다.",
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "프로필 이미지 삭제 성공"),
+                    @ApiResponse(responseCode = "404", description = "해당 유저 혹은 이미지를 찾을 수 없음")
+            }
+    )
+    public ResponseEntity<Void> deleteProfile(@LoginUser Long userId) {
+        imageService.deleteProfileImage(userId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

@@ -1,4 +1,4 @@
-package com.jiwon.mylog.domain.image.dto;
+package com.jiwon.mylog.domain.image.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;

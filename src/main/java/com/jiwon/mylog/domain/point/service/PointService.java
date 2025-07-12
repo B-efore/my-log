@@ -1,6 +1,6 @@
 package com.jiwon.mylog.domain.point.service;
 
-import com.jiwon.mylog.domain.point.dto.PointResponse;
+import com.jiwon.mylog.domain.point.dto.response.PointResponse;
 import com.jiwon.mylog.domain.point.entity.Point;
 import com.jiwon.mylog.domain.point.entity.PointHistory;
 import com.jiwon.mylog.domain.point.entity.PointType;

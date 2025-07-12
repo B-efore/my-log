@@ -110,6 +110,6 @@ class PostControllerTest {
     }
 
     private TagResponse createTag(long id, String tag1) {
-        return TagResponse.builder().id(id).name(tag1).build();
+        return TagResponse.builder().tagId(id).name(tag1).build();
     }
 }

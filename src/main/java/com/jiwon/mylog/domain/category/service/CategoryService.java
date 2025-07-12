@@ -26,26 +26,28 @@ public class CategoryService {
     private final UserRepository userRepository;
 
     @Transactional
-    public CategoryResponse create(Long userId, CategoryRequest categoryRequest) {
+    public CategoryResponse createCategory(Long userId, CategoryRequest categoryRequest) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
+
         validateDuplicateCategory(userId, categoryRequest.getName());
+
         Category category = Category.create(categoryRequest, user);
         categoryRepository.save(category);
         return CategoryResponse.fromCategory(category);
     }
 
     @Transactional
-    public CategoryResponse update(Long userId, Long categoryId, CategoryRequest categoryRequest) {
+    public CategoryResponse updateCategory(Long userId, Long categoryId, CategoryRequest categoryRequest) {
         validateDuplicateCategory(userId, categoryRequest.getName());
-        Category category = getCategory(userId, categoryId);
+        Category category = getUserCategory(userId, categoryId);
         category.updateName(categoryRequest.getName());
         return CategoryResponse.fromCategory(category);
     }
 
     @Transactional
-    public void delete(Long userId, Long categoryId) {
-        Category category = getCategory(userId, categoryId);
+    public void deleteCategory(Long userId, Long categoryId) {
+        Category category = getUserCategory(userId, categoryId);
         categoryRepository.delete(category);
     }
 
@@ -64,7 +66,7 @@ public class CategoryService {
         return new CategoryCountListResponse(categories, totalCount);
     }
 
-    private Category getCategory(Long userId, Long categoryId) {
+    private Category getUserCategory(Long userId, Long categoryId) {
         return categoryRepository.findByUserIdAndId(userId, categoryId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_CATEGORY));
     }

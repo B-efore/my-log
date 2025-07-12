@@ -1,4 +1,4 @@
-package com.jiwon.mylog.domain.item;
+package com.jiwon.mylog.domain.item.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

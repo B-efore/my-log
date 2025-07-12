@@ -40,6 +40,7 @@ public class Tag {
 
     private String name;
 
+    @Builder.Default
     @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 0")
     private Long usageCount = 0L;
 
@@ -47,6 +48,7 @@ public class Tag {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Builder.Default
     @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostTag> postTags = new ArrayList<>();
 

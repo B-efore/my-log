@@ -11,8 +11,8 @@ import com.jiwon.mylog.domain.post.entity.QPost;
 import com.jiwon.mylog.domain.tag.dto.response.TagResponse;
 import com.jiwon.mylog.domain.tag.entity.QPostTag;
 import com.jiwon.mylog.domain.tag.entity.QTag;
-import com.jiwon.mylog.domain.user.dto.response.ActivityResponse;
 import com.jiwon.mylog.domain.user.dto.response.UserActivityResponse;
+import com.jiwon.mylog.domain.user.dto.response.UserActivitiesResponse;
 import com.jiwon.mylog.domain.user.dto.response.UserResponse;
 import com.jiwon.mylog.domain.user.entity.QUser;
 import com.querydsl.core.BooleanBuilder;
@@ -146,15 +146,15 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
     }
 
     @Override
-    public UserActivityResponse findUserActivities(Long userId, LocalDate start, LocalDate end) {
+    public UserActivitiesResponse findUserActivities(Long userId, LocalDate start, LocalDate end) {
         DateTemplate<Date> formattedDate = Expressions.dateTemplate(
                 Date.class,
                 "FUNCTION('DATE', {0})",
                 POST.createdAt
         );
 
-        List<ActivityResponse> activities = jpaQueryFactory
-                .select(Projections.constructor(ActivityResponse.class,
+        List<UserActivityResponse> activities = jpaQueryFactory
+                .select(Projections.constructor(UserActivityResponse.class,
                                 formattedDate,
                                 POST.id.count()
                         )
@@ -171,7 +171,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
                 .orderBy(formattedDate.asc())
                 .fetch();
 
-        return new UserActivityResponse(activities);
+        return new UserActivitiesResponse(activities);
     }
 
     private PageImpl<Post> createResult(Pageable pageable, BooleanBuilder builder) {

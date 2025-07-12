@@ -1,4 +1,4 @@
-package com.jiwon.mylog.domain.post.dto.response;
+package com.jiwon.mylog.global.common.entity;
 
 import java.util.List;
 import lombok.AllArgsConstructor;

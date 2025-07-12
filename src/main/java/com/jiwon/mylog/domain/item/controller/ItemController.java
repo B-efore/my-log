@@ -1,11 +1,13 @@
-package com.jiwon.mylog.domain.item;
+package com.jiwon.mylog.domain.item.controller;
 
-import com.jiwon.mylog.domain.post.dto.response.PageResponse;
+import com.jiwon.mylog.domain.item.dto.ItemRequest;
+import com.jiwon.mylog.domain.item.dto.ItemResponse;
+import com.jiwon.mylog.domain.item.service.ItemService;
+import com.jiwon.mylog.global.common.entity.PageResponse;
 import com.jiwon.mylog.global.security.auth.annotation.LoginUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

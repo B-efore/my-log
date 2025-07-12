@@ -1,4 +1,4 @@
-package com.jiwon.mylog.domain.user.dto.response;
+package com.jiwon.mylog.domain.user.dto.response.auth;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
