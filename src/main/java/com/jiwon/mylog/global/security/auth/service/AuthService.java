@@ -2,11 +2,11 @@ package com.jiwon.mylog.global.security.auth.service;
 
 import com.jiwon.mylog.domain.point.entity.Point;
 import com.jiwon.mylog.domain.event.dto.DailyLoginEvent;
-import com.jiwon.mylog.domain.user.dto.request.PasswordResetRequest;
-import com.jiwon.mylog.domain.user.dto.request.UserSaveRequest;
-import com.jiwon.mylog.domain.user.dto.response.FindIdResponse;
+import com.jiwon.mylog.domain.user.dto.request.auth.PasswordResetRequest;
+import com.jiwon.mylog.domain.user.dto.request.auth.UserSaveRequest;
+import com.jiwon.mylog.domain.user.dto.response.auth.FindIdResponse;
 import com.jiwon.mylog.domain.user.entity.User;
-import com.jiwon.mylog.domain.user.dto.request.UserLoginRequest;
+import com.jiwon.mylog.domain.user.dto.request.auth.UserLoginRequest;
 import com.jiwon.mylog.global.common.error.exception.CustomException;
 import com.jiwon.mylog.global.common.error.exception.DuplicateException;
 import com.jiwon.mylog.global.mail.dto.request.MailRequest;
@@ -101,20 +101,12 @@ public class AuthService {
         Long userId = jwtService.getUserId(refreshToken);
         String accountId = jwtService.getAccountId(refreshToken);
         String userRole = jwtService.getUserRole(refreshToken);
+
         validateExistUser(userId);
         tokenService.validateRefreshToken(userId, refreshToken);
 
         String accessToken = jwtService.createAccessToken(userId, accountId, userRole);
         return TokenResponse.of(accessToken);
-    }
-
-    @Transactional
-    public void sendPasswordResetMail(MailRequest mailRequest) {
-        String email = mailRequest.getEmail();
-        if (!userRepository.existsByEmail(email)) {
-            throw new NotFoundException(ErrorCode.NOT_FOUND_USER);
-        }
-        mailService.sendCodeMail(mailRequest.getEmail());
     }
 
     @Transactional(readOnly = true)
@@ -131,11 +123,21 @@ public class AuthService {
     }
 
     @Transactional
+    public void sendPasswordResetMail(MailRequest mailRequest) {
+        String email = mailRequest.getEmail();
+        if (!userRepository.existsByEmail(email)) {
+            throw new NotFoundException(ErrorCode.NOT_FOUND_USER);
+        }
+        mailService.sendCodeMail(email);
+    }
+
+    @Transactional
     public void resetPassword(PasswordResetRequest passwordResetRequest) {
         validateConfirmPassword(passwordResetRequest.getPassword(), passwordResetRequest.getConfirmPassword());
-        String encodedPassword = bCryptPasswordEncoder.encode(passwordResetRequest.getPassword());
+
         User user = userRepository.findByEmail(passwordResetRequest.getEmail())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
+        String encodedPassword = bCryptPasswordEncoder.encode(passwordResetRequest.getPassword());
         user.updatePassword(encodedPassword);
     }
 

@@ -17,7 +17,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByAccountId(String accountId);
 
-    @Query(value = "select u from User u where u.email = :email")
+    @Query("select u from User u where u.email = :email")
     Optional<User> findByEmail(@Param("email") String email);
 
     @Query("select u from User u where u.accountId = :accountId")
@@ -27,7 +27,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findUserWithProfileImage(@Param("userId") Long userId);
 
     Page<User> findByUsernameContaining(String username, Pageable pageable);
-
-//    @Query(value = "select u from User u left join fetch u.userRoles where u.provider = :provider and u.providerId = :providerId")
-//    Optional<User> findByProviderAndProviderId(@Param("provider") String provider, @Param("providerId") String providerId);
 }

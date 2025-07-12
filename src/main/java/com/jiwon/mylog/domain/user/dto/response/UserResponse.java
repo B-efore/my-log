@@ -13,7 +13,7 @@ public class UserResponse {
     private final Long userId;
     private final String username;
     private final String bio;
-    private final String profileImageUrl;
+    private final String imageKey;
     private final UserStatus userStatus;
 
     public static UserResponse fromUser(User user) {
@@ -21,7 +21,7 @@ public class UserResponse {
                 .userId(user.getId())
                 .username(user.getUsername())
                 .bio(user.getBio())
-                .profileImageUrl(user.getProfileImage() == null ? "" : user.getProfileImage().getFileKey())
+                .imageKey(user.getProfileImage() == null ? "" : user.getProfileImage().getFileKey())
                 .userStatus(user.getStatus())
                 .build();
     }

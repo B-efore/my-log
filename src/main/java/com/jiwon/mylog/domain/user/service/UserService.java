@@ -4,13 +4,13 @@ import com.jiwon.mylog.domain.item.entity.Item;
 import com.jiwon.mylog.domain.item.entity.UserItem;
 import com.jiwon.mylog.domain.item.repository.ItemRepository;
 import com.jiwon.mylog.domain.item.repository.UserItemRepository;
+import com.jiwon.mylog.domain.post.dto.response.PageResponse;
 import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.domain.post.repository.PostRepository;
-import com.jiwon.mylog.domain.user.dto.request.UserUpdateRequest;
-import com.jiwon.mylog.domain.user.dto.response.UserActivityResponse;
+import com.jiwon.mylog.domain.user.dto.request.UserProfileRequest;
+import com.jiwon.mylog.domain.user.dto.response.UserActivitiesResponse;
 import com.jiwon.mylog.domain.user.dto.response.UserMainResponse;
-import com.jiwon.mylog.domain.user.dto.response.UserProfilePageResponse;
-import com.jiwon.mylog.domain.user.dto.response.UserProfileResponse;
+import com.jiwon.mylog.domain.user.dto.response.UserResponse;
 import com.jiwon.mylog.domain.user.entity.User;
 import com.jiwon.mylog.domain.user.repository.UserRepository;
 import com.jiwon.mylog.global.common.error.ErrorCode;
@@ -33,22 +33,22 @@ public class UserService {
     private final ItemRepository itemRepository;
     private final UserItemRepository userItemRepository;
 
-    @Transactional
-    public UserProfileResponse update(Long userId, UserUpdateRequest userUpdateRequest) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
-        user.updateInformation(
-                userUpdateRequest.getUsername(),
-                userUpdateRequest.getBio()
-        );
-        return UserProfileResponse.fromUser(user);
-    }
-
     @Transactional(readOnly = true)
-    public UserProfileResponse getUserProfile(Long userId) {
+    public UserResponse getUserProfile(Long userId) {
         User user = userRepository.findUserWithProfileImage(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
-        return UserProfileResponse.fromUser(user);
+        return UserResponse.fromUser(user);
+    }
+
+    @Transactional
+    public UserResponse updateUserProfile(Long userId, UserProfileRequest userProfileRequest) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
+        user.updateProfile(
+                userProfileRequest.getUsername(),
+                userProfileRequest.getBio()
+        );
+        return UserResponse.fromUser(user);
     }
 
     @Transactional(readOnly = true)
@@ -61,26 +61,26 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserProfilePageResponse searchWithUsername(String username, Pageable pageable) {
+    public UserActivitiesResponse getUserActivity(Long userId, LocalDate startDate, LocalDate endDate) {
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException(ErrorCode.NOT_FOUND_USER);
+        }
+        return postRepository.findUserActivities(userId, startDate, endDate);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse searchWithUsername(String username, Pageable pageable) {
         Page<User> userPage = userRepository.findByUsernameContaining(username, pageable);
-        List<UserProfileResponse> users = userPage.stream()
-                .map(UserProfileResponse::fromUser)
+        List<UserResponse> users = userPage.stream()
+                .map(UserResponse::fromUser)
                 .toList();
 
-        return UserProfilePageResponse.from(
+        return PageResponse.from(
                 users,
                 userPage.getNumber(),
                 userPage.getSize(),
                 userPage.getTotalPages(),
                 (int) userPage.getTotalElements());
-    }
-
-    @Transactional(readOnly = true)
-    public UserActivityResponse getUserActivity(Long userId, LocalDate startDate, LocalDate endDate) {
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException(ErrorCode.NOT_FOUND_USER);
-        }
-        return postRepository.findUserActivities(userId, startDate, endDate);
     }
 
     @Transactional

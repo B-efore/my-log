@@ -1,4 +1,4 @@
-package com.jiwon.mylog.domain.user.dto.request;
+package com.jiwon.mylog.domain.user.dto.request.auth;
 
 import com.jiwon.mylog.domain.user.entity.Role;
 import com.jiwon.mylog.domain.user.entity.User;
@@ -45,6 +45,7 @@ public class UserSaveRequest {
                 .username(username)
                 .status(UserStatus.ACTIVE)
                 .role(Role.ROLE_USER)
+                .provider("local")
                 .build();
     }
 }
