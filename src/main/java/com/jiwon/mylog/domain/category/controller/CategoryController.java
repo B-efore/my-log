@@ -35,13 +35,15 @@ public class CategoryController {
             summary = "카테고리 생성",
             responses = {
                     @ApiResponse(responseCode = "201", description = "카테고리 생성 성공"),
-                    @ApiResponse(responseCode = "400", description = "중복된 카테고리명이 존재함")
+                    @ApiResponse(responseCode = "400", description = "유효하지 않은 카테고리명"),
+                    @ApiResponse(responseCode = "404", description = "존재하지 않는 사용자"),
+                    @ApiResponse(responseCode = "409", description = "중복된 카테고리명이 존재")
             }
     )
-    public ResponseEntity<CategoryResponse> create(
+    public ResponseEntity<CategoryResponse> createCategory(
             @LoginUser Long userId,
             @Valid @RequestBody CategoryRequest categoryRequest) {
-        CategoryResponse response = categoryService.create(userId, categoryRequest);
+        CategoryResponse response = categoryService.createCategory(userId, categoryRequest);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
@@ -50,16 +52,16 @@ public class CategoryController {
             summary = "카테고리 수정",
             responses = {
                     @ApiResponse(responseCode = "200", description = "카테고리 수정 성공"),
-                    @ApiResponse(responseCode = "400", description = "중복된 카테고리명이 존재함"),
-                    @ApiResponse(responseCode = "404", description = "해당 카테고리를 찾을 수 없음")
+                    @ApiResponse(responseCode = "404", description = "해당 카테고리를 찾을 수 없음"),
+                    @ApiResponse(responseCode = "409", description = "중복된 카테고리명이 존재")
             }
     )
-    public ResponseEntity<CategoryResponse> update(
+    public ResponseEntity<CategoryResponse> updateCategory(
             @LoginUser Long userId,
             @PathVariable("categoryId") Long categoryId,
             @Valid @RequestBody CategoryRequest categoryRequest) {
-        CategoryResponse response = categoryService.update(userId, categoryId, categoryRequest);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        CategoryResponse response = categoryService.updateCategory(userId, categoryId, categoryRequest);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{categoryId}")
@@ -70,10 +72,10 @@ public class CategoryController {
                     @ApiResponse(responseCode = "404", description = "해당 카테고리를 찾을 수 없음")
             }
     )
-    public ResponseEntity<Void> delete(
+    public ResponseEntity<Void> deleteCategory(
             @LoginUser Long userId,
             @PathVariable("categoryId") Long categoryId) {
-        categoryService.delete(userId, categoryId);
+        categoryService.deleteCategory(userId, categoryId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -84,10 +86,10 @@ public class CategoryController {
                     @ApiResponse(responseCode = "200", description = "카테고리 조회 성공")
             }
     )
-    public ResponseEntity<CategoryListResponse> getCategories(
+    public ResponseEntity<CategoryListResponse> getUserCategories(
             @PathVariable("userId") Long userId) {
         CategoryListResponse response = categoryService.getCategories(userId);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/users/{userId}/categories/with-counts")
@@ -97,9 +99,9 @@ public class CategoryController {
                     @ApiResponse(responseCode = "200", description = "카테고리 조회 성공")
             }
     )
-    public ResponseEntity<CategoryCountListResponse> getCategoriesWithCount(
+    public ResponseEntity<CategoryCountListResponse> getUserCategoriesWithCount(
             @PathVariable("userId") Long userId) {
         CategoryCountListResponse response = categoryService.getCategoriesWithCount(userId);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(response);
     }
 }

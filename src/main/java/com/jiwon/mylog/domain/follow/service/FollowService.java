@@ -24,13 +24,8 @@ public class FollowService {
 
     @Transactional
     public void follow(Long fromUserId, Long toUserId) {
-        if (fromUserId == null || fromUserId.equals(toUserId)) {
-            throw new IllegalArgumentException("자기 자신을 팔로우 할 수 없습니다.");
-        }
-
-        if (followRepository.existsByFromUserIdAndToUserId(fromUserId, toUserId)) {
-            throw new IllegalArgumentException("이미 팔로우한 유저입니다.");
-        }
+        validateFollow(fromUserId, toUserId);
+        validateIsFollowing(fromUserId, toUserId, true);
 
         User fromUser = userRepository.findById(fromUserId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
@@ -42,13 +37,8 @@ public class FollowService {
 
     @Transactional
     public void unfollow(Long fromUserId, Long toUserId) {
-        if (fromUserId.equals(toUserId)) {
-            throw new IllegalArgumentException("자기 자신을 팔로우 할 수 없습니다.");
-        }
-
-        if (!followRepository.existsByFromUserIdAndToUserId(fromUserId, toUserId)) {
-            throw new IllegalArgumentException("팔로우 하지 않은 유저입ㄴ디ㅏ.");
-        }
+        validateFollow(fromUserId, toUserId);
+        validateIsFollowing(fromUserId, toUserId, false);
 
         Follow follow = followRepository.findByFromUserIdAndToUserId(fromUserId, toUserId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND));
@@ -77,11 +67,24 @@ public class FollowService {
         return new FollowListResponse(followers);
     }
 
+    @Transactional(readOnly = true)
     public FollowCountResponse getFollowCounts(Long userId) {
         List<Object[]> counts = followRepository.countFollowsByUserId(userId);
         Object[] row = counts.get(0);
         Long followingsCount = row[0] != null ? ((Number) row[0]).longValue() : 0L;
         Long followersCount = row[1] != null ? ((Number) row[1]).longValue() : 0L;
         return new FollowCountResponse(followingsCount, followersCount);
+    }
+
+    private void validateFollow(Long fromUserId, Long toUserId) {
+        if (fromUserId.equals(toUserId)) {
+            throw new IllegalArgumentException("자기 자신을 팔로우 할 수 없습니다.");
+        }
+    }
+
+    private void validateIsFollowing(Long fromUserId, Long toUserId, boolean isFollowing) {
+        if (followRepository.existsByFromUserIdAndToUserId(fromUserId, toUserId) == isFollowing) {
+            throw new IllegalArgumentException("잘못된 요청입니다.");
+        }
     }
 }

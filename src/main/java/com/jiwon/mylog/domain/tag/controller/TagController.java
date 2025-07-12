@@ -1,6 +1,6 @@
 package com.jiwon.mylog.domain.tag.controller;
 
-import com.jiwon.mylog.domain.tag.dto.response.TagCountPageResponse;
+import com.jiwon.mylog.global.common.entity.PageResponse;
 import com.jiwon.mylog.domain.tag.dto.response.TagResponse;
 import com.jiwon.mylog.domain.tag.service.TagService;
 import lombok.RequiredArgsConstructor;
@@ -30,11 +30,11 @@ public class TagController {
     }
 
     @GetMapping("/users/{userId}/tags/with-counts")
-    public ResponseEntity<?> getAllTagsWithCount(
+    public ResponseEntity<PageResponse> getAllTagsWithCount(
             @PathVariable("userId") Long userId,
             @PageableDefault(size = 10, page = 0,
                     sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        TagCountPageResponse response = tagService.getAllTagsWithCount(userId, pageable);
+        PageResponse response = tagService.getAllTagsWithCount(userId, pageable);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

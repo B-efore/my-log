@@ -40,27 +40,31 @@ public class Comment extends BaseEntity {
     @JoinColumn(name = "parent_id")
     private Comment parent;
 
+    @Builder.Default
     @OneToMany(mappedBy = "parent")
     private List<Comment> children = new ArrayList<>();
 
+    @Builder.Default
     @Column(nullable = false)
-    private int depth;
+    private int depth = 0;
 
     @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String content;
 
     @Enumerated(value = EnumType.STRING)
+    @Column(nullable = false)
     private CommentStatus commentStatus;
 
     @Enumerated(value = EnumType.STRING)
+    @Column(nullable = false)
     private Visibility visibility;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false, updatable = false)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id", nullable = false)
+    @JoinColumn(name = "post_id", nullable = false, updatable = false)
     private Post post;
 
     public static Comment create(CommentCreateRequest request, Comment parent, User user, Post post) {

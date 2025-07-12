@@ -1,6 +1,6 @@
 package com.jiwon.mylog.global.aws;
 
-import com.jiwon.mylog.domain.image.dto.PresignedUrlResponse;
+import com.jiwon.mylog.domain.image.dto.response.PresignedUrlResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

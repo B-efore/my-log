@@ -36,11 +36,11 @@ public class CommentController {
                     @ApiResponse(responseCode = "404", description = "게시글 또는 댓글 작성자를 찾을 수 없음")
             }
     )
-    public ResponseEntity<CommentResponse> create(
+    public ResponseEntity<CommentResponse> createComment(
             @LoginUser Long userId,
             @PathVariable("postId") Long postId,
             @Valid @RequestBody CommentCreateRequest commentCreateRequest) {
-        CommentResponse response = commentService.create(userId, postId, commentCreateRequest);
+        CommentResponse response = commentService.createComment(userId, postId, commentCreateRequest);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
@@ -53,12 +53,12 @@ public class CommentController {
                     @ApiResponse(responseCode = "404", description = "댓글을 찾을 수 없음")
             }
     )
-    public ResponseEntity<CommentResponse> update(
+    public ResponseEntity<CommentResponse> updateComment(
             @LoginUser Long userId,
             @PathVariable("postId") Long postId,
             @PathVariable("commentId") Long commentId,
             @Valid @RequestBody CommentUpdateRequest commentUpdateRequest) {
-        CommentResponse response = commentService.update(userId, postId, commentId, commentUpdateRequest);
+        CommentResponse response = commentService.updateComment(userId, postId, commentId, commentUpdateRequest);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -71,11 +71,11 @@ public class CommentController {
                     @ApiResponse(responseCode = "404", description = "댓글을 찾을 수 없음")
             }
     )
-    public ResponseEntity<Void> delete(
+    public ResponseEntity<Void> deleteComment(
             @LoginUser Long userId,
             @PathVariable("postId") Long postId,
             @PathVariable("commentId") Long commentId) {
-        commentService.delete(userId, postId, commentId);
+        commentService.deleteComment(userId, postId, commentId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

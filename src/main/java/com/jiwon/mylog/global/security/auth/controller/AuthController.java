@@ -34,7 +34,8 @@ public class AuthController {
             summary = "회원가입",
             responses = {
                     @ApiResponse(responseCode = "201", description = "회원가입 성공"),
-                    @ApiResponse(responseCode = "400", description = "잘못된 요청이 들어옴")
+                    @ApiResponse(responseCode = "400", description = "잘못된 요청이 들어옴"),
+                    @ApiResponse(responseCode = "409", description = "중복된 아이디 또는 이메일 존재")
 
             }
     )

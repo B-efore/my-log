@@ -1,7 +1,7 @@
 package com.jiwon.mylog.domain.point.controller;
 
 import com.jiwon.mylog.domain.point.service.PointHistoryService;
-import com.jiwon.mylog.domain.post.dto.response.PageResponse;
+import com.jiwon.mylog.global.common.entity.PageResponse;
 import com.jiwon.mylog.global.security.auth.annotation.LoginUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 
 @RequiredArgsConstructor
-@RequestMapping("/api/point-history")
+@RequestMapping("/api")
 @RestController
 public class PointHistoryController {
 
     private final PointHistoryService pointHistoryService;
 
-    @GetMapping
+    @GetMapping("/users/point-history")
     public ResponseEntity<PageResponse> getUserHistoriesByPeriod(
             @LoginUser Long userId,
             @RequestParam("fromDate") LocalDate fromDate,

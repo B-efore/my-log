@@ -1,4 +1,4 @@
-package com.jiwon.mylog.domain.image.dto;
+package com.jiwon.mylog.domain.image.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;

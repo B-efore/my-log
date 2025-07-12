@@ -1,6 +1,6 @@
 package com.jiwon.mylog.domain.user.controller;
 
-import com.jiwon.mylog.domain.post.dto.response.PageResponse;
+import com.jiwon.mylog.global.common.entity.PageResponse;
 import com.jiwon.mylog.domain.user.dto.request.UserProfileRequest;
 import com.jiwon.mylog.domain.user.dto.response.UserActivitiesResponse;
 import com.jiwon.mylog.domain.user.dto.response.UserMainResponse;

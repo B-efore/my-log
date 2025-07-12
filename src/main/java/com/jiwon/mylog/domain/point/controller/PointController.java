@@ -1,6 +1,6 @@
 package com.jiwon.mylog.domain.point.controller;
 
-import com.jiwon.mylog.domain.point.dto.PointResponse;
+import com.jiwon.mylog.domain.point.dto.response.PointResponse;
 import com.jiwon.mylog.domain.point.service.PointService;
 import com.jiwon.mylog.global.security.auth.annotation.LoginUser;
 import lombok.RequiredArgsConstructor;

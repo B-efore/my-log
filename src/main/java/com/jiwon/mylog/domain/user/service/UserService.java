@@ -4,7 +4,7 @@ import com.jiwon.mylog.domain.item.entity.Item;
 import com.jiwon.mylog.domain.item.entity.UserItem;
 import com.jiwon.mylog.domain.item.repository.ItemRepository;
 import com.jiwon.mylog.domain.item.repository.UserItemRepository;
-import com.jiwon.mylog.domain.post.dto.response.PageResponse;
+import com.jiwon.mylog.global.common.entity.PageResponse;
 import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.domain.post.repository.PostRepository;
 import com.jiwon.mylog.domain.user.dto.request.UserProfileRequest;

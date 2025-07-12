@@ -30,7 +30,7 @@ public class CommentService {
 
     @CacheEvict(value = "post::detail", key = "#postId")
     @Transactional
-    public CommentResponse create(Long userId, Long postId, CommentCreateRequest request) {
+    public CommentResponse createComment(Long userId, Long postId, CommentCreateRequest request) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
@@ -52,7 +52,7 @@ public class CommentService {
 
     @CacheEvict(value = "post::detail", key = "#postId")
     @Transactional
-    public CommentResponse update(Long userId, Long postId, Long commentId, CommentUpdateRequest request) {
+    public CommentResponse updateComment(Long userId, Long postId, Long commentId, CommentUpdateRequest request) {
         Comment comment = getComment(commentId);
         validateOwner(userId, comment);
         comment.update(request);
@@ -61,7 +61,7 @@ public class CommentService {
 
     @CacheEvict(value = "post::detail", key = "#postId")
     @Transactional
-    public void delete(Long userId, Long postId, Long commentId) {
+    public void deleteComment(Long userId, Long postId, Long commentId) {
         Comment comment = getComment(commentId);
         validateOwner(userId, comment);
         comment.delete();

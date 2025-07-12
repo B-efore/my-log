@@ -1,7 +1,7 @@
 package com.jiwon.mylog.domain.image.service;
 
-import com.jiwon.mylog.domain.image.dto.ImageResponse;
-import com.jiwon.mylog.domain.image.dto.PresignedUrlResponse;
+import com.jiwon.mylog.domain.image.dto.response.ImageResponse;
+import com.jiwon.mylog.domain.image.dto.response.PresignedUrlResponse;
 import com.jiwon.mylog.domain.image.entity.ProfileImage;
 import com.jiwon.mylog.domain.image.repository.ProfileImageRepository;
 import com.jiwon.mylog.domain.user.entity.User;
@@ -24,6 +24,7 @@ public class ImageService {
 
     private static final String IMAGE_PROFILE = "PROFILE";
     private static final String[] EXTENSIONS = {"jpg", "jpeg", "png"};
+
     private final S3Service s3Service;
     private final UserRepository userRepository;
     private final ProfileImageRepository profileImageRepository;
@@ -42,7 +43,6 @@ public class ImageService {
         PresignedUrlResponse response = s3Service.generatePutPresignedUrl(fileName);
 
         User user = getUser(userId);
-
         ProfileImage profileImage = profileImageRepository.findByUserId(userId)
                 .orElseGet(() -> ProfileImage.forUserProfile(user));
         profileImage.updateProfile(response.getKey());
@@ -56,14 +56,18 @@ public class ImageService {
 
     @Transactional
     public void deleteProfileImage(Long userId) {
-        User user = getUser(userId);
+        User user = userRepository.findUserWithProfileImage(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
 
-        if (user.getProfileImage() != null) {
-            String fileKey = user.getProfileImage().getFileKey();
-            user.deleteProfileImage();
-            deleteImageFromS3(fileKey);
+        if (user.getProfileImage() == null) {
+            throw new NotFoundException(ErrorCode.NOT_FOUND);
         }
+
+        String fileKey = user.getProfileImage().getFileKey();
+        user.deleteProfileImage();
+        deleteImageFromS3(fileKey);
     }
+
     private void deleteImageFromS3(String fileKey) {
         s3Service.deleteFile(fileKey);
     }

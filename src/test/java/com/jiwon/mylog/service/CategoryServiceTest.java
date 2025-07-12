@@ -46,7 +46,7 @@ class CategoryServiceTest {
         given(categoryRepository.existsByUserIdAndName(user.getId(), request.getName())).willReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> categoryService.create(userId, request))
+        assertThatThrownBy(() -> categoryService.createCategory(userId, request))
                 .isInstanceOf(DuplicateException.class)
                 .hasMessage(ErrorCode.DUPLICATE_CATEGORY.getMessage());
 
@@ -64,7 +64,7 @@ class CategoryServiceTest {
         given(categoryRepository.findByUserIdAndId(userId, categoryId)).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> categoryService.update(userId, categoryId, request))
+        assertThatThrownBy(() -> categoryService.updateCategory(userId, categoryId, request))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining( ErrorCode.NOT_FOUND_CATEGORY.getMessage());
     }
@@ -80,7 +80,7 @@ class CategoryServiceTest {
         given(categoryRepository.existsByUserIdAndName(userId, request.getName())).willReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> categoryService.update(userId, categoryId, request))
+        assertThatThrownBy(() -> categoryService.updateCategory(userId, categoryId, request))
                 .isInstanceOf(DuplicateException.class)
                 .hasMessage(ErrorCode.DUPLICATE_CATEGORY.getMessage());
     }

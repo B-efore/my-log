@@ -21,9 +21,10 @@ public enum ErrorCode {
 
     NOT_CONFIRM_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
 
-    DUPLICATE_ACCOUNT_ID(HttpStatus.BAD_REQUEST, "이미 사용중인 아이디입니다."),
-    DUPLICATE_EMAIL(HttpStatus.BAD_REQUEST, "이미 사용중인 이메일입니다."),
-    DUPLICATE_CATEGORY(HttpStatus.BAD_REQUEST, "이미 존재하는 카테고리입니다."),
+    DUPLICATE(HttpStatus.CONFLICT, "중복된 값이 존재합니다."),
+    DUPLICATE_ACCOUNT_ID(HttpStatus.CONFLICT, "이미 사용중인 아이디입니다."),
+    DUPLICATE_EMAIL(HttpStatus.CONFLICT, "이미 사용중인 이메일입니다."),
+    DUPLICATE_CATEGORY(HttpStatus.CONFLICT, "이미 존재하는 카테고리입니다."),
 
     NOT_FOUND(HttpStatus.NOT_FOUND, "해당 객체를 찾을 수 없습니다."),
     NOT_FOUND_USER(HttpStatus.NOT_FOUND, "존재하지 않는 사용자입니다."),

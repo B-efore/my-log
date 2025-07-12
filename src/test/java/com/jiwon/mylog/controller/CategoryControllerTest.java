@@ -50,7 +50,7 @@ class CategoryControllerTest {
 
         given(resolver.supportsParameter(any())).willReturn(true);
         given(resolver.resolveArgument(any(), any(), any(), any())).willReturn(1L);
-        given(categoryService.create(any(Long.class), any(CategoryRequest.class))).willReturn(response);
+        given(categoryService.createCategory(any(Long.class), any(CategoryRequest.class))).willReturn(response);
 
         // when & then
         mockMvc.perform(post("/api/categories")
@@ -74,7 +74,7 @@ class CategoryControllerTest {
 
         given(resolver.supportsParameter(any())).willReturn(true);
         given(resolver.resolveArgument(any(), any(), any(), any())).willReturn(1L);
-        given(categoryService.update(any(Long.class), eq(categoryId), any(CategoryRequest.class))).willReturn(response);
+        given(categoryService.updateCategory(any(Long.class), eq(categoryId), any(CategoryRequest.class))).willReturn(response);
 
         // when & then
         mockMvc.perform(patch("/api/categories/{categoryId}", categoryId)

@@ -1,10 +1,11 @@
 package com.jiwon.mylog.global.aws;
 
-import com.jiwon.mylog.domain.image.dto.PresignedUrlResponse;
+import com.jiwon.mylog.domain.image.dto.response.PresignedUrlResponse;
 import com.jiwon.mylog.global.common.error.ErrorCode;
 import com.jiwon.mylog.global.common.error.exception.AmazonS3Exception;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -16,7 +17,6 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -27,6 +27,7 @@ public class S3Service {
     private final S3Presigner s3Presigner;
     private final AwsProperties awsProperties;
 
+    @Transactional
     public String uploadFile(MultipartFile multipartFile) {
         try {
             String key = generateKey(multipartFile.getOriginalFilename());
@@ -45,7 +46,7 @@ public class S3Service {
         }
     }
 
-
+    @Transactional
     public PresignedUrlResponse generatePutPresignedUrl(String fileName) {
         String key = generateKey(fileName);
         PutObjectRequest putObjectRequest = getPutObjectRequest(key);
@@ -56,10 +57,10 @@ public class S3Service {
                 )
                 .url()
                 .toString();
-
         return PresignedUrlResponse.create(key, url);
     }
 
+    @Transactional
     public void deleteFile(String fileName) {
         try {
             DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()

@@ -43,9 +43,11 @@ public class Category extends BaseEntity {
     @Column(nullable = false, length = 10)
     private String name;
 
+    @Builder.Default
     @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 0")
     private Long postCount = 0L;
 
+    @Builder.Default
     @OneToMany(mappedBy = "category")
     private List<Post> posts = new ArrayList<>();
 
