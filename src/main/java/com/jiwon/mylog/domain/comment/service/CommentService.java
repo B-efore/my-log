@@ -57,7 +57,8 @@ public class CommentService {
                             postId,
                             post.getUser().getId(),
                             comment.getId(),
-                            userId)
+                            userId,
+                            user.getUsername())
             );
         }
 

@@ -10,4 +10,5 @@ public class CommentCreatedEvent {
     private final Long postWriterId;
     private final Long commentId;
     private final Long commentWriterId;
+    private final String commentWriterName;
 }

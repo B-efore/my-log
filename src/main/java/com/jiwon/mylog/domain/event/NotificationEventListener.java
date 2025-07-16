@@ -33,7 +33,7 @@ public class NotificationEventListener {
 
         Notification notification = Notification.create(
                 receiver,
-                "게시글 새로운 댓글이 달렸습니다.",
+                event.getCommentWriterName() + "왹이 외계 수집물에 발사를 남겼습니다.",
                 "/posts/" + event.getPostId(),
                 NotificationType.COMMENT
         );
