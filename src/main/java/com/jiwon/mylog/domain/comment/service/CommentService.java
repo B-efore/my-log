@@ -6,6 +6,8 @@ import com.jiwon.mylog.domain.comment.dto.response.CommentResponse;
 import com.jiwon.mylog.domain.comment.entity.Comment;
 import com.jiwon.mylog.domain.comment.repository.CommentRepository;
 import com.jiwon.mylog.domain.event.dto.CommentCreatedEvent;
+import com.jiwon.mylog.domain.notification.repository.NotificationRepository;
+import com.jiwon.mylog.domain.notification.service.NotificationService;
 import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.domain.user.entity.User;
 import com.jiwon.mylog.global.common.error.ErrorCode;
@@ -14,11 +16,13 @@ import com.jiwon.mylog.global.common.error.exception.NotFoundException;
 import com.jiwon.mylog.domain.post.repository.PostRepository;
 import com.jiwon.mylog.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class CommentService {
@@ -45,7 +49,18 @@ public class CommentService {
         Comment comment = Comment.create(request, parent, user, post);
         Comment savedComment = commentRepository.save(comment);
 
-        eventPublisher.publishEvent(new CommentCreatedEvent(userId, savedComment.getId()));
+        Long receiverId = post.getUser().getId();
+
+        if (!receiverId.equals(userId)) {
+            eventPublisher.publishEvent(
+                    new CommentCreatedEvent(
+                            postId,
+                            post.getUser().getId(),
+                            comment.getId(),
+                            userId,
+                            user.getUsername())
+            );
+        }
 
         return CommentResponse.fromComment(savedComment);
     }

@@ -6,6 +6,9 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public class CommentCreatedEvent {
-    private final Long userId;
+    private final Long postId;
+    private final Long postWriterId;
     private final Long commentId;
+    private final Long commentWriterId;
+    private final String commentWriterName;
 }

@@ -50,10 +50,10 @@ public class PointEventListener {
     @EventListener
     public void handleCommentCreated(CommentCreatedEvent event) {
         if (historyRepository.countDailyPointByDescription(
-                event.getUserId(),
+                event.getCommentWriterId(),
                 COMMENT_EARN_DESCRIPTION) >= COMMENT_POINT_LIMIT) {
             return;
         }
-        pointService.earnPoint(event.getUserId(), 44, COMMENT_EARN_DESCRIPTION);
+        pointService.earnPoint(event.getCommentWriterId(), 44, COMMENT_EARN_DESCRIPTION);
     }
 }

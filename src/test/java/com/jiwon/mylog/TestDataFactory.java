@@ -3,6 +3,8 @@ package com.jiwon.mylog;
 import com.jiwon.mylog.domain.category.entity.Category;
 import com.jiwon.mylog.domain.image.entity.ProfileImage;
 import com.jiwon.mylog.domain.item.entity.Item;
+import com.jiwon.mylog.domain.notification.entity.Notification;
+import com.jiwon.mylog.domain.notification.entity.NotificationType;
 import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.domain.user.entity.User;
 import com.jiwon.mylog.domain.user.entity.UserStatus;
@@ -47,6 +49,16 @@ public class TestDataFactory {
                 .name("name")
                 .description("description")
                 .price(0)
+                .build();
+    }
+
+    public static Notification createNotification(User receiver, boolean isRead) {
+        return Notification.builder()
+                .receiver(receiver)
+                .content("테스트")
+                .url("/test")
+                .isRead(isRead)
+                .type(NotificationType.SERVER)
                 .build();
     }
 }
