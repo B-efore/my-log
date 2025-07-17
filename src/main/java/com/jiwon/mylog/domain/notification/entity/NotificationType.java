@@ -6,5 +6,6 @@ public enum NotificationType {
     FOLLOW,
     UNFOLLOW,
     SERVER,
+    LIKE,
     ETC
 }

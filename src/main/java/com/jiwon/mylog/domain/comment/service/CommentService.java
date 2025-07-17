@@ -6,8 +6,6 @@ import com.jiwon.mylog.domain.comment.dto.response.CommentResponse;
 import com.jiwon.mylog.domain.comment.entity.Comment;
 import com.jiwon.mylog.domain.comment.repository.CommentRepository;
 import com.jiwon.mylog.domain.event.dto.CommentCreatedEvent;
-import com.jiwon.mylog.domain.notification.repository.NotificationRepository;
-import com.jiwon.mylog.domain.notification.service.NotificationService;
 import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.domain.user.entity.User;
 import com.jiwon.mylog.global.common.error.ErrorCode;

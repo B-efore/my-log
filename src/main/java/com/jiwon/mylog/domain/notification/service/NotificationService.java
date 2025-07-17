@@ -8,6 +8,8 @@ import com.jiwon.mylog.domain.notification.repository.SseEmitterRepository;
 import com.jiwon.mylog.global.common.entity.PageResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,7 @@ public class NotificationService {
     private final SseEmitterRepository emitterRepository;
     private final NotificationRepository notificationRepository;
 
+    @CacheEvict(value = "notification::count", key="'userId:' + #userId", condition = "#userId != null")
     @Transactional
     public void updateNotificationRead(Long userId) {
         notificationRepository.updateReadStateByReceiverId(userId);
@@ -48,6 +51,7 @@ public class NotificationService {
         );
     }
 
+    @Cacheable(value = "notification::count", key = "'userId:' + #userId", condition = "#userId != null")
     @Transactional(readOnly = true)
     public NotificationCountResponse countUnreadNotifications(Long userId) {
         long countedNotification = notificationRepository.countByReceiverIdAndReadIsFalse(userId);
