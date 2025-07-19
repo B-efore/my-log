@@ -60,7 +60,7 @@ class PostServiceCacheTest {
         PostDetailResponse post = postService.createPost(userId, postRequest, false);
         Long postId = post.getPostId();
 
-        postService.getPost(postId);
+        postService.getPost(postId, "dummy");
         postService.getUserPosts(userId, pageable); // 캐시 다시 생성
         postService.getPostsByCategoryAndTags(userId, categoryId, List.of(), pageable); // 캐시 다시 생성
 
@@ -88,7 +88,7 @@ class PostServiceCacheTest {
 
         // when
         PostDetailResponse post = postService.updatePost(userId, postId, postRequest, false);
-        postService.getPost(postId);
+        postService.getPost(postId, "dummy");
         postService.getUserPosts(userId, pageable); // 캐시 다시 생성
         postService.getPostsByCategoryAndTags(userId, categoryId, List.of(), pageable); // 캐시 다시 생성
 
@@ -113,11 +113,11 @@ class PostServiceCacheTest {
                 .willReturn(Optional.empty());
 
         // when
-        postService.getPost(postId);
+        postService.getPost(postId, "dummy");
         postService.deletePost(userId, postId);
 
         // then
-        assertThrows(NotFoundException.class, () -> postService.getPost(postId));
+        assertThrows(NotFoundException.class, () -> postService.getPost(postId, "dummy"));
         verify(postRepository, times(2)).findPostDetail(postId);
     }
 
@@ -131,10 +131,10 @@ class PostServiceCacheTest {
                 .willReturn(Optional.of(post));
 
         // when & then
-        PostDetailResponse firstPost = postService.getPost(postId);
+        PostDetailResponse firstPost = postService.getPost(postId, "dummy");
         verify(postRepository, times(1)).findPostDetail(postId);
 
-        PostDetailResponse secondPost = postService.getPost(postId);
+        PostDetailResponse secondPost = postService.getPost(postId, "dummy");
         verify(postRepository, times(1)).findPostDetail(postId);
 
         assertThat(firstPost).isEqualTo(secondPost);

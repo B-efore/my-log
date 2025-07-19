@@ -38,7 +38,7 @@ public class MailService {
 
     @Transactional
     public void sendCodeMail(String email)  {
-        if (redisUtil.existData(email)) {
+        if (redisUtil.existEmailData(email)) {
             redisUtil.deleteData(email);
         }
 
