@@ -74,6 +74,10 @@ public class PostDetailResponse {
                 .build();
     }
 
+    public void setViews(int views) {
+        this.views = views;
+    }
+
     public void setTagsAndComments(List<TagResponse> tags, List<CommentResponse> comments) {
         this.tags = tags;
         this.comments = comments;
