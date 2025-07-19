@@ -1,6 +1,10 @@
 package com.jiwon.mylog.global.redis;
 
 import java.time.Duration;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -49,5 +53,13 @@ public class RedisUtil {
     public int getPostView(String key, String hashKey, int view) {
         String value = (String) redisTemplate.opsForHash().get(key, hashKey);
         return value != null ? Integer.parseInt(value) : view;
+    }
+
+    public Map<Long, Integer> getAllPostView(String key) {
+        return redisTemplate.opsForHash().entries(key).entrySet().stream()
+                .collect(Collectors.toMap(
+                        e -> Long.parseLong(e.getKey().toString()),
+                        e -> Integer.parseInt(e.getValue().toString())
+                ));
     }
 }
