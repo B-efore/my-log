@@ -1,5 +1,6 @@
 package com.jiwon.mylog.global.common.config;
 
+import com.jiwon.mylog.global.security.auth.resolver.AllUserArgumentResolver;
 import com.jiwon.mylog.global.security.auth.resolver.LoginUserArgumentResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
@@ -13,9 +14,11 @@ import java.util.List;
 public class WebConfig implements WebMvcConfigurer {
 
     private final LoginUserArgumentResolver loginUserArgumentResolver;
+    private final AllUserArgumentResolver allUserArgumentResolver;
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(loginUserArgumentResolver);
+        resolvers.add(allUserArgumentResolver);
     }
 }

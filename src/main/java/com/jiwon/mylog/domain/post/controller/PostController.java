@@ -1,6 +1,7 @@
 package com.jiwon.mylog.domain.post.controller;
 
 import com.jiwon.mylog.domain.post.service.PostService;
+import com.jiwon.mylog.global.security.auth.annotation.AllUser;
 import com.jiwon.mylog.global.security.auth.annotation.LoginUser;
 import com.jiwon.mylog.domain.post.dto.request.PostRequest;
 import com.jiwon.mylog.domain.post.dto.response.PostDetailResponse;
@@ -103,8 +104,9 @@ public class PostController {
             }
     )
     public ResponseEntity<PostDetailResponse> getPost(
+            @AllUser String userKey,
             @PathVariable("postId") Long postId) {
-        PostDetailResponse response = postService.getPost(postId);
+        PostDetailResponse response = postService.getPost(postId, userKey);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
