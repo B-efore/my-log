@@ -1,6 +1,7 @@
 package com.jiwon.mylog.domain.post.controller;
 
 import com.jiwon.mylog.domain.post.service.PostService;
+import com.jiwon.mylog.domain.post.service.PostViewService;
 import com.jiwon.mylog.global.security.auth.annotation.AllUser;
 import com.jiwon.mylog.global.security.auth.annotation.LoginUser;
 import com.jiwon.mylog.domain.post.dto.request.PostRequest;
@@ -37,6 +38,7 @@ import java.util.List;
 public class PostController {
 
     private final PostService postService;
+    private final PostViewService postViewService;
 
     @PostMapping("/posts")
     @Operation(
@@ -106,7 +108,9 @@ public class PostController {
     public ResponseEntity<PostDetailResponse> getPost(
             @AllUser String userKey,
             @PathVariable("postId") Long postId) {
-        PostDetailResponse response = postService.getPost(postId, userKey);
+        PostDetailResponse response = postService.getPost(postId);
+        int view = postViewService.incrementPostView(response.getPostId(), response.getViews(), userKey);
+        response.setViews(view);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

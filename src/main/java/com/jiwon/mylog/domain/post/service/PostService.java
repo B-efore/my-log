@@ -39,7 +39,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class PostService {
 
     private final ApplicationEventPublisher eventPublisher;
-    private final PostViewService postViewService;
     private final TagService tagService;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
@@ -168,16 +167,9 @@ public class PostService {
             condition = "#postId != null && #postId > 0"
     )
     @Transactional(readOnly = true)
-    public PostDetailResponse getPostContent(Long postId) {
+    public PostDetailResponse getPost(Long postId) {
         return postRepository.findPostDetail(postId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_POST));
-    }
-
-    public PostDetailResponse getPost(Long postId, String userKey) {
-        PostDetailResponse post = getPostContent(postId);
-        postViewService.incrementPostView(post.getPostId(), post.getViews(), userKey);
-        post.setViews(postViewService.getPostView(post.getPostId(), post.getViews()));
-        return post;
     }
 
     @Cacheable(value = "post::main",

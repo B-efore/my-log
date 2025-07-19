@@ -12,7 +12,7 @@ public class PostViewService {
     private static final String VIEW_KEY_PREFIX = "post:view:";
     private static final String VIEW_COUNT_KEY_PREFIX = "post:view:count";
 
-    public void incrementPostView(Long postId, int view, String userKey) {
+    public int incrementPostView(Long postId, int view, String userKey) {
         String existKey = VIEW_KEY_PREFIX + postId;
         String countKey = VIEW_COUNT_KEY_PREFIX;
 
@@ -21,9 +21,11 @@ public class PostViewService {
             redisUtil.addPostViewUser(existKey, userKey);
             redisUtil.increasePostView(countKey, postId.toString(), String.valueOf(view));
         }
+
+        return getPostView(postId, view);
     }
 
-    public int getPostView(Long postId, int view) {
+    private int getPostView(Long postId, int view) {
         return redisUtil.getPostView(VIEW_COUNT_KEY_PREFIX, postId.toString(), view);
     }
 }
