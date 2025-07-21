@@ -1,5 +1,8 @@
 package com.jiwon.mylog.global.security.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jiwon.mylog.global.common.error.ErrorCode;
+import com.jiwon.mylog.global.common.error.ErrorResponse;
 import com.jiwon.mylog.global.security.auth.user.JwtUserDetails;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -50,8 +53,7 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         } catch (ExpiredJwtException e) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json;charset=UTF-8");
+            throw e;
         }
 
         filterChain.doFilter(request, response);

@@ -1,9 +1,9 @@
 package com.jiwon.mylog.global.common.config;
 
+import com.jiwon.mylog.global.common.error.ExceptionHandlerFilter;
 import com.jiwon.mylog.global.oauth.CustomOAuth2UserService;
 import com.jiwon.mylog.global.oauth.OAuth2Properties;
 import com.jiwon.mylog.global.oauth.OAuth2SuccessHandler;
-import com.jiwon.mylog.global.security.auth.user.CustomUserDetailsService;
 import com.jiwon.mylog.global.security.jwt.JwtService;
 import com.jiwon.mylog.global.security.jwt.JwtTokenAuthenticationFilter;
 import com.jiwon.mylog.global.security.token.sevice.TokenService;
@@ -12,7 +12,6 @@ import java.util.List;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -103,8 +102,8 @@ public class SecurityConfig {
                 );
 
         http
+                .addFilterBefore(new ExceptionHandlerFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JwtTokenAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
-
         http
                 .exceptionHandling(exceptions -> exceptions
                         // 인증
