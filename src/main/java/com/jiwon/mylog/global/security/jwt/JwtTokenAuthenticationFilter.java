@@ -1,6 +1,7 @@
 package com.jiwon.mylog.global.security.jwt;
 
 import com.jiwon.mylog.global.security.auth.user.JwtUserDetails;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,19 +34,24 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
         String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         String token = jwtService.getAccessToken(authorizationHeader);
 
-        if (token != null && jwtService.validateToken(token)) {
-            Long userId = jwtService.getUserId(token);
-            String accountId = jwtService.getAccountId(token);
-            String role = jwtService.getUserRole(token);
+        try {
+            if (token != null && jwtService.validateToken(token)) {
+                Long userId = jwtService.getUserId(token);
+                String accountId = jwtService.getAccountId(token);
+                String role = jwtService.getUserRole(token);
 
-            JwtUserDetails userDetails = new JwtUserDetails(
-                    userId,
-                    accountId,
-                    List.of(new SimpleGrantedAuthority(role))
-            );
-            Authentication authToken = getAuthentication(userDetails);
+                JwtUserDetails userDetails = new JwtUserDetails(
+                        userId,
+                        accountId,
+                        List.of(new SimpleGrantedAuthority(role))
+                );
+                Authentication authToken = getAuthentication(userDetails);
 
-            SecurityContextHolder.getContext().setAuthentication(authToken);
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
+        } catch (ExpiredJwtException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json;charset=UTF-8");
         }
 
         filterChain.doFilter(request, response);
