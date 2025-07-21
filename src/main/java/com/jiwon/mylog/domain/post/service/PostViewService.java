@@ -3,6 +3,7 @@ package com.jiwon.mylog.domain.post.service;
 import com.jiwon.mylog.global.redis.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -25,7 +26,7 @@ public class PostViewService {
         return getPostView(postId, view);
     }
 
-    private int getPostView(Long postId, int view) {
+    public int getPostView(Long postId, int view) {
         return redisUtil.getPostView(VIEW_COUNT_KEY_PREFIX, postId.toString(), view);
     }
 }

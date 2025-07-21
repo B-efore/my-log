@@ -117,7 +117,7 @@ class PostServiceCacheTest {
         postService.deletePost(userId, postId);
 
         // then
-        assertThrows(NotFoundException.class, () -> postService.getPost(postId);
+        assertThrows(NotFoundException.class, () -> postService.getPost(postId));
         verify(postRepository, times(2)).findPostDetail(postId);
     }
 
