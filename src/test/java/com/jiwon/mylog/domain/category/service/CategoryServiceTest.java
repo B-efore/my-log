@@ -1,6 +1,7 @@
 package com.jiwon.mylog.domain.category.service;
 
 import com.jiwon.mylog.domain.category.dto.request.CategoryRequest;
+import com.jiwon.mylog.domain.category.entity.Category;
 import com.jiwon.mylog.domain.category.repository.CategoryRepository;
 import com.jiwon.mylog.domain.user.entity.User;
 import com.jiwon.mylog.domain.user.repository.UserRepository;
@@ -18,9 +19,10 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class CategoryServiceMockTest {
+class CategoryServiceTest {
 
     @InjectMocks
     private CategoryService categoryService;
@@ -79,5 +81,20 @@ class CategoryServiceMockTest {
         assertThatThrownBy(() -> categoryService.updateCategory(userId, categoryId, request))
                 .isInstanceOf(DuplicateException.class)
                 .hasMessage(ErrorCode.DUPLICATE_CATEGORY.getMessage());
+    }
+
+    @DisplayName("존재하지 않는 카테고리를 삭제할 시 예외가 발생한다.")
+    @Test
+    void delete() {
+        // given
+        Long userId = 1L;
+        Long categoryId = 1L;
+
+        given(categoryRepository.findByUserIdAndId(userId, categoryId)).willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> categoryService.deleteCategory(userId, categoryId))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage(ErrorCode.NOT_FOUND_CATEGORY.getMessage());
     }
 }

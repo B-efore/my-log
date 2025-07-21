@@ -19,6 +19,10 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
     @Query("update Post p set p.views = :view where p.id = :postId")
     void updatePostView(@Param("postId") Long postId, @Param("view") int view);
 
+    @Modifying
+    @Query("update Post p set p.category = null where p.category.id = :categoryId")
+    void updatePostCategory(@Param("categoryId") Long categoryId);
+
     @Query(value = "select p from Post p where p.deletedAt is null and p.isNotice = true order by p.createdAt desc",
             countQuery = "select count(p) from Post p where p.deletedAt is null and p.isNotice = true")
     Page<Post> findAllNotice(Pageable pageable);
