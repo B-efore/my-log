@@ -9,6 +9,7 @@ import com.jiwon.mylog.domain.user.entity.User;
 import com.jiwon.mylog.domain.user.dto.request.auth.UserLoginRequest;
 import com.jiwon.mylog.global.common.error.exception.CustomException;
 import com.jiwon.mylog.global.common.error.exception.DuplicateException;
+import com.jiwon.mylog.global.common.error.exception.UnauthorizedException;
 import com.jiwon.mylog.global.mail.dto.request.MailRequest;
 import com.jiwon.mylog.global.mail.service.MailService;
 import com.jiwon.mylog.global.security.auth.user.CustomUserDetails;
@@ -143,7 +144,7 @@ public class AuthService {
 
     private void validateToken(String refreshToken) {
         if (!jwtService.validateToken(refreshToken)) {
-            throw new IllegalArgumentException(ErrorCode.INVALID_TOKEN.getMessage());
+            throw new UnauthorizedException(ErrorCode.INVALID_TOKEN);
         }
     }
 

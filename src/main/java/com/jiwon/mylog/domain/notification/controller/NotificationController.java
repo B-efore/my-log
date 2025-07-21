@@ -58,7 +58,7 @@ public class NotificationController {
             HttpServletResponse response) {
 
         if (accessToken == null || !jwtService.validateToken(accessToken)) {
-            throw new UnauthorizedException(ErrorCode.UNAUTHORIZED);
+            throw new UnauthorizedException(ErrorCode.INVALID_TOKEN);
         }
 
         response.setHeader("Cache-Control", "no-cache");
