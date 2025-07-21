@@ -2,7 +2,6 @@ package com.jiwon.mylog.global.redis;
 
 import java.time.Duration;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
@@ -15,6 +14,9 @@ public class RedisUtil {
 
     private final StringRedisTemplate redisTemplate;
 
+    /**
+     * 이메일 관련
+     */
     public String getData(String key) {
         return redisTemplate.opsForValue().get(key);
     }
@@ -44,9 +46,7 @@ public class RedisUtil {
     }
 
     public Long increasePostView(String key, String hashKey, String view) {
-        if (!redisTemplate.opsForHash().hasKey(key, hashKey)) {
-            redisTemplate.opsForHash().put(key, hashKey, view);
-        }
+        redisTemplate.opsForHash().putIfAbsent(key, hashKey, view);
         return redisTemplate.opsForHash().increment(key, hashKey, 1);
     }
 
@@ -61,5 +61,9 @@ public class RedisUtil {
                         e -> Long.parseLong(e.getKey().toString()),
                         e -> Integer.parseInt(e.getValue().toString())
                 ));
+    }
+
+    public void clearAll() {
+        redisTemplate.getConnectionFactory().getConnection().serverCommands().flushAll();
     }
 }
