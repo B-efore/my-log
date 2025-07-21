@@ -7,6 +7,7 @@ import com.jiwon.mylog.domain.category.dto.response.CategoryListResponse;
 import com.jiwon.mylog.domain.category.dto.response.CategoryResponse;
 import com.jiwon.mylog.domain.category.dto.request.CategoryRequest;
 import com.jiwon.mylog.domain.category.repository.CategoryRepository;
+import com.jiwon.mylog.domain.post.repository.PostRepository;
 import com.jiwon.mylog.domain.user.entity.User;
 import com.jiwon.mylog.global.common.error.exception.DuplicateException;
 import com.jiwon.mylog.global.common.error.ErrorCode;
@@ -24,6 +25,7 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+    private final PostRepository postRepository;
 
     @Transactional
     public CategoryResponse createCategory(Long userId, CategoryRequest categoryRequest) {
@@ -48,6 +50,7 @@ public class CategoryService {
     @Transactional
     public void deleteCategory(Long userId, Long categoryId) {
         Category category = getUserCategory(userId, categoryId);
+        postRepository.updatePostCategory(categoryId);
         categoryRepository.delete(category);
     }
 

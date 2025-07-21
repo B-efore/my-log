@@ -12,8 +12,10 @@ import com.jiwon.mylog.global.common.config.QueryDSLConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,11 +24,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.*;
 
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@ActiveProfiles("test")
 @DataJpaTest
 @Import({QueryDSLConfig.class, JpaAuditingConfiguration.class})
 class CategoryRepositoryTest {
 
-    private static final List<String> DEFAULT_CATEGORY_NAMES = List.of("category1", "category2", "category3");
+    private static final List<String> DEFAULT_CATEGORY_NAMES =
+            List.of("category1", "category2", "category3");
 
     @Autowired
     private UserRepository userRepository;
@@ -84,10 +89,12 @@ class CategoryRepositoryTest {
 
         User savedUser = userRepository.save(user);
         List<Category> savedCategories = saveCategories(user, DEFAULT_CATEGORY_NAMES);
+        Category category1 = savedCategories.get(0);
+        Category category2 = savedCategories.get(1);
 
-        Post post1 = TestDataFactory.createPost("title1", "content", user, savedCategories.get(0));
-        Post post2 = TestDataFactory.createPost("title2", "content", user, savedCategories.get(0));
-        Post post3 = TestDataFactory.createPost("title3", "content", user, savedCategories.get(1));
+        Post post1 = createPostWithCategory(user, category1);
+        Post post2 = createPostWithCategory(user, category1);
+        Post post3 = createPostWithCategory(user, category2);
 
         postRepository.saveAll(List.of(post1, post2, post3));
 
@@ -113,10 +120,12 @@ class CategoryRepositoryTest {
 
         User savedUser = userRepository.save(user);
         List<Category> savedCategories = saveCategories(user, DEFAULT_CATEGORY_NAMES);
+        Category category1 = savedCategories.get(0);
+        Category category2 = savedCategories.get(1);
 
-        Post post1 = TestDataFactory.createPost("title1", "content", user, savedCategories.get(0));
-        Post post2 = TestDataFactory.createPost("title2", "content", user, savedCategories.get(0));
-        Post post3 = TestDataFactory.createPost("title3", "content", user, savedCategories.get(1));
+        Post post1 = createPostWithCategory(user, category1);
+        Post post2 = createPostWithCategory(user, category1);
+        Post post3 = createPostWithCategory(user, category2);
         Post post4 = TestDataFactory.createPost("title4", "content", user, null);
         Post post5 = TestDataFactory.createPost("title5", "content", user, null);
 
@@ -145,15 +154,17 @@ class CategoryRepositoryTest {
 
         User savedUser = userRepository.save(user);
         List<Category> savedCategories = saveCategories(user, DEFAULT_CATEGORY_NAMES);
+        Category category1 = savedCategories.get(0);
+        Category category2 = savedCategories.get(1);
 
-        Post post1 = TestDataFactory.createPost("title1", "content", user, savedCategories.get(0));
-        Post post2 = TestDataFactory.createPost("title2", "content", user, savedCategories.get(0));
-        Post post3 = TestDataFactory.createPost("title3", "content", user, savedCategories.get(1));
+        Post post1 = createPostWithCategory(user, category1);
+        Post post2 = createPostWithCategory(user, category1);
+        Post post3 = createPostWithCategory(user, category2);
         Post post4 = TestDataFactory.createPost("title4", "content", user, null);
         Post post5 = TestDataFactory.createPost("title5", "content", user, null);
 
         post1.delete();
-        post2.delete();
+        post1.getCategory().decrementUsage();
 
         postRepository.saveAll(List.of(post1, post2, post3, post4, post5));
 
@@ -165,11 +176,19 @@ class CategoryRepositoryTest {
         assertThat(result)
                 .extracting(CategoryCountResponse::getName, CategoryCountResponse::getPostCount)
                 .containsExactly(
-                        tuple("category1", 0L),
+                        tuple("category1", 1L),
                         tuple("category2", 1L),
                         tuple("category3", 0L),
                         tuple("미분류", 2L)
                 );
+    }
+
+    private Post createPostWithCategory(User user, Category category) {
+        Post post = TestDataFactory.createPost("title1", "content", user, category);
+        if (category != null) {
+            category.incrementUsage();
+        }
+        return post;
     }
 
     private List<Category> saveCategories(User user, List<String> names) {
