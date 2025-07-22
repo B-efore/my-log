@@ -9,10 +9,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
+
+    @Modifying
+    @Query("delete from Notification n where n.isRead = true and n.createdAt < :date")
+    void deleteAllByCreatedAtBefore(@Param("date") LocalDateTime date);
 
     @Modifying(clearAutomatically = true)
     @Query("update Notification n set n.isRead = true where n.receiver.id = :receiverId and n.isRead = false")
