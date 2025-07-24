@@ -6,11 +6,7 @@ import com.jiwon.mylog.domain.item.repository.ItemRepository;
 import com.jiwon.mylog.domain.item.repository.UserItemRepository;
 import com.jiwon.mylog.domain.point.service.PointService;
 import com.jiwon.mylog.global.common.entity.PageResponse;
-import com.jiwon.mylog.domain.post.entity.Post;
-import com.jiwon.mylog.domain.post.repository.PostRepository;
 import com.jiwon.mylog.domain.user.dto.request.UserProfileRequest;
-import com.jiwon.mylog.domain.user.dto.response.UserActivitiesResponse;
-import com.jiwon.mylog.domain.user.dto.response.UserMainResponse;
 import com.jiwon.mylog.domain.user.dto.response.UserResponse;
 import com.jiwon.mylog.domain.user.entity.User;
 import com.jiwon.mylog.domain.user.repository.UserRepository;
@@ -23,7 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -31,7 +26,6 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final PostRepository postRepository;
     private final ItemRepository itemRepository;
     private final UserItemRepository userItemRepository;
     private final PointService pointService;
@@ -52,23 +46,6 @@ public class UserService {
                 userProfileRequest.getBio()
         );
         return UserResponse.fromUser(user);
-    }
-
-    @Transactional(readOnly = true)
-    public UserMainResponse getUserMain(Long userId) {
-        User user = userRepository.findUserWithProfileImage(userId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
-        List<Post> pinnedPosts = postRepository.findPinnedPostsByUserId(userId);
-        return UserMainResponse.fromUser(user, pinnedPosts);
-
-    }
-
-    @Transactional(readOnly = true)
-    public UserActivitiesResponse getUserActivity(Long userId, LocalDate startDate, LocalDate endDate) {
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException(ErrorCode.NOT_FOUND_USER);
-        }
-        return postRepository.findUserActivities(userId, startDate, endDate);
     }
 
     @Transactional(readOnly = true)

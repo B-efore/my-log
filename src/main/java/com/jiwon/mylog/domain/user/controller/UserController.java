@@ -1,5 +1,6 @@
 package com.jiwon.mylog.domain.user.controller;
 
+import com.jiwon.mylog.domain.user.service.UserBlogService;
 import com.jiwon.mylog.global.common.entity.PageResponse;
 import com.jiwon.mylog.domain.user.dto.request.UserProfileRequest;
 import com.jiwon.mylog.domain.user.dto.response.UserActivitiesResponse;
@@ -36,6 +37,7 @@ import java.time.LocalDate;
 public class UserController {
 
     private final UserService userService;
+    private final UserBlogService userBlogService;
 
     @GetMapping("/me")
     @Operation(
@@ -74,26 +76,9 @@ public class UserController {
                     @ApiResponse(responseCode = "404", description = "회원 정보를 찾을 수 없음")
             })
     public ResponseEntity<UserMainResponse> getUserMain(@PathVariable("userId") Long userId) {
-        UserMainResponse response = userService.getUserMain(userId);
+        UserMainResponse response = userBlogService.getUserMain(userId);
         return ResponseEntity.ok(response);
 
-    }
-
-    @GetMapping("/{userId}/activity")
-    @Operation(
-            summary = "유저 활동 내역 조회 (활동 날짜 - 횟수)",
-            description = "일정 기간 동안의 유저 활동 일자와 활동 횟수를 조회한다.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "유저 활동 내역 조회 성공"),
-                    @ApiResponse(responseCode = "404", description = "회원 정보를 찾을 수 없음")
-            }
-    )
-    public ResponseEntity<UserActivitiesResponse> getUserActivity(
-            @PathVariable("userId") Long userId,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
-        UserActivitiesResponse response = userService.getUserActivity(userId, startDate, endDate);
-        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/search")

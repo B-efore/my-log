@@ -1,5 +1,6 @@
 package com.jiwon.mylog.domain.post.repository;
 
+import com.jiwon.mylog.domain.post.dto.response.PinnedPostResponse;
 import com.jiwon.mylog.domain.post.entity.Post;
 
 import java.util.List;
@@ -51,6 +52,8 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
     @Query("select p from Post p left join fetch p.postTags pt left join fetch pt.tag where p.id = :postId")
     Optional<Post> findWithTags(@Param("postId") Long postId);
 
-    @Query("select p from Post p where p.user.id = :userId and p.pinned = true and p.deletedAt is null")
-    List<Post> findPinnedPostsByUserId(@Param("userId") Long userId);
+    @Query("select new com.jiwon.mylog.domain.post.dto.response.PinnedPostResponse(p.id, p.title, p.contentPreview) " +
+            "from Post p " +
+            "where p.user.id = :userId and p.pinned = true and p.deletedAt is null")
+    List<PinnedPostResponse> findPinnedPostsByUserId(@Param("userId") Long userId);
 }

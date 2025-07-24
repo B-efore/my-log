@@ -2,6 +2,7 @@ package com.jiwon.mylog.domain.user.dto.response;
 
 import com.jiwon.mylog.domain.post.dto.response.PinnedPostResponse;
 import com.jiwon.mylog.domain.post.entity.Post;
+import com.jiwon.mylog.domain.readme.dto.ReadmeResponse;
 import com.jiwon.mylog.domain.user.entity.User;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,17 +17,24 @@ public class UserMainResponse {
     private final String username;
     private final String bio;
     private final String imageKey;
+    private final ReadmeResponse readme;
     private final List<PinnedPostResponse> pinnedPosts;
+    private final List<UserActivityResponse> activities;
 
-    public static UserMainResponse fromUser(User user, List<Post> pinnedPosts) {
+    public static UserMainResponse fromUser(
+            User user,
+            ReadmeResponse readme,
+            List<PinnedPostResponse> pinnedPosts,
+            List<UserActivityResponse> activities
+    ) {
         return UserMainResponse.builder()
                 .userId(user.getId())
                 .username(user.getUsername())
                 .bio(user.getBio())
                 .imageKey(user.getProfileImage() == null ? "" : user.getProfileImage().getFileKey())
-                .pinnedPosts(pinnedPosts.stream()
-                        .map(PinnedPostResponse::fromPost)
-                        .collect(Collectors.toList()))
+                .readme(readme)
+                .pinnedPosts(pinnedPosts)
+                .activities(activities)
                 .build();
     }
 }

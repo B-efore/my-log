@@ -146,7 +146,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
     }
 
     @Override
-    public UserActivitiesResponse findUserActivities(Long userId, LocalDate start, LocalDate end) {
+    public List<UserActivityResponse> findUserActivities(Long userId, LocalDate start, LocalDate end) {
         DateTemplate<Date> formattedDate = Expressions.dateTemplate(
                 Date.class,
                 "FUNCTION('DATE', {0})",
@@ -171,7 +171,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
                 .orderBy(formattedDate.asc())
                 .fetch();
 
-        return new UserActivitiesResponse(activities);
+        return activities;
     }
 
     private PageImpl<Post> createResult(Pageable pageable, BooleanBuilder builder) {

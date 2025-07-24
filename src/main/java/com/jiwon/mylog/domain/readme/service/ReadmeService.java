@@ -43,11 +43,4 @@ public class ReadmeService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND));
         readmeRepository.delete(readme);
     }
-
-    @Transactional(readOnly = true)
-    public ReadmeResponse getReadme(Long userId) {
-        Readme readme = readmeRepository.findByUserId(userId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND));
-        return new ReadmeResponse(readme.getContent());
-    }
 }
