@@ -23,16 +23,16 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
     @Query("update Post p set p.category = null where p.category.id = :categoryId")
     void updatePostCategory(@Param("categoryId") Long categoryId);
 
-    @Query(value = "select p from Post p where p.deletedAt is null and p.isNotice = true order by p.createdAt desc",
-            countQuery = "select count(p) from Post p where p.deletedAt is null and p.isNotice = true")
+    @Query(value = "select p from Post p where p.deletedAt is null and p.type = 'NOTICE' order by p.createdAt desc",
+            countQuery = "select count(p) from Post p where p.deletedAt is null and p.type = 'NOTICE'")
     Page<Post> findAllNotice(Pageable pageable);
 
     @Query(value = "select p from Post p " +
             "join fetch p.user u " +
             "left join fetch u.profileImage " +
-            "where p.deletedAt is null and p.visibility = 'PUBLIC' and p.isNotice = false " +
+            "where p.deletedAt is null and p.visibility = 'PUBLIC' and p.type = 'NORMAL' " +
             "order by p.createdAt desc",
-            countQuery = "select count(p) from Post p where p.deletedAt is null and p.visibility = 'PUBLIC' and p.isNotice = false")
+            countQuery = "select count(p) from Post p where p.deletedAt is null and p.visibility = 'PUBLIC' and p.type = 'NORMAL'")
     Page<Post> findAll(Pageable pageable);
 
     @Query(value = "select p from Post p left join fetch p.category left join fetch p.postTags pt left join fetch pt.tag t where p.deletedAt is null and p.user.id = :userId",

@@ -2,6 +2,7 @@ package com.jiwon.mylog.domain.post.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.jiwon.mylog.domain.post.entity.Post;
+import com.jiwon.mylog.domain.post.entity.PostType;
 import com.jiwon.mylog.global.common.enums.Visibility;
 import com.jiwon.mylog.domain.category.dto.response.CategoryResponse;
 import com.jiwon.mylog.domain.comment.dto.response.CommentResponse;
@@ -30,13 +31,13 @@ public class PostDetailResponse {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
     private boolean pinned;
-    private boolean isNotice;
+    private PostType type;
     private UserResponse user;
     private CategoryResponse category;
     private List<TagResponse> tags;
     private List<CommentResponse> comments;
 
-    public PostDetailResponse(Long postId, String title, String content, String contentPreview, int views, PostStatus postStatus, Visibility visibility, LocalDateTime createdAt, boolean pinned, boolean isNotice, UserResponse user, CategoryResponse category) {
+    public PostDetailResponse(Long postId, String title, String content, String contentPreview, int views, PostStatus postStatus, Visibility visibility, LocalDateTime createdAt, boolean pinned, PostType type, UserResponse user, CategoryResponse category) {
         this.postId = postId;
         this.title = title;
         this.content = content;
@@ -46,7 +47,7 @@ public class PostDetailResponse {
         this.visibility = visibility;
         this.createdAt = createdAt;
         this.pinned = pinned;
-        this.isNotice = isNotice;
+        this.type = type;
         this.user = user;
         this.category = category;
     }
@@ -67,7 +68,7 @@ public class PostDetailResponse {
                         .toList())
                 .createdAt(post.getCreatedAt())
                 .pinned(post.isPinned())
-                .isNotice(post.isNotice())
+                .type(post.getType())
                 .comments(post.getComments().stream()
                         .map(comment -> CommentResponse.fromComment(comment))
                         .toList())

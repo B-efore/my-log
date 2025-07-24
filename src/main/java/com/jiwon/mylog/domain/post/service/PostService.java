@@ -47,19 +47,19 @@ public class PostService {
     @Caching(
             put = @CachePut(value = "post::detail", key = "#result.postId", unless = "#result.postId == null"),
             evict = {
-                    @CacheEvict(value = "post::notice", allEntries = true, condition = "#isNotice"),
-                    @CacheEvict(value = "post::main", allEntries = true, condition = "!#isNotice"),
-                    @CacheEvict(value = "post::list", allEntries = true, condition = "!#isNotice"),
-                    @CacheEvict(value = "post::filter", allEntries = true, condition = "!#isNotice")
+                    @CacheEvict(value = "post::notice", allEntries = true, condition = "#postRequest.type.equals('공지')"),
+                    @CacheEvict(value = "post::main", allEntries = true, condition = "#postRequest.type.equals('일반 글')"),
+                    @CacheEvict(value = "post::list", allEntries = true, condition = "#postRequest.type.equals('일반 글')"),
+                    @CacheEvict(value = "post::filter", allEntries = true, condition = "#postRequest.type.equals('일반 글')")
             }
     )
     @Transactional
-    public PostDetailResponse createPost(Long userId, PostRequest postRequest, boolean isNotice) {
+    public PostDetailResponse createPost(Long userId, PostRequest postRequest) {
         User user = getUserById(userId);
         Category category = getCategoryById(userId, postRequest.getCategoryId());
         List<Tag> tags = tagService.getTagsById(user, postRequest.getTagRequests());
 
-        Post post = Post.create(postRequest, isNotice, user, category, tags);
+        Post post = Post.create(postRequest, user, category, tags);
         Post savedPost = postRepository.save(post);
 
         increaseRelatedPostInfo(category, tags);
@@ -71,14 +71,14 @@ public class PostService {
     @Caching(
             put = @CachePut(value = "post::detail", key = "#postId", unless = "#postId == null"),
             evict = {
-                    @CacheEvict(value = "post::notice", allEntries = true, condition = "#isNotice"),
-                    @CacheEvict(value = "post::main", allEntries = true, condition = "!#isNotice"),
-                    @CacheEvict(value = "post::list", allEntries = true, condition = "!#isNotice"),
-                    @CacheEvict(value = "post::filter", allEntries = true, condition = "!#isNotice")
+                    @CacheEvict(value = "post::notice", allEntries = true, condition = "#postRequest.type.equals('공지')"),
+                    @CacheEvict(value = "post::main", allEntries = true, condition = "#postRequest.type.equals('일반 글')"),
+                    @CacheEvict(value = "post::list", allEntries = true, condition = "#postRequest.type.equals('일반 글')"),
+                    @CacheEvict(value = "post::filter", allEntries = true, condition = "#postRequest.type.equals('일반 글')")
             }
     )
     @Transactional
-    public PostDetailResponse updatePost(Long userId, Long postId, PostRequest postRequest, boolean isNotice) {
+    public PostDetailResponse updatePost(Long userId, Long postId, PostRequest postRequest) {
         Post post = getPostWithDetails(postId);
         validateOwner(post, userId);
 

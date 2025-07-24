@@ -2,6 +2,7 @@ package com.jiwon.mylog.domain.post.service;
 
 import com.jiwon.mylog.domain.post.dto.request.PostRequest;
 import com.jiwon.mylog.domain.post.dto.response.PostDetailResponse;
+import com.jiwon.mylog.domain.post.entity.PostType;
 import com.jiwon.mylog.domain.post.repository.PostRepository;
 import com.jiwon.mylog.global.common.error.exception.NotFoundException;
 import org.assertj.core.api.Assertions;
@@ -51,13 +52,13 @@ class PostServiceCacheTest {
         Long userId = 1L;
         Long categoryId = 1L;
         Pageable pageable = PageRequest.of(0, 10);
-        PostRequest postRequest = new PostRequest("title", "content", "preview", "공개", 1L, List.of(), true);
+        PostRequest postRequest = new PostRequest("title", "content", "preview", "공개", 1L, List.of(), true, PostType.NORMAL.getStatus());
 
         postService.getUserPosts(userId, pageable);
         postService.getPostsByCategoryAndTags(userId, categoryId, List.of(), pageable);
 
         // when
-        PostDetailResponse post = postService.createPost(userId, postRequest, false);
+        PostDetailResponse post = postService.createPost(userId, postRequest);
         Long postId = post.getPostId();
 
         postService.getPost(postId);
@@ -81,13 +82,13 @@ class PostServiceCacheTest {
         Long postId = 1L;
         Long categoryId = 1L;
         Pageable pageable = PageRequest.of(0, 10);
-        PostRequest postRequest = new PostRequest("title", "content", "preview", "공개", 1L, List.of(), true);
+        PostRequest postRequest = new PostRequest("title", "content", "preview", "공개", 1L, List.of(), true, PostType.NORMAL.getStatus());
 
         postService.getUserPosts(userId, pageable); // 캐시 생성
         postService.getPostsByCategoryAndTags(userId, categoryId, List.of(), pageable); // 캐시 생성
 
         // when
-        PostDetailResponse post = postService.updatePost(userId, postId, postRequest, false);
+        PostDetailResponse post = postService.updatePost(userId, postId, postRequest);
         postService.getPost(postId);
         postService.getUserPosts(userId, pageable); // 캐시 다시 생성
         postService.getPostsByCategoryAndTags(userId, categoryId, List.of(), pageable); // 캐시 다시 생성

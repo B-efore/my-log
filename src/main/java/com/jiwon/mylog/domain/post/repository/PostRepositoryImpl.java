@@ -75,7 +75,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
                         POST.visibility,
                         POST.createdAt,
                         POST.pinned,
-                        POST.isNotice,
+                        POST.type,
                         Projections.constructor(UserResponse.class,
                                 USER.id,
                                 USER.username,

@@ -48,7 +48,7 @@ public class AdminNoticeController {
     public ResponseEntity<PostDetailResponse> createNotice(
             @LoginUser Long userId,
             @Valid @RequestBody PostRequest postRequest) {
-        PostDetailResponse response = postService.createPost(userId, postRequest, true);
+        PostDetailResponse response = postService.createPost(userId, postRequest);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
@@ -65,7 +65,7 @@ public class AdminNoticeController {
             @LoginUser Long userId,
             @PathVariable("postId") Long postId,
             @Valid @RequestBody PostRequest postRequest) {
-        PostDetailResponse response = postService.updatePost(userId, postId, postRequest, true);
+        PostDetailResponse response = postService.updatePost(userId, postId, postRequest);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
