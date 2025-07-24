@@ -1,4 +1,4 @@
-package com.jiwon.mylog.domain.follow.entity;
+package com.jiwon.mylog.domain.readme.entity;
 
 import com.jiwon.mylog.domain.user.entity.User;
 import jakarta.persistence.Column;
@@ -8,41 +8,52 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
-@Getter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
-@Entity
+@Getter
 @EntityListeners(AuditingEntityListener.class)
-public class Follow {
+@Entity
+public class Readme {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private User fromUser;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", unique = true)
+    private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private User toUser;
+    @Column(nullable = false, columnDefinition = "LONGTEXT")
+    private String content;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    public static Follow follow(User fromUser, User toUser) {
-        return Follow.builder()
-                .fromUser(fromUser)
-                .toUser(toUser)
+    @LastModifiedDate
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
+    public static Readme from(User user, String content) {
+        return Readme.builder()
+                .user(user)
+                .content(content)
                 .build();
+    }
+
+    public void updateContent(String content) {
+        this.content = content;
     }
 }

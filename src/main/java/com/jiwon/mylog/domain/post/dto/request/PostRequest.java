@@ -35,4 +35,7 @@ public class PostRequest {
     private List<@Valid TagRequest> tagRequests = new ArrayList<>();
 
     private boolean pinned;
+
+    @NotBlank(message = "게시글 타입을 지정해주세요.")
+    private String type;
 }

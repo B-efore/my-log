@@ -17,7 +17,7 @@ public class PostViewScheduler {
 
     private final PostRepository postRepository;
     private final RedisUtil redisUtil;
-    private static final String REDIS_KEY = "post:view:count";
+    private static final String REDIS_KEY = "post:view:count:";
 
     @Scheduled(fixedRate = 10 * 60 * 1000L)
     @Transactional

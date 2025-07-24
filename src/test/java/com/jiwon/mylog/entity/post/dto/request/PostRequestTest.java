@@ -1,6 +1,7 @@
 package com.jiwon.mylog.entity.post.dto.request;
 
 import com.jiwon.mylog.domain.post.dto.request.PostRequest;
+import com.jiwon.mylog.domain.post.entity.PostType;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -30,7 +31,7 @@ class PostRequestTest {
     @MethodSource("titles")
     void validateTitleLength(String title, boolean validated) {
         // given
-        PostRequest request = new PostRequest(title, "content", "preview", "visibility", 1L, null, false);
+        PostRequest request = new PostRequest(title, "content", "preview", "visibility", 1L, null, false, PostType.NORMAL.getStatus());
 
         // when
         Set<ConstraintViolation<PostRequest>> violations = validator.validate(request);
@@ -55,7 +56,7 @@ class PostRequestTest {
     @ValueSource(strings = {"", " "})
     void validateTitleIsNotBlank(String title) {
         // given
-        PostRequest request = new PostRequest(title, "content", "preview", "visibility", 1L, null, false);
+        PostRequest request = new PostRequest(title, "content", "preview", "visibility", 1L, null, false, PostType.NORMAL.getStatus());
 
         // when
         Set<ConstraintViolation<PostRequest>> violations = validator.validate(request);
@@ -69,7 +70,7 @@ class PostRequestTest {
     @ValueSource(strings = {"", " "})
     void validateContentIsNotBlank(String content) {
         // given
-        PostRequest request = new PostRequest("title", content, "preview", "visibility", 1L, null, false);
+        PostRequest request = new PostRequest("title", content, "preview", "visibility", 1L, null, false, PostType.NORMAL.getStatus());
 
         // when
         Set<ConstraintViolation<PostRequest>> violations = validator.validate(request);
@@ -83,7 +84,7 @@ class PostRequestTest {
     @ValueSource(strings = {"", " "})
     void validateVisibilityIsNotBlank(String visibility) {
         // given
-        PostRequest request = new PostRequest("title", "content", "preview", visibility, 1L, null, false);
+        PostRequest request = new PostRequest("title", "content", "preview", visibility, 1L, null, false, PostType.NORMAL.getStatus());
 
         // when
         Set<ConstraintViolation<PostRequest>> violations = validator.validate(request);
@@ -97,7 +98,7 @@ class PostRequestTest {
     @MethodSource("contentPreviews")
     void validateContentPreviewLength(String contentPreview, boolean validated) {
         // given
-        PostRequest request = new PostRequest("title", "content", contentPreview, "visibility", 1L, null, false);
+        PostRequest request = new PostRequest("title", "content", contentPreview, "visibility", 1L, null, false, PostType.NORMAL.getStatus());
 
         // when
         Set<ConstraintViolation<PostRequest>> violations = validator.validate(request);

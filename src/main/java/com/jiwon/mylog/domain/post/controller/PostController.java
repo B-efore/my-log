@@ -49,7 +49,7 @@ public class PostController {
     public ResponseEntity<PostDetailResponse> createPost(
             @LoginUser Long userId,
             @Valid @RequestBody PostRequest postRequest) {
-        PostDetailResponse response = postService.createPost(userId, postRequest, false);
+        PostDetailResponse response = postService.createPost(userId, postRequest);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
@@ -66,7 +66,7 @@ public class PostController {
             @LoginUser Long userId,
             @PathVariable("postId") Long postId,
             @Valid @RequestBody PostRequest postRequest) {
-        PostDetailResponse response = postService.updatePost(userId, postId, postRequest, false);
+        PostDetailResponse response = postService.updatePost(userId, postId, postRequest);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

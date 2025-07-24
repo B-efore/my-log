@@ -1,6 +1,8 @@
 package com.jiwon.mylog.domain.event;
 
 import com.jiwon.mylog.domain.event.dto.CommentCreatedEvent;
+import com.jiwon.mylog.domain.event.dto.FollowCreatedEvent;
+import com.jiwon.mylog.domain.event.dto.FollowDeletedEvent;
 import com.jiwon.mylog.domain.event.dto.LikeCreatedEvent;
 import com.jiwon.mylog.domain.notification.entity.Notification;
 import com.jiwon.mylog.domain.notification.repository.NotificationRepository;
@@ -29,8 +31,7 @@ public class NotificationEventListener {
     @EventListener
     public void handleCommentCreated(CommentCreatedEvent event) {
         Long receiverId = event.getPostWriterId();
-        User receiver = userRepository.findById(receiverId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
+        User receiver = getReceiver(receiverId);
 
         Notification notification = Notification.create(
                 receiver,
@@ -40,19 +41,14 @@ public class NotificationEventListener {
         );
         notificationRepository.save(notification);
 
-        try {
-            notificationService.sendNotification(receiverId, notification);
-        } catch(Exception e) {
-            log.warn("SSE 전송 실패");
-        }
+        sendSSE(receiverId, notification);
     }
 
     @Transactional
     @EventListener
     public void handleLikeCreated(LikeCreatedEvent event) {
         Long receiverId = event.getPostWriterId();
-        User receiver = userRepository.findById(receiverId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
+        User receiver = getReceiver(receiverId);
 
         Notification notification = Notification.create(
                 receiver,
@@ -62,6 +58,49 @@ public class NotificationEventListener {
         );
         notificationRepository.save(notification);
 
+        sendSSE(receiverId, notification);
+    }
+
+    @Transactional
+    @EventListener
+    public void handleFollowCreated(FollowCreatedEvent event) {
+        Long receiverId = event.getReceiverId();
+        User receiver = getReceiver(event.getReceiverId());
+
+        Notification notification = Notification.create(
+                receiver,
+                event.getFollowerName() + "왹이 잡 았다! 너 잡혔다!",
+                "/" + event.getFollowerId(),
+                NotificationType.FOLLOW
+        );
+        notificationRepository.save(notification);
+
+        sendSSE(receiverId, notification);
+    }
+
+    @Transactional
+    @EventListener
+    public void handleUnFollowCreated(FollowDeletedEvent event) {
+        Long receiverId = event.getReceiverId();
+        User receiver = getReceiver(receiverId);
+
+        Notification notification = Notification.create(
+                receiver,
+                "오오자비로운" + event.getFollowerName() + "왹께서널놓아주시니",
+                "/" + event.getFollowerId(),
+                NotificationType.FOLLOW
+        );
+        notificationRepository.save(notification);
+
+        sendSSE(receiverId, notification);
+    }
+
+    private User getReceiver(Long receiverId) {
+        return userRepository.findById(receiverId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
+    }
+
+    private void sendSSE(Long receiverId, Notification notification) {
         try {
             notificationService.sendNotification(receiverId, notification);
         } catch(Exception e) {

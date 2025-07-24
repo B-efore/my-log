@@ -2,7 +2,7 @@ package com.jiwon.mylog.domain.post.repository;
 
 import com.jiwon.mylog.domain.post.dto.response.PostDetailResponse;
 import com.jiwon.mylog.domain.post.entity.Post;
-import com.jiwon.mylog.domain.user.dto.response.UserActivitiesResponse;
+import com.jiwon.mylog.domain.user.dto.response.UserActivityResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -15,5 +15,5 @@ public interface PostRepositoryCustom {
     Page<Post> findByTags(Long userId, List<Long> tagIds, Pageable pageable);
     Optional<PostDetailResponse> findPostDetail(Long postId);
 
-    UserActivitiesResponse findUserActivities(Long userId, LocalDate start, LocalDate end);
+    List<UserActivityResponse> findUserActivities(Long userId, LocalDate start, LocalDate end);
 }

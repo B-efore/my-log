@@ -1,5 +1,7 @@
 package com.jiwon.mylog.global.security.auth.resolver;
 
+import com.jiwon.mylog.global.common.error.ErrorCode;
+import com.jiwon.mylog.global.common.error.exception.UnauthorizedException;
 import com.jiwon.mylog.global.security.auth.annotation.LoginUser;
 import com.jiwon.mylog.global.security.jwt.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,7 +35,7 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
         String token = jwtService.getAccessToken(header);
 
         if (token == null || !jwtService.validateToken(token)) {
-            throw new IllegalArgumentException("잘못된 토큰입니다.");
+            throw new UnauthorizedException(ErrorCode.INVALID_TOKEN);
         }
 
         return jwtService.getUserId(token);

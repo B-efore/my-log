@@ -1,5 +1,7 @@
 package com.jiwon.mylog.domain.follow.service;
 
+import com.jiwon.mylog.domain.event.dto.FollowCreatedEvent;
+import com.jiwon.mylog.domain.event.dto.FollowDeletedEvent;
 import com.jiwon.mylog.domain.follow.dto.FollowCountResponse;
 import com.jiwon.mylog.domain.follow.dto.FollowListResponse;
 import com.jiwon.mylog.domain.follow.dto.FollowResponse;
@@ -10,6 +12,7 @@ import com.jiwon.mylog.domain.user.repository.UserRepository;
 import com.jiwon.mylog.global.common.error.ErrorCode;
 import com.jiwon.mylog.global.common.error.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +22,7 @@ import java.util.List;
 @Service
 public class FollowService {
 
+    private final ApplicationEventPublisher eventPublisher;
     private final UserRepository userRepository;
     private final FollowRepository followRepository;
 
@@ -33,6 +37,16 @@ public class FollowService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
 
         followRepository.save(Follow.follow(fromUser, toUser));
+
+        if (toUser.getId() != null) {
+            eventPublisher.publishEvent(
+                    new FollowCreatedEvent(
+                            toUser.getId(),
+                            fromUser.getId(),
+                            fromUser.getUsername()
+                    )
+            );
+        }
     }
 
     @Transactional
@@ -44,6 +58,16 @@ public class FollowService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND));
 
         followRepository.delete(follow);
+
+        if (toUserId != null) {
+            eventPublisher.publishEvent(
+                    new FollowDeletedEvent(
+                            toUserId,
+                            fromUserId,
+                            follow.getFromUser().getUsername()
+                    )
+            );
+        }
     }
 
     @Transactional(readOnly = true)

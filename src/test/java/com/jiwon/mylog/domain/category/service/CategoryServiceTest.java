@@ -1,13 +1,13 @@
-package com.jiwon.mylog.service;
+package com.jiwon.mylog.domain.category.service;
 
-import com.jiwon.mylog.domain.category.service.CategoryService;
 import com.jiwon.mylog.domain.category.dto.request.CategoryRequest;
-import com.jiwon.mylog.domain.user.entity.User;
-import com.jiwon.mylog.global.common.error.exception.DuplicateException;
-import com.jiwon.mylog.global.common.error.ErrorCode;
-import com.jiwon.mylog.global.common.error.exception.NotFoundException;
+import com.jiwon.mylog.domain.category.entity.Category;
 import com.jiwon.mylog.domain.category.repository.CategoryRepository;
+import com.jiwon.mylog.domain.user.entity.User;
 import com.jiwon.mylog.domain.user.repository.UserRepository;
+import com.jiwon.mylog.global.common.error.ErrorCode;
+import com.jiwon.mylog.global.common.error.exception.DuplicateException;
+import com.jiwon.mylog.global.common.error.exception.NotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,9 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class CategoryServiceTest {
@@ -49,7 +48,6 @@ class CategoryServiceTest {
         assertThatThrownBy(() -> categoryService.createCategory(userId, request))
                 .isInstanceOf(DuplicateException.class)
                 .hasMessage(ErrorCode.DUPLICATE_CATEGORY.getMessage());
-
     }
 
     @DisplayName("존재하지 않는 카테고리 ID로 수정을 요청할 시 예외가 발생한다.")
@@ -83,5 +81,20 @@ class CategoryServiceTest {
         assertThatThrownBy(() -> categoryService.updateCategory(userId, categoryId, request))
                 .isInstanceOf(DuplicateException.class)
                 .hasMessage(ErrorCode.DUPLICATE_CATEGORY.getMessage());
+    }
+
+    @DisplayName("존재하지 않는 카테고리를 삭제할 시 예외가 발생한다.")
+    @Test
+    void delete() {
+        // given
+        Long userId = 1L;
+        Long categoryId = 1L;
+
+        given(categoryRepository.findByUserIdAndId(userId, categoryId)).willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> categoryService.deleteCategory(userId, categoryId))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage(ErrorCode.NOT_FOUND_CATEGORY.getMessage());
     }
 }

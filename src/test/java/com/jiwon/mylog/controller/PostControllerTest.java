@@ -2,6 +2,7 @@ package com.jiwon.mylog.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jiwon.mylog.domain.post.controller.PostController;
+import com.jiwon.mylog.domain.post.entity.PostType;
 import com.jiwon.mylog.global.common.enums.Visibility;
 import com.jiwon.mylog.domain.category.dto.response.CategoryResponse;
 import com.jiwon.mylog.domain.post.entity.PostStatus;
@@ -50,7 +51,7 @@ class PostControllerTest {
     @Test
     void createPost() throws Exception {
         // given
-        PostRequest request = new PostRequest("title", "content", "contentPreview", "공개", 1L, null, false);
+        PostRequest request = new PostRequest("title", "content", "contentPreview", "공개", 1L, null, false, PostType.NORMAL.getStatus());
         UserResponse user = createUser(1L, "testUser");
         CategoryResponse category = createCategory(1L, "category");
         List<TagResponse> tags = List.of(
@@ -60,7 +61,7 @@ class PostControllerTest {
 
         given(resolver.supportsParameter(any())).willReturn(true);
         given(resolver.resolveArgument(any(), any(), any(), any())).willReturn(1L);
-        given(postService.createPost(any(Long.class), any(PostRequest.class), any(Boolean.class))).willReturn(response);
+        given(postService.createPost(any(Long.class), any(PostRequest.class))).willReturn(response);
 
         // when & then
         mockMvc.perform(post("/api/posts")

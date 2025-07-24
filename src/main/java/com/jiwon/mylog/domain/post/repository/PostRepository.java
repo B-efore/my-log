@@ -1,5 +1,6 @@
 package com.jiwon.mylog.domain.post.repository;
 
+import com.jiwon.mylog.domain.post.dto.response.PinnedPostResponse;
 import com.jiwon.mylog.domain.post.entity.Post;
 
 import java.util.List;
@@ -19,16 +20,20 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
     @Query("update Post p set p.views = :view where p.id = :postId")
     void updatePostView(@Param("postId") Long postId, @Param("view") int view);
 
-    @Query(value = "select p from Post p where p.deletedAt is null and p.isNotice = true order by p.createdAt desc",
-            countQuery = "select count(p) from Post p where p.deletedAt is null and p.isNotice = true")
+    @Modifying
+    @Query("update Post p set p.category = null where p.category.id = :categoryId")
+    void updatePostCategory(@Param("categoryId") Long categoryId);
+
+    @Query(value = "select p from Post p where p.deletedAt is null and p.type = 'NOTICE' order by p.createdAt desc",
+            countQuery = "select count(p) from Post p where p.deletedAt is null and p.type = 'NOTICE'")
     Page<Post> findAllNotice(Pageable pageable);
 
     @Query(value = "select p from Post p " +
             "join fetch p.user u " +
             "left join fetch u.profileImage " +
-            "where p.deletedAt is null and p.visibility = 'PUBLIC' and p.isNotice = false " +
+            "where p.deletedAt is null and p.visibility = 'PUBLIC' and p.type = 'NORMAL' " +
             "order by p.createdAt desc",
-            countQuery = "select count(p) from Post p where p.deletedAt is null and p.visibility = 'PUBLIC' and p.isNotice = false")
+            countQuery = "select count(p) from Post p where p.deletedAt is null and p.visibility = 'PUBLIC' and p.type = 'NORMAL'")
     Page<Post> findAll(Pageable pageable);
 
     @Query(value = "select p from Post p left join fetch p.category left join fetch p.postTags pt left join fetch pt.tag t where p.deletedAt is null and p.user.id = :userId",
@@ -47,6 +52,8 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
     @Query("select p from Post p left join fetch p.postTags pt left join fetch pt.tag where p.id = :postId")
     Optional<Post> findWithTags(@Param("postId") Long postId);
 
-    @Query("select p from Post p where p.user.id = :userId and p.pinned = true and p.deletedAt is null")
-    List<Post> findPinnedPostsByUserId(@Param("userId") Long userId);
+    @Query("select new com.jiwon.mylog.domain.post.dto.response.PinnedPostResponse(p.id, p.title, p.contentPreview) " +
+            "from Post p " +
+            "where p.user.id = :userId and p.pinned = true and p.deletedAt is null")
+    List<PinnedPostResponse> findPinnedPostsByUserId(@Param("userId") Long userId);
 }

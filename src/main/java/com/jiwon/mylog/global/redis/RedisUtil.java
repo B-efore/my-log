@@ -2,12 +2,15 @@ package com.jiwon.mylog.global.redis;
 
 import java.time.Duration;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class RedisUtil {
@@ -42,24 +45,28 @@ public class RedisUtil {
 
     public void addPostViewUser(String key, String value) {
         redisTemplate.opsForSet().add(key, value);
-        redisTemplate.expire(key, Duration.ofHours(12L));
+        redisTemplate.expire(key, Duration.ofHours(12));
     }
 
-    public Long increasePostView(String key, String hashKey, String view) {
-        redisTemplate.opsForHash().putIfAbsent(key, hashKey, view);
-        return redisTemplate.opsForHash().increment(key, hashKey, 1);
+    public Long increasePostView(String key, String view) {
+        Boolean isNew = redisTemplate.opsForValue().setIfAbsent(key, view);
+        if (Boolean.TRUE.equals(isNew)) {
+            redisTemplate.expire(key, Duration.ofDays(7));
+        }
+        return redisTemplate.opsForValue().increment(key, 1);
     }
 
-    public int getPostView(String key, String hashKey, int view) {
-        String value = (String) redisTemplate.opsForHash().get(key, hashKey);
+    public int getPostView(String key, int view) {
+        String value = redisTemplate.opsForValue().get(key);
         return value != null ? Integer.parseInt(value) : view;
     }
 
-    public Map<Long, Integer> getAllPostView(String key) {
-        return redisTemplate.opsForHash().entries(key).entrySet().stream()
+    public Map<Long, Integer> getAllPostView(String keyPrefix) {
+        Set<String> keys = redisTemplate.keys(keyPrefix);
+        return keys.stream()
                 .collect(Collectors.toMap(
-                        e -> Long.parseLong(e.getKey().toString()),
-                        e -> Integer.parseInt(e.getValue().toString())
+                        key -> Long.parseLong(key.replace(keyPrefix, "")),
+                        key -> getPostView(key, 0)
                 ));
     }
 

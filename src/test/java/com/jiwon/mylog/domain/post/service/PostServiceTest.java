@@ -1,11 +1,13 @@
 package com.jiwon.mylog.domain.post.service;
 
 import com.jiwon.mylog.TestDataFactory;
+import com.jiwon.mylog.config.EmbeddedRedisConfig;
 import com.jiwon.mylog.domain.category.entity.Category;
 import com.jiwon.mylog.domain.category.repository.CategoryRepository;
 import com.jiwon.mylog.domain.post.dto.request.PostRequest;
 import com.jiwon.mylog.domain.post.dto.response.PostDetailResponse;
 import com.jiwon.mylog.domain.post.entity.Post;
+import com.jiwon.mylog.domain.post.entity.PostType;
 import com.jiwon.mylog.domain.post.repository.PostRepository;
 import com.jiwon.mylog.domain.tag.dto.request.TagRequest;
 import com.jiwon.mylog.domain.tag.entity.PostTag;
@@ -15,10 +17,12 @@ import com.jiwon.mylog.domain.tag.service.TagService;
 import com.jiwon.mylog.domain.user.entity.User;
 import com.jiwon.mylog.domain.user.repository.UserRepository;
 import jakarta.persistence.EntityManager;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +31,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
+@Import(EmbeddedRedisConfig.class)
 @SpringBootTest
 @ActiveProfiles("test")
 class PostServiceTest {
@@ -52,6 +57,12 @@ class PostServiceTest {
     @Autowired
     private TagRepository tagRepository;
 
+    @BeforeEach
+    void setUp() {
+        userRepository.deleteAll();
+        postRepository.deleteAll();
+    }
+
     @DisplayName("게시글 생성 시 연관된 정보(카테고리, 태그 게시글 수)가 올바르게 업데이트 된다.")
     @Test
     void createPost_연관정보() {
@@ -63,10 +74,11 @@ class PostServiceTest {
         PostRequest postRequest = new PostRequest("title", "content", "preview", "공개",
                 savedCategory.getId(),
                 tagRequest,
-                false);
+                false,
+                PostType.NORMAL.getStatus());
 
         // when
-        PostDetailResponse response = postService.createPost(savedUser.getId(), postRequest, false);
+        PostDetailResponse response = postService.createPost(savedUser.getId(), postRequest);
 
         // then
         Post post = postRepository.findById(response.getPostId()).get();
@@ -95,9 +107,10 @@ class PostServiceTest {
         PostRequest oldPostRequest = new PostRequest("title", "content", "preview", "공개",
                 savedOldCategory.getId(),
                 oldTagRequest,
-                false);
+                false,
+                PostType.NORMAL.getStatus());
 
-        PostDetailResponse oldPostResponse = postService.createPost(savedUser.getId(), oldPostRequest, false);
+        PostDetailResponse oldPostResponse = postService.createPost(savedUser.getId(), oldPostRequest);
 
         em.flush();
         em.clear();
@@ -108,10 +121,11 @@ class PostServiceTest {
         PostRequest newPostRequest = new PostRequest("title", "content", "preview", "공개",
                 savedNewCategory.getId(),
                 newTagRequest,
-                false);
+                false,
+                "일반 글");
 
         // when
-        PostDetailResponse newPostResponse = postService.updatePost(savedUser.getId(), oldPostResponse.getPostId(), newPostRequest, false);
+        PostDetailResponse newPostResponse = postService.updatePost(savedUser.getId(), oldPostResponse.getPostId(), newPostRequest);
 
         em.flush();
         em.clear();
@@ -145,8 +159,9 @@ class PostServiceTest {
         PostRequest postRequest = new PostRequest("title", "content", "preview", "공개",
                 savedCategory.getId(),
                 tagRequest,
-                false);
-        PostDetailResponse response = postService.createPost(savedUser.getId(), postRequest, false);
+                false,
+                PostType.NORMAL.getStatus());
+        PostDetailResponse response = postService.createPost(savedUser.getId(), postRequest);
 
         em.flush();
         em.clear();

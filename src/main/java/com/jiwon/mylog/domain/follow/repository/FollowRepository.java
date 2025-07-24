@@ -14,7 +14,10 @@ import java.util.Optional;
 public interface FollowRepository extends JpaRepository<Follow, Long> {
     boolean existsByFromUserIdAndToUserId(Long fromUserId, Long toUserId);
 
-    Optional<Follow> findByFromUserIdAndToUserId(Long fromUserId, Long toUserId);
+    @Query("select f from Follow f " +
+            "join fetch f.fromUser " +
+            "where f.fromUser.id = :fromUserId and f.toUser.id = :toUserId")
+    Optional<Follow> findByFromUserIdAndToUserId(@Param("fromUserId") Long fromUserId, @Param("toUserId") Long toUserId);
 
     @Query("select " +
             "sum(case when f.fromUser.id = :userId then 1 else 0 end), " +
