@@ -12,6 +12,7 @@ import com.jiwon.mylog.domain.user.repository.UserRepository;
 import com.jiwon.mylog.global.common.error.ErrorCode;
 import com.jiwon.mylog.global.common.error.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +27,7 @@ public class UserBlogService {
     private final PostRepository postRepository;
     private final ReadmeRepository readmeRepository;
 
+    @Cacheable(value = "blog::home", key = "#userId", condition = "#userId != null")
     @Transactional(readOnly = true)
     public UserMainResponse getUserMain(Long userId) {
         User user = userRepository.findUserWithProfileImage(userId)
