@@ -20,21 +20,18 @@ public class ReadmeService {
     private final ReadmeRepository readmeRepository;
 
     @Transactional
-    public ReadmeResponse createReadme(Long userId, ReadmeRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
+    public ReadmeResponse editReadme(Long userId, ReadmeRequest request) {
+        Readme readme = readmeRepository.findByUserId(userId).orElse(null);
 
-        Readme readme = Readme.from(user, request.getContent());
-        readmeRepository.save(readme);
-        return new ReadmeResponse(readme.getContent());
-    }
+        if (readme == null) {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
+            readme = Readme.from(user, request.getContent());
+        } else {
+            readme.updateContent(request.getContent());
+        }
 
-    @Transactional
-    public ReadmeResponse updateReadme(Long userId, ReadmeRequest request) {
-        Readme readme = readmeRepository.findByUserId(userId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND));
-        readme.updateContent(request.getContent());
-        return new ReadmeResponse(readme.getContent());
+        return ReadmeResponse.from(readmeRepository.save(readme));
     }
 
     @Transactional
