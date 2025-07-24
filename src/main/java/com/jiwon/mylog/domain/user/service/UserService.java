@@ -14,6 +14,7 @@ import com.jiwon.mylog.global.common.error.ErrorCode;
 import com.jiwon.mylog.global.common.error.exception.DuplicateException;
 import com.jiwon.mylog.global.common.error.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,7 @@ public class UserService {
         return UserResponse.fromUser(user);
     }
 
+    @CacheEvict(value = "blog::home", key = "#userId", condition = "#userId != null")
     @Transactional
     public UserResponse updateUserProfile(Long userId, UserProfileRequest userProfileRequest) {
         User user = userRepository.findById(userId)
