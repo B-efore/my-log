@@ -13,12 +13,18 @@ import java.time.Duration;
 public class CacheConfig {
     @Bean
     public CacheManager cacheManager() {
-        Caffeine<Object, Object> cache = Caffeine.newBuilder()
-                .expireAfterWrite(Duration.ofMinutes(10))
-                .maximumSize(1_000);
-
         CaffeineCacheManager cacheManager = new CaffeineCacheManager();
-        cacheManager.setCaffeine(cache);
+
+        cacheManager.setCaffeine(Caffeine.newBuilder()
+                .maximumSize(1000)
+                .expireAfterWrite(Duration.ofHours(1)));
+
+        cacheManager.registerCustomCache("dailyFortune",
+                Caffeine.newBuilder()
+                        .maximumSize(1000)
+                        .expireAfterWrite(Duration.ofHours(1))
+                        .build());
+
         return cacheManager;
     }
 }
