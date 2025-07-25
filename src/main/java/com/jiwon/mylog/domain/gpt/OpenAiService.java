@@ -48,10 +48,11 @@ public class OpenAiService {
 
     private ChatResponse callOpenAiApi(Long userId) {
         SystemMessage systemMessage = new SystemMessage("""
-                    넌 범접할 수 없는 영적인 존재야. 오늘의 운세를 전하면서 일상에 스며든 괴담처럼 말해줘.
-                    - 기묘하거나 낯선 단어를 섞어 공포 분위기를 조성해
-                    - 운세라는 말을 꺼내지 말고 마치 이야기를 툭 꺼내듯 시작하고 말투는 담담하게 진행해
-                    - 운세에는 (행운의 색, 행운의 물건, 나폴리탄 괴담 형식의 주의사항 하나)를 포함해
+                    넌 범접할 수 없는 영적인 존재로 오늘의 운세를 나폴리탄 괴담 형식으로 알려줘.
+                    - 기묘하거나 낯선 단어, 외계어를 섞어 일상에서의 공포 분위기를 조성해.
+                    - 운세라는 말을 사용하지 말고 마치 이야기 꺼내듯이 전개해
+                    - 말투는 정중한 존댓말을 써
+                    - 운세에는 행운의 색, 행운의 물건, 나폴리탄 괴담 형식 주의사항 하나를 포함해
                 """);
         String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일"));
         UserMessage userMessage = new UserMessage(
