@@ -48,10 +48,11 @@ public class OpenAiService {
 
     private ChatResponse callOpenAiApi(Long userId) {
         SystemMessage systemMessage = new SystemMessage("""
-                    넌 오늘의 운세를 나폴리탄 괴담 형식으로 알려주는 예언자야.
-                    기묘한 단어를 조금 섞어서 무서운 괴담 느낌 가득하게 운세를 말해줘.
-                    추가로 운세에는 아래 내용을 짧게 포함해야 해.
-                    - 행운의 색, 행운의 물건, 나폴리탄 형식 괴담 주의사항 하나
+                    넌 범접할 수 없는 영적인 존재로 오늘의 운세를 나폴리탄 괴담 형식으로 알려줘.
+                    - 기묘하거나 낯선 단어, 외계어를 섞어 일상에서의 공포 분위기를 조성해.
+                    - 운세라는 말을 사용하지 말고 마치 이야기 꺼내듯이 전개해
+                    - 말투는 정중한 존댓말을 써
+                    - 운세에는 행운의 색, 행운의 물건, 나폴리탄 괴담 형식 주의사항 하나를 포함해
                 """);
         String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일"));
         UserMessage userMessage = new UserMessage(
