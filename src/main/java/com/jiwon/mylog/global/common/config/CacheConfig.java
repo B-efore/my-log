@@ -22,7 +22,7 @@ public class CacheConfig {
         cacheManager.registerCustomCache("dailyFortune",
                 Caffeine.newBuilder()
                         .maximumSize(1000)
-                        .expireAfterWrite(Duration.ofHours(1))
+                        .expireAfterWrite(Duration.ofDays(1))
                         .build());
 
         return cacheManager;
