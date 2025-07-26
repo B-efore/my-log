@@ -56,7 +56,7 @@ public class OpenAiService {
                 """);
         String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일"));
         UserMessage userMessage = new UserMessage(
-                String.format("사용자 %d, %s 기준으로 오늘의 외계인 운세 알려줘.", userId, date));
+                String.format("사용자 %d, %s 기준으로 오늘의 괴담 운세 알려줘.", userId, date));
 
         List<Message> messages = Arrays.asList(systemMessage, userMessage);
 
