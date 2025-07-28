@@ -1,5 +1,6 @@
 package com.jiwon.mylog.domain.like;
 
+import com.jiwon.mylog.global.common.entity.PageResponse;
 import com.jiwon.mylog.global.common.entity.SliceResponse;
 import com.jiwon.mylog.global.security.auth.annotation.LoginUser;
 import lombok.RequiredArgsConstructor;
@@ -47,10 +48,10 @@ public class LikeController {
     }
 
     @GetMapping("/users/{userId}/likes")
-    public ResponseEntity<?> getUserLikes(
+    public ResponseEntity<PageResponse> getUserLikes(
             @PathVariable Long userId,
-            @PageableDefault(sort="createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        SliceResponse response = likeService.getUserLikes(userId, pageable);
+            @PageableDefault(size = 10, sort="createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        PageResponse response = likeService.getUserLikes(userId, pageable);
         return ResponseEntity.ok(response);
     }
 }

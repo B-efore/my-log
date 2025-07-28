@@ -2,6 +2,8 @@ package com.jiwon.mylog.domain.post.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.jiwon.mylog.domain.post.entity.Post;
+import com.jiwon.mylog.domain.user.dto.response.UserResponse;
+import com.jiwon.mylog.domain.user.dto.response.UserSummaryResponse;
 import com.jiwon.mylog.global.common.enums.Visibility;
 import com.jiwon.mylog.domain.category.dto.response.CategoryResponse;
 import com.jiwon.mylog.domain.post.entity.PostStatus;
@@ -23,6 +25,7 @@ public class PostSummaryResponse {
     private final Visibility visibility;
     private final CategoryResponse category;
     private final List<TagResponse> tags;
+    private final UserSummaryResponse user;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private final LocalDateTime createdAt;
 
@@ -37,6 +40,7 @@ public class PostSummaryResponse {
                 .tags(post.getPostTags().stream()
                         .map(postTag -> TagResponse.fromTag(postTag.getTag()))
                         .toList())
+                .user(UserSummaryResponse.fromUser(post.getUser()))
                 .createdAt(post.getCreatedAt())
                 .build();
     }

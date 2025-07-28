@@ -183,6 +183,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
     private List<Post> createPostsQuery(BooleanBuilder builder, Pageable pageable) {
         return jpaQueryFactory
                 .selectFrom(POST)
+                .leftJoin(POST.user, USER).fetchJoin()
                 .leftJoin(POST.category, CATEGORY).fetchJoin()
                 .leftJoin(POST.postTags, POST_TAG).fetchJoin()
                 .leftJoin(POST_TAG.tag, TAG).fetchJoin()
