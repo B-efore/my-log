@@ -1,6 +1,7 @@
 package com.jiwon.mylog.global.oauth;
 
 import com.jiwon.mylog.domain.point.entity.Point;
+import com.jiwon.mylog.domain.point.repository.PointRepository;
 import com.jiwon.mylog.domain.user.entity.User;
 import com.jiwon.mylog.domain.user.repository.UserRepository;
 import com.jiwon.mylog.global.common.error.ErrorCode;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
+    private final PointRepository pointRepository;
 
     @Transactional
     @Override
@@ -42,9 +44,15 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 })
                 .orElseGet(() -> {
                     User user = oAuth2UserInfo.toEntity();
-                    Point point = new Point();
-                    user.initUserPoint(point);
-                    return userRepository.save(user);
+                    User savedUser = userRepository.save(user);
+                    initUserPoint(savedUser);
+                    return savedUser;
                 });
+    }
+
+    private void initUserPoint(User user) {
+        Point point = new Point();
+        point.setUser(user);
+        pointRepository.save(point);
     }
 }

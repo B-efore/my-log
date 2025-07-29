@@ -5,6 +5,7 @@ import com.jiwon.mylog.domain.category.entity.QCategory;
 import com.jiwon.mylog.domain.comment.dto.response.CommentResponse;
 import com.jiwon.mylog.domain.comment.entity.QComment;
 import com.jiwon.mylog.domain.image.entity.QProfileImage;
+import com.jiwon.mylog.domain.point.entity.QPoint;
 import com.jiwon.mylog.domain.post.dto.response.PostDetailResponse;
 import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.domain.post.entity.QPost;
@@ -184,6 +185,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
         return jpaQueryFactory
                 .selectFrom(POST)
                 .leftJoin(POST.user, USER).fetchJoin()
+                .leftJoin(POST.user.profileImage, PROFILE_IMAGE).fetchJoin()
                 .leftJoin(POST.category, CATEGORY).fetchJoin()
                 .leftJoin(POST.postTags, POST_TAG).fetchJoin()
                 .leftJoin(POST_TAG.tag, TAG).fetchJoin()

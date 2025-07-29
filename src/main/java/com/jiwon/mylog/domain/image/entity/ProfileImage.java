@@ -3,6 +3,7 @@ package com.jiwon.mylog.domain.image.entity;
 import com.jiwon.mylog.domain.user.entity.User;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 
@@ -10,7 +11,7 @@ import jakarta.persistence.OneToOne;
 @DiscriminatorValue("PROFILE")
 public class ProfileImage extends Image {
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
