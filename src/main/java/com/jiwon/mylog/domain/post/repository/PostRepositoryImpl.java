@@ -5,6 +5,7 @@ import com.jiwon.mylog.domain.category.entity.QCategory;
 import com.jiwon.mylog.domain.comment.dto.response.CommentResponse;
 import com.jiwon.mylog.domain.comment.entity.QComment;
 import com.jiwon.mylog.domain.image.entity.QProfileImage;
+import com.jiwon.mylog.domain.point.entity.QPoint;
 import com.jiwon.mylog.domain.post.dto.response.PostDetailResponse;
 import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.domain.post.entity.QPost;
@@ -51,14 +52,14 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
     private static final QComment COMMENT = QComment.comment;
 
     @Override
-    public Page<Post> findByCategoryAndTags(Long userId, Long categoryId, List<Long> tagIds, Pageable pageable) {
-        BooleanBuilder builder = buildConditions(userId, categoryId,tagIds);
+    public Page<Post> findByCategoryAndTags(Long userId, Long categoryId, List<Long> tagIds, String keyword, Pageable pageable) {
+        BooleanBuilder builder = buildConditions(userId, categoryId, tagIds, keyword);
         return createResult(pageable, builder);
     }
 
     @Override
-    public Page<Post> findByTags(Long userId, List<Long> tagIds, Pageable pageable) {
-        BooleanBuilder builder = buildConditions(userId, null, tagIds);
+    public Page<Post> findByTags(Long userId, List<Long> tagIds, String keyword, Pageable pageable) {
+        BooleanBuilder builder = buildConditions(userId, null, tagIds, keyword);
         return createResult(pageable, builder);
     }
 
@@ -183,6 +184,8 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
     private List<Post> createPostsQuery(BooleanBuilder builder, Pageable pageable) {
         return jpaQueryFactory
                 .selectFrom(POST)
+                .leftJoin(POST.user, USER).fetchJoin()
+                .leftJoin(POST.user.profileImage, PROFILE_IMAGE).fetchJoin()
                 .leftJoin(POST.category, CATEGORY).fetchJoin()
                 .leftJoin(POST.postTags, POST_TAG).fetchJoin()
                 .leftJoin(POST_TAG.tag, TAG).fetchJoin()
@@ -201,7 +204,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
                 .fetchOne();
     }
 
-    private BooleanBuilder buildConditions(Long userId, Long categoryId, List<Long> tagIds) {
+    private BooleanBuilder buildConditions(Long userId, Long categoryId, List<Long> tagIds, String keyword) {
         BooleanBuilder builder = new BooleanBuilder()
                 .and(POST.user.id.eq(userId))
                 .and(POST.deletedAt.isNull());
@@ -219,6 +222,10 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
         // 태그 필터
         if (tagIds != null && !tagIds.isEmpty()) {
             builder.and(createTagExistsCondition(tagIds));
+        }
+
+        if (keyword != null && !keyword.isEmpty()) {
+            builder.and(POST.title.contains(keyword));
         }
 
         return builder;

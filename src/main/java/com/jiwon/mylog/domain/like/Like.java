@@ -13,12 +13,17 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
+@Getter
 @EntityListeners(AuditingEntityListener.class)
+@NoArgsConstructor
 @Entity
 @Table(
         name = "likes",
@@ -44,4 +49,11 @@ public class Like {
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    public static Like toLike(User user, Post post) {
+        Like like = new Like();
+        like.user = user;
+        like.post = post;
+        return like;
+    }
 }

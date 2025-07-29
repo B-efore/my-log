@@ -216,14 +216,43 @@ public class PostService {
 
     @Cacheable(value = "post::filter", keyGenerator = "postCacheKeyGenerator")
     @Transactional(readOnly = true)
-    public PageResponse getPostsByCategoryAndTags(Long userId, Long categoryId, List<Long> tagIds, Pageable pageable) {
+    public PageResponse getPostsByCategoryAndTags(
+            Long userId,
+            Long categoryId, List<Long> tagIds, String keyword,
+            Pageable pageable) {
 
         Page<Post> postPage;
 
         if (categoryId == null || categoryId.equals(0L)) {
-            postPage = postRepository.findByTags(userId, tagIds, pageable);
+            postPage = postRepository.findByTags(userId, tagIds, keyword, pageable);
         } else {
-            postPage = postRepository.findByCategoryAndTags(userId, categoryId, tagIds, pageable);
+            postPage = postRepository.findByCategoryAndTags(userId, categoryId, tagIds, keyword, pageable);
+        }
+
+        List<PostSummaryResponse> posts = postPage.stream()
+                .map(PostSummaryResponse::fromPost)
+                .toList();
+
+        return PageResponse.from(
+                posts,
+                postPage.getNumber(),
+                postPage.getSize(),
+                postPage.getTotalPages(),
+                (int) postPage.getTotalElements());
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse searchPosts(
+            Long userId,
+            Long categoryId, List<Long> tagIds, String keyword,
+            Pageable pageable) {
+
+        Page<Post> postPage;
+
+        if (categoryId == null || categoryId.equals(0L)) {
+            postPage = postRepository.findByTags(userId, tagIds, keyword, pageable);
+        } else {
+            postPage = postRepository.findByCategoryAndTags(userId, categoryId, tagIds, keyword, pageable);
         }
 
         List<PostSummaryResponse> posts = postPage.stream()

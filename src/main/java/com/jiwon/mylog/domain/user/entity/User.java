@@ -14,6 +14,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -70,8 +71,8 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private Role role = Role.ROLE_USER;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Point point;
+//    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private Point point;
 
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -100,11 +101,6 @@ public class User extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserItem> items = new ArrayList<>();
-
-    public void initUserPoint(Point point) {
-        this.point = point;
-        point.setUser(this);
-    }
 
     public void updateProfile(String username, String bio) {
         this.username = username;

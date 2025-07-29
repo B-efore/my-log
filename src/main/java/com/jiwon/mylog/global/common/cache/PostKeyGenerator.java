@@ -15,7 +15,7 @@ public class PostKeyGenerator implements KeyGenerator {
         Long userId = (Long) params[0];
         Long categoryId = (Long) params[1];
         List<Long> tagIds = (List<Long>) params[2];
-        Pageable pageable = (Pageable) params[3];
+        Pageable pageable = (Pageable) params[4];
 
         String tagKey = (tagIds == null || tagIds.isEmpty())
                 ? "none"

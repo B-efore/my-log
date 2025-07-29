@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PostRepositoryCustom {
-    Page<Post> findByCategoryAndTags(Long userId, Long categoryId, List<Long> tagIds, Pageable pageable);
-    Page<Post> findByTags(Long userId, List<Long> tagIds, Pageable pageable);
+    Page<Post> findByCategoryAndTags(Long userId, Long categoryId, List<Long> tagIds, String keyword, Pageable pageable);
+    Page<Post> findByTags(Long userId, List<Long> tagIds, String keyword, Pageable pageable);
     Optional<PostDetailResponse> findPostDetail(Long postId);
 
     List<UserActivityResponse> findUserActivities(Long userId, LocalDate start, LocalDate end);

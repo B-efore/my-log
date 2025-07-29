@@ -139,7 +139,7 @@ public class PostController {
 
     @GetMapping("/users/{userId}/categories/{categoryId}/posts")
     @Operation(
-            summary = "특정 유저의 카테고리별 게시글 조회 (태그 필터링 포함)",
+            summary = "특정 유저의 카테고리별 게시글 조회 (태그 필터링 및 키워드 검색 포함)",
             responses = {
                     @ApiResponse(responseCode = "200", description = "조회 성공"),
                     @ApiResponse(responseCode = "404", description = "존재하지 않는 사용자 혹은 카테고리")
@@ -149,9 +149,15 @@ public class PostController {
             @PathVariable("userId") Long userId,
             @PathVariable("categoryId") Long categoryId,
             @RequestParam(value = "tags", required = false) List<Long> tags,
+            @RequestParam(value = "keyword", required = false) String keyword,
             @PageableDefault(size = 10, page = 0,
                     sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
-        PageResponse response = postService.getPostsByCategoryAndTags(userId, categoryId, tags, pageable);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        if (keyword == null || keyword.isEmpty()) {
+            return ResponseEntity.ok(postService.getPostsByCategoryAndTags(
+                    userId, categoryId, tags, "", pageable));
+        } else {
+            return ResponseEntity.ok(postService.searchPosts(
+                    userId, categoryId, tags, keyword, pageable));
+        }
     }
 }

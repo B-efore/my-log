@@ -2,6 +2,7 @@ package com.jiwon.mylog.global.security.auth.service;
 
 import com.jiwon.mylog.domain.point.entity.Point;
 import com.jiwon.mylog.domain.event.dto.DailyLoginEvent;
+import com.jiwon.mylog.domain.point.repository.PointRepository;
 import com.jiwon.mylog.domain.user.dto.request.auth.PasswordResetRequest;
 import com.jiwon.mylog.domain.user.dto.request.auth.UserSaveRequest;
 import com.jiwon.mylog.domain.user.dto.response.auth.FindIdResponse;
@@ -41,6 +42,7 @@ public class AuthService {
 
     private final ApplicationEventPublisher eventPublisher;
     private final UserRepository userRepository;
+    private final PointRepository pointRepository;
     private final MailService mailService;
     private final JwtService jwtService;
     private final TokenService tokenService;
@@ -57,10 +59,8 @@ public class AuthService {
         String encodedPassword = bCryptPasswordEncoder.encode(userSaveRequest.getPassword());
         User user = userSaveRequest.toEntity(encodedPassword);
 
-        Point point = new Point();
-        user.initUserPoint(point);
-
         User savedUser = userRepository.save(user);
+        initUserPoint(savedUser);
         return savedUser.getId();
     }
 
@@ -170,5 +170,11 @@ public class AuthService {
         if (userRepository.existsByEmail(email)) {
             throw new DuplicateException(ErrorCode.DUPLICATE_EMAIL);
         }
+    }
+
+    private void initUserPoint(User savedUser) {
+        Point point = new Point();
+        point.setUser(savedUser);
+        pointRepository.save(point);
     }
 }
