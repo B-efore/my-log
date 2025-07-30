@@ -5,7 +5,6 @@ import com.jiwon.mylog.domain.comment.entity.Comment;
 import com.jiwon.mylog.domain.follow.entity.Follow;
 import com.jiwon.mylog.domain.image.entity.ProfileImage;
 import com.jiwon.mylog.domain.item.entity.UserItem;
-import com.jiwon.mylog.domain.point.entity.Point;
 import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.global.common.entity.BaseEntity;
 import com.jiwon.mylog.domain.tag.entity.Tag;
@@ -14,15 +13,16 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -70,9 +70,6 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role = Role.ROLE_USER;
-
-//    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private Point point;
 
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
