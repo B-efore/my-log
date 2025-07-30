@@ -1,7 +1,7 @@
 package com.jiwon.mylog.domain.guestbook.repository;
 
-import com.jiwon.mylog.domain.guestbook.QGuestBook;
 import com.jiwon.mylog.domain.guestbook.dto.GuestBookResponse;
+import com.jiwon.mylog.domain.guestbook.entity.QGuestBook;
 import com.jiwon.mylog.domain.image.entity.QProfileImage;
 import com.jiwon.mylog.domain.user.dto.response.UserSummaryResponse;
 import com.jiwon.mylog.domain.user.entity.QUser;
