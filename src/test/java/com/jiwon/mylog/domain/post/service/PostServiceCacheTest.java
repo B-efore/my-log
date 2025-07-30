@@ -54,7 +54,6 @@ class PostServiceCacheTest {
         Pageable pageable = PageRequest.of(0, 10);
         PostRequest postRequest = new PostRequest("title", "content", "preview", "공개", 1L, List.of(), true, PostType.NORMAL.getStatus());
 
-        postService.getUserPosts(userId, pageable);
         postService.getFilteredPosts(userId, categoryId, List.of(), "", pageable);
 
         // when
@@ -62,14 +61,12 @@ class PostServiceCacheTest {
         Long postId = post.getPostId();
 
         postService.getPost(postId);
-        postService.getUserPosts(userId, pageable); // 캐시 다시 생성
         postService.getFilteredPosts(userId, categoryId, List.of(), "", pageable); // 캐시 다시 생성
 
         // then
         Assertions.assertThat(post).isNotNull();
         Assertions.assertThat(post.getPostId()).isEqualTo(postId);
 
-        verify(postRepository, times(2)).findAllByUser(userId, pageable);
         verify(postRepository, times(2)).findFilteredPosts(userId, categoryId, List.of(), "", pageable);
         verify(postRepository, times(0)).findPostDetail(postId);
     }
@@ -84,20 +81,17 @@ class PostServiceCacheTest {
         Pageable pageable = PageRequest.of(0, 10);
         PostRequest postRequest = new PostRequest("title", "content", "preview", "공개", 1L, List.of(), true, PostType.NORMAL.getStatus());
 
-        postService.getUserPosts(userId, pageable); // 캐시 생성
         postService.getFilteredPosts(userId, categoryId, List.of(), "", pageable); // 캐시 생성
 
         // when
         PostDetailResponse post = postService.updatePost(userId, postId, postRequest);
         postService.getPost(postId);
-        postService.getUserPosts(userId, pageable); // 캐시 다시 생성
         postService.getFilteredPosts(userId, categoryId, List.of(), "", pageable); // 캐시 다시 생성
 
         // then
         Assertions.assertThat(post).isNotNull();
         Assertions.assertThat(post.getPostId()).isEqualTo(postId);
 
-        verify(postRepository, times(2)).findAllByUser(userId, pageable);
         verify(postRepository, times(2)).findFilteredPosts(userId, categoryId, List.of(), "", pageable);
         verify(postRepository, times(0)).findPostDetail(postId);
     }
@@ -140,29 +134,5 @@ class PostServiceCacheTest {
 
         assertThat(firstPost).isEqualTo(secondPost);
 
-    }
-
-    @DisplayName("user, pageable에 따라 캐시를 생성한다.")
-    @Test
-    void getAllPosts() {
-        // given
-        Long userId1 = 1L;
-        Long userId2 = 2L;
-        Pageable pageable1 = PageRequest.of(0, 10);
-        Pageable pageable2 = PageRequest.of(1, 10);
-
-        // when
-        postService.getUserPosts(userId1, pageable1);
-        postService.getUserPosts(userId1, pageable2);
-        postService.getUserPosts(userId2, pageable1);
-
-        postService.getUserPosts(userId1, pageable1);
-        postService.getUserPosts(userId1, pageable2);
-        postService.getUserPosts(userId2, pageable1);
-
-        // then
-        verify(postRepository, times(1)).findAllByUser(userId1, pageable1);
-        verify(postRepository, times(1)).findAllByUser(userId1, pageable2);
-        verify(postRepository, times(1)).findAllByUser(userId2, pageable1);
     }
 }

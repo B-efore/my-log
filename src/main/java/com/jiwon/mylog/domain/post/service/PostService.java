@@ -49,7 +49,6 @@ public class PostService {
             evict = {
                     @CacheEvict(value = "post::notice", allEntries = true, condition = "#postRequest.type.equals('공지')"),
                     @CacheEvict(value = "post::main", allEntries = true, condition = "#postRequest.type.equals('일반 글')"),
-                    @CacheEvict(value = "post::list", allEntries = true, condition = "#postRequest.type.equals('일반 글')"),
                     @CacheEvict(value = "post::filter", allEntries = true, condition = "#postRequest.type.equals('일반 글')"),
 
                     @CacheEvict(value = "blog::home", key = "#userId", condition = "#userId != null")
@@ -75,7 +74,6 @@ public class PostService {
             evict = {
                     @CacheEvict(value = "post::notice", allEntries = true, condition = "#postRequest.type.equals('공지')"),
                     @CacheEvict(value = "post::main", allEntries = true, condition = "#postRequest.type.equals('일반 글')"),
-                    @CacheEvict(value = "post::list", allEntries = true, condition = "#postRequest.type.equals('일반 글')"),
                     @CacheEvict(value = "post::filter", allEntries = true, condition = "#postRequest.type.equals('일반 글')"),
 
                     @CacheEvict(value = "blog::home", key = "#userId", condition = "#userId != null")
@@ -98,7 +96,6 @@ public class PostService {
     @Caching(evict = {
             @CacheEvict(value = "post::detail", key = "#postId"),
             @CacheEvict(value = "post::main", allEntries = true),
-            @CacheEvict(value = "post::list", allEntries = true),
             @CacheEvict(value = "post::filter", allEntries = true),
 
             @CacheEvict(value = "blog::home", key = "#userId", condition = "#userId != null")
@@ -187,25 +184,6 @@ public class PostService {
         List<MainPostResponse> posts = postPage.stream()
                 .map(MainPostResponse::fromPost)
                 .toList();
-        return PageResponse.from(
-                posts,
-                postPage.getNumber(),
-                postPage.getSize(),
-                postPage.getTotalPages(),
-                postPage.getTotalElements());
-    }
-
-    @Cacheable(value = "post::list",
-            key = "'user:' + #userId + ':page:' + #pageable.pageNumber + ':size:' + #pageable.pageSize",
-            condition = "#userId != null && #pageable != null"
-    )
-    @Transactional(readOnly = true)
-    public PageResponse getUserPosts(Long userId, Pageable pageable) {
-        Page<Post> postPage = postRepository.findAllByUser(userId, pageable);
-        List<PostSummaryResponse> posts = postPage.stream()
-                .map(PostSummaryResponse::fromPost)
-                .toList();
-
         return PageResponse.from(
                 posts,
                 postPage.getNumber(),

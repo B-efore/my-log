@@ -109,7 +109,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .from(POST_TAG)
                 .join(POST_TAG.tag, TAG)
                 .where(POST_TAG.post.id.eq(postId))
-                .orderBy(TAG.id.asc())
+                .orderBy(POST_TAG.id.asc())
                 .fetch();
 
         List<CommentResponse> comments = jpaQueryFactory
@@ -241,6 +241,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .from(POST_TAG)
                 .join(POST_TAG.tag, TAG)
                 .where(POST_TAG.post.id.in(postIds))
+                .orderBy(POST_TAG.id.asc())
                 .fetch()
                 .stream()
                 .collect(Collectors.groupingBy(
