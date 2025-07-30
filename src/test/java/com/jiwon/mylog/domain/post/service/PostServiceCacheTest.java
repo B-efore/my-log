@@ -55,7 +55,7 @@ class PostServiceCacheTest {
         PostRequest postRequest = new PostRequest("title", "content", "preview", "공개", 1L, List.of(), true, PostType.NORMAL.getStatus());
 
         postService.getUserPosts(userId, pageable);
-        postService.getPostsByCategoryAndTags(userId, categoryId, List.of(), "", pageable);
+        postService.getFilteredPosts(userId, categoryId, List.of(), "", pageable);
 
         // when
         PostDetailResponse post = postService.createPost(userId, postRequest);
@@ -63,14 +63,14 @@ class PostServiceCacheTest {
 
         postService.getPost(postId);
         postService.getUserPosts(userId, pageable); // 캐시 다시 생성
-        postService.getPostsByCategoryAndTags(userId, categoryId, List.of(), "", pageable); // 캐시 다시 생성
+        postService.getFilteredPosts(userId, categoryId, List.of(), "", pageable); // 캐시 다시 생성
 
         // then
         Assertions.assertThat(post).isNotNull();
         Assertions.assertThat(post.getPostId()).isEqualTo(postId);
 
         verify(postRepository, times(2)).findAllByUser(userId, pageable);
-        verify(postRepository, times(2)).findByCategoryAndTags(userId, categoryId, List.of(), "", pageable);
+        verify(postRepository, times(2)).findFilteredPosts(userId, categoryId, List.of(), "", pageable);
         verify(postRepository, times(0)).findPostDetail(postId);
     }
 
@@ -85,20 +85,20 @@ class PostServiceCacheTest {
         PostRequest postRequest = new PostRequest("title", "content", "preview", "공개", 1L, List.of(), true, PostType.NORMAL.getStatus());
 
         postService.getUserPosts(userId, pageable); // 캐시 생성
-        postService.getPostsByCategoryAndTags(userId, categoryId, List.of(), "", pageable); // 캐시 생성
+        postService.getFilteredPosts(userId, categoryId, List.of(), "", pageable); // 캐시 생성
 
         // when
         PostDetailResponse post = postService.updatePost(userId, postId, postRequest);
         postService.getPost(postId);
         postService.getUserPosts(userId, pageable); // 캐시 다시 생성
-        postService.getPostsByCategoryAndTags(userId, categoryId, List.of(), "", pageable); // 캐시 다시 생성
+        postService.getFilteredPosts(userId, categoryId, List.of(), "", pageable); // 캐시 다시 생성
 
         // then
         Assertions.assertThat(post).isNotNull();
         Assertions.assertThat(post.getPostId()).isEqualTo(postId);
 
         verify(postRepository, times(2)).findAllByUser(userId, pageable);
-        verify(postRepository, times(2)).findByCategoryAndTags(userId, categoryId, List.of(), "", pageable);
+        verify(postRepository, times(2)).findFilteredPosts(userId, categoryId, List.of(), "", pageable);
         verify(postRepository, times(0)).findPostDetail(postId);
     }
 
@@ -164,25 +164,5 @@ class PostServiceCacheTest {
         verify(postRepository, times(1)).findAllByUser(userId1, pageable1);
         verify(postRepository, times(1)).findAllByUser(userId1, pageable2);
         verify(postRepository, times(1)).findAllByUser(userId2, pageable1);
-    }
-
-    @Test
-    void getPostsByCategoryAndTags() {
-        // given
-        Long userId = 1L;
-        Long categoryId = 1L;
-        List<Long> tagIds = List.of(1L, 2L);
-        Pageable pageable = PageRequest.of(0, 10);
-
-        // when
-        postService.getPostsByCategoryAndTags(userId, categoryId, tagIds, "", pageable);
-        postService.getPostsByCategoryAndTags(userId, categoryId, tagIds, "", pageable);
-
-        postService.getPostsByCategoryAndTags(userId, 0L, tagIds, "", pageable);
-        postService.getPostsByCategoryAndTags(userId, 0L, tagIds, "", pageable);
-
-        // then
-        verify(postRepository, times(1)).findByCategoryAndTags(userId, categoryId, tagIds, "", pageable);
-        verify(postRepository, times(1)).findByTags(userId, tagIds, "", pageable);
     }
 }

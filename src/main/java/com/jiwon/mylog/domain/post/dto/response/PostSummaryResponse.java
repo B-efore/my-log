@@ -24,10 +24,25 @@ public class PostSummaryResponse {
     private final PostStatus postStatus;
     private final Visibility visibility;
     private final CategoryResponse category;
-    private final List<TagResponse> tags;
     private final UserSummaryResponse user;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private final LocalDateTime createdAt;
+    private List<TagResponse> tags;
+
+    public PostSummaryResponse(Long postId, String title, String contentPreview, PostStatus postStatus, Visibility visibility, CategoryResponse category, UserSummaryResponse user, LocalDateTime createdAt) {
+        this.postId = postId;
+        this.title = title;
+        this.contentPreview = contentPreview;
+        this.postStatus = postStatus;
+        this.visibility = visibility;
+        this.category = category;
+        this.user = user;
+        this.createdAt = createdAt;
+    }
+
+    public void setTags(List<TagResponse> tags) {
+        this.tags = tags;
+    }
 
     public static PostSummaryResponse fromPost(Post post) {
         return PostSummaryResponse.builder()

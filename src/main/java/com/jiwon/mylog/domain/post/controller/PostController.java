@@ -153,7 +153,7 @@ public class PostController {
             @PageableDefault(size = 10, page = 0,
                     sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
         if (keyword == null || keyword.isEmpty()) {
-            return ResponseEntity.ok(postService.getPostsByCategoryAndTags(
+            return ResponseEntity.ok(postService.getFilteredPosts(
                     userId, categoryId, tags, "", pageable));
         } else {
             return ResponseEntity.ok(postService.searchPosts(
