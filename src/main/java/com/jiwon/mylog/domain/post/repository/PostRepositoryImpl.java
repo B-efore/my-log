@@ -73,6 +73,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                                         CATEGORY.name
                                 ),
                                 Projections.constructor(UserSummaryResponse.class,
+                                        USER.id,
                                         USER.username,
                                         PROFILE_IMAGE.fileKey.coalesce("")
                                 ),
@@ -245,6 +246,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                                         CATEGORY.name
                                 ),
                                 Projections.constructor(UserSummaryResponse.class,
+                                        USER.id,
                                         USER.username,
                                         PROFILE_IMAGE.fileKey.coalesce("")
                                 ),
