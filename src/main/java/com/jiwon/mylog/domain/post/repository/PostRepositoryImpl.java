@@ -5,6 +5,7 @@ import com.jiwon.mylog.domain.category.entity.QCategory;
 import com.jiwon.mylog.domain.comment.dto.response.CommentResponse;
 import com.jiwon.mylog.domain.comment.entity.QComment;
 import com.jiwon.mylog.domain.image.entity.QProfileImage;
+import com.jiwon.mylog.domain.like.QLike;
 import com.jiwon.mylog.domain.post.dto.response.PostDetailResponse;
 import com.jiwon.mylog.domain.post.dto.response.PostSummaryResponse;
 import com.jiwon.mylog.domain.post.entity.QPost;
@@ -52,11 +53,61 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     private static final QPostTag POST_TAG = QPostTag.postTag;
     private static final QTag TAG = QTag.tag;
     private static final QComment COMMENT = QComment.comment;
+    private static final QLike LIKE = QLike.like;
+
+    @Override
+    public Page<PostSummaryResponse> findLikedPosts(Long userId, Pageable pageable) {
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(LIKE.user.id.eq(userId))
+                .and(POST.deletedAt.isNull());
+
+        List<PostSummaryResponse> posts = jpaQueryFactory
+                .select(Projections.constructor(PostSummaryResponse.class,
+                                POST.id,
+                                POST.title,
+                                POST.contentPreview,
+                                POST.postStatus,
+                                POST.visibility,
+                                Projections.constructor(CategoryResponse.class,
+                                        CATEGORY.id,
+                                        CATEGORY.name
+                                ),
+                                Projections.constructor(UserSummaryResponse.class,
+                                        USER.username,
+                                        PROFILE_IMAGE.fileKey.coalesce("")
+                                ),
+                                POST.createdAt
+                        )
+                )
+                .from(LIKE)
+                .join(LIKE.post, POST)
+                .join(POST.user, USER)
+                .leftJoin(POST.category, CATEGORY)
+                .leftJoin(USER.profileImage, PROFILE_IMAGE)
+                .where(builder)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .orderBy(LIKE.createdAt.desc())
+                .fetch();
+
+        Long total = jpaQueryFactory
+                .select(LIKE.count())
+                .from(LIKE)
+                .join(LIKE.post, POST)
+                .where(builder)
+                .fetchOne();
+
+        if (!posts.isEmpty()) {
+            setTagsToPosts(posts);
+        }
+
+        return new PageImpl<>(posts, pageable, total);
+    }
 
     @Override
     public Page<PostSummaryResponse> findFilteredPosts(
             Long userId, Long categoryId, List<Long> tagIds, String keyword, Pageable pageable) {
-        BooleanBuilder builder = buildConditions(userId, categoryId, tagIds, keyword);
+        BooleanBuilder builder = buildPostFilters(userId, categoryId, tagIds, keyword);
         return getPostSummaryPage(builder, pageable);
     }
 
@@ -195,7 +246,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                                 ),
                                 Projections.constructor(UserSummaryResponse.class,
                                         USER.username,
-                                        PROFILE_IMAGE.fileKey
+                                        PROFILE_IMAGE.fileKey.coalesce("")
                                 ),
                                 POST.createdAt
                         )
@@ -253,7 +304,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 ));
     }
 
-    private BooleanBuilder buildConditions(Long userId, Long categoryId, List<Long> tagIds, String keyword) {
+    private BooleanBuilder buildPostFilters(Long userId, Long categoryId, List<Long> tagIds, String keyword) {
         BooleanBuilder builder = new BooleanBuilder()
                 .and(POST.user.id.eq(userId))
                 .and(POST.deletedAt.isNull());

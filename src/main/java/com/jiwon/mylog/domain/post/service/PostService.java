@@ -18,6 +18,7 @@ import com.jiwon.mylog.global.common.error.exception.ForbiddenException;
 import com.jiwon.mylog.global.common.error.exception.NotFoundException;
 import com.jiwon.mylog.domain.category.repository.CategoryRepository;
 import com.jiwon.mylog.domain.user.repository.UserRepository;
+
 import java.util.List;
 
 import com.jiwon.mylog.domain.tag.service.TagService;
@@ -111,6 +112,7 @@ public class PostService {
 
     /**
      * 포스트와 연관된 카테고리, 태그 게시글 카운트 증가
+     *
      * @param category
      * @param tags
      */
@@ -123,6 +125,7 @@ public class PostService {
 
     /**
      * 포스트와 연관된 카테고리, 태그 게시글 카운트 감소
+     *
      * @param post
      */
     private void decreaseRelatedPostInfo(Post post) {
@@ -134,9 +137,10 @@ public class PostService {
 
     /**
      * 포스트와 연관된 정보 삭제 (포스트태그, 댓글)
+     *
      * @param post
      */
-    private void deleteRelatedPostInfo(Post post){
+    private void deleteRelatedPostInfo(Post post) {
         post.getPostTags().forEach(postTag -> {
             postTag.setTag(null);
             postTag.setPost(null);
@@ -241,7 +245,7 @@ public class PostService {
     }
 
     private void validateOwner(Post post, Long userId) {
-        if(!post.getUser().getId().equals(userId)) {
+        if (!post.getUser().getId().equals(userId)) {
             throw new ForbiddenException(ErrorCode.FORBIDDEN);
         }
     }

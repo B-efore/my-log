@@ -21,17 +21,6 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
     @Query(value = "delete from likes where user_id = :userId and post_id = :postId", nativeQuery = true)
     void deleteLike(@Param("userId") Long userId, @Param("postId") Long postId);
 
-    @Query("select p from Like l " +
-            "join l.post p " +
-            "left join fetch p.user u " +
-            "left join fetch u.profileImage " +
-            "left join fetch p.category " +
-            "left join fetch p.postTags pt " +
-            "left join fetch pt.tag " +
-            "where l.user.id = :userId and p.deletedAt is null " +
-            "order by l.createdAt desc")
-    Page<Post> findLikedPostByUserId(@Param("userId") Long userId, Pageable pageable);
-
     @Query(value = "select count(*) from likes where post_id = :postId", nativeQuery = true)
     long countByPostId(@Param("postId") Long postId);
 }

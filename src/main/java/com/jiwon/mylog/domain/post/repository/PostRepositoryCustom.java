@@ -12,7 +12,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PostRepositoryCustom {
+    Page<PostSummaryResponse> findLikedPosts(Long userId, Pageable pageable);
+
     Page<PostSummaryResponse> findFilteredPosts(Long userId, Long categoryId, List<Long> tagIds, String keyword, Pageable pageable);
+
     Optional<PostDetailResponse> findPostDetail(Long postId);
+
     List<UserActivityResponse> findUserActivities(Long userId, LocalDate start, LocalDate end);
 }
