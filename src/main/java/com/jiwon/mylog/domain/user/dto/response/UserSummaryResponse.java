@@ -9,11 +9,13 @@ import lombok.Getter;
 @Builder
 @Getter
 public class UserSummaryResponse {
+    private final Long userId;
     private final String username;
     private final String imageKey;
 
     public static UserSummaryResponse fromUser(User user) {
         return UserSummaryResponse.builder()
+                .userId(user.getId())
                 .username(user.getUsername())
                 .imageKey(user.getProfileImage() == null ? "" : user.getProfileImage().getFileKey())
                 .build();

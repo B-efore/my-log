@@ -1,6 +1,7 @@
 package com.jiwon.mylog.domain.post.repository;
 
 import com.jiwon.mylog.domain.post.dto.response.PostDetailResponse;
+import com.jiwon.mylog.domain.post.dto.response.PostSummaryResponse;
 import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.domain.user.dto.response.UserActivityResponse;
 import org.springframework.data.domain.Page;
@@ -11,8 +12,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PostRepositoryCustom {
-    Page<Post> findByCategoryAndTags(Long userId, Long categoryId, List<Long> tagIds, String keyword, Pageable pageable);
-    Page<Post> findByTags(Long userId, List<Long> tagIds, String keyword, Pageable pageable);
+    Page<PostSummaryResponse> findLikedPosts(Long userId, Pageable pageable);
+
+    Page<PostSummaryResponse> findFilteredPosts(Long userId, Long categoryId, List<Long> tagIds, String keyword, Pageable pageable);
+
     Optional<PostDetailResponse> findPostDetail(Long postId);
 
     List<UserActivityResponse> findUserActivities(Long userId, LocalDate start, LocalDate end);

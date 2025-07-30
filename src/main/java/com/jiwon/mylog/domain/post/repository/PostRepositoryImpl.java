@@ -5,16 +5,16 @@ import com.jiwon.mylog.domain.category.entity.QCategory;
 import com.jiwon.mylog.domain.comment.dto.response.CommentResponse;
 import com.jiwon.mylog.domain.comment.entity.QComment;
 import com.jiwon.mylog.domain.image.entity.QProfileImage;
-import com.jiwon.mylog.domain.point.entity.QPoint;
+import com.jiwon.mylog.domain.like.QLike;
 import com.jiwon.mylog.domain.post.dto.response.PostDetailResponse;
-import com.jiwon.mylog.domain.post.entity.Post;
+import com.jiwon.mylog.domain.post.dto.response.PostSummaryResponse;
 import com.jiwon.mylog.domain.post.entity.QPost;
 import com.jiwon.mylog.domain.tag.dto.response.TagResponse;
 import com.jiwon.mylog.domain.tag.entity.QPostTag;
 import com.jiwon.mylog.domain.tag.entity.QTag;
 import com.jiwon.mylog.domain.user.dto.response.UserActivityResponse;
-import com.jiwon.mylog.domain.user.dto.response.UserActivitiesResponse;
 import com.jiwon.mylog.domain.user.dto.response.UserResponse;
+import com.jiwon.mylog.domain.user.dto.response.UserSummaryResponse;
 import com.jiwon.mylog.domain.user.entity.QUser;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
@@ -34,13 +34,16 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
 @Repository
-public class PostRepositoryImpl implements PostRepositoryCustom{
+public class PostRepositoryImpl implements PostRepositoryCustom {
 
     private final JPAQueryFactory jpaQueryFactory;
     private static final QPost POST = QPost.post;
@@ -50,17 +53,63 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
     private static final QPostTag POST_TAG = QPostTag.postTag;
     private static final QTag TAG = QTag.tag;
     private static final QComment COMMENT = QComment.comment;
+    private static final QLike LIKE = QLike.like;
 
     @Override
-    public Page<Post> findByCategoryAndTags(Long userId, Long categoryId, List<Long> tagIds, String keyword, Pageable pageable) {
-        BooleanBuilder builder = buildConditions(userId, categoryId, tagIds, keyword);
-        return createResult(pageable, builder);
+    public Page<PostSummaryResponse> findLikedPosts(Long userId, Pageable pageable) {
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(LIKE.user.id.eq(userId))
+                .and(POST.deletedAt.isNull());
+
+        List<PostSummaryResponse> posts = jpaQueryFactory
+                .select(Projections.constructor(PostSummaryResponse.class,
+                                POST.id,
+                                POST.title,
+                                POST.contentPreview,
+                                POST.postStatus,
+                                POST.visibility,
+                                Projections.constructor(CategoryResponse.class,
+                                        CATEGORY.id,
+                                        CATEGORY.name
+                                ),
+                                Projections.constructor(UserSummaryResponse.class,
+                                        USER.id,
+                                        USER.username,
+                                        PROFILE_IMAGE.fileKey.coalesce("")
+                                ),
+                                POST.createdAt
+                        )
+                )
+                .from(LIKE)
+                .join(LIKE.post, POST)
+                .join(POST.user, USER)
+                .leftJoin(POST.category, CATEGORY)
+                .leftJoin(USER.profileImage, PROFILE_IMAGE)
+                .where(builder)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .orderBy(LIKE.createdAt.desc())
+                .fetch();
+
+        Long total = jpaQueryFactory
+                .select(LIKE.count())
+                .from(LIKE)
+                .join(LIKE.post, POST)
+                .where(builder)
+                .fetchOne();
+
+        if (!posts.isEmpty()) {
+            setTagsToPosts(posts);
+        }
+
+        return new PageImpl<>(posts, pageable, total);
     }
 
     @Override
-    public Page<Post> findByTags(Long userId, List<Long> tagIds, String keyword, Pageable pageable) {
-        BooleanBuilder builder = buildConditions(userId, null, tagIds, keyword);
-        return createResult(pageable, builder);
+    public Page<PostSummaryResponse> findFilteredPosts(
+            Long userId, Long categoryId, List<Long> tagIds, String keyword, Pageable pageable) {
+        BooleanBuilder builder = buildPostFilters(userId, categoryId, tagIds, keyword);
+        return getPostSummaryPage(builder, pageable);
     }
 
     @Override
@@ -112,7 +161,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
                 .from(POST_TAG)
                 .join(POST_TAG.tag, TAG)
                 .where(POST_TAG.post.id.eq(postId))
-                .orderBy(TAG.id.asc())
+                .orderBy(POST_TAG.id.asc())
                 .fetch();
 
         List<CommentResponse> comments = jpaQueryFactory
@@ -175,24 +224,43 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
         return activities;
     }
 
-    private PageImpl<Post> createResult(Pageable pageable, BooleanBuilder builder) {
-        List<Post> posts = createPostsQuery(builder, pageable);
+    private PageImpl<PostSummaryResponse> getPostSummaryPage(BooleanBuilder builder, Pageable pageable) {
+        List<PostSummaryResponse> posts = createPostSummaryQuery(builder, pageable);
         Long total = createCountQuery(builder);
+        if (!posts.isEmpty()) {
+            setTagsToPosts(posts);
+        }
         return new PageImpl<>(posts, pageable, total);
     }
 
-    private List<Post> createPostsQuery(BooleanBuilder builder, Pageable pageable) {
+    private List<PostSummaryResponse> createPostSummaryQuery(BooleanBuilder builder, Pageable pageable) {
         return jpaQueryFactory
-                .selectFrom(POST)
-                .leftJoin(POST.user, USER).fetchJoin()
-                .leftJoin(POST.user.profileImage, PROFILE_IMAGE).fetchJoin()
-                .leftJoin(POST.category, CATEGORY).fetchJoin()
-                .leftJoin(POST.postTags, POST_TAG).fetchJoin()
-                .leftJoin(POST_TAG.tag, TAG).fetchJoin()
+                .select(Projections.constructor(PostSummaryResponse.class,
+                                POST.id,
+                                POST.title,
+                                POST.contentPreview,
+                                POST.postStatus,
+                                POST.visibility,
+                                Projections.constructor(CategoryResponse.class,
+                                        CATEGORY.id,
+                                        CATEGORY.name
+                                ),
+                                Projections.constructor(UserSummaryResponse.class,
+                                        USER.id,
+                                        USER.username,
+                                        PROFILE_IMAGE.fileKey.coalesce("")
+                                ),
+                                POST.createdAt
+                        )
+                )
+                .from(POST)
+                .join(POST.user, USER)
+                .leftJoin(POST.category, CATEGORY)
+                .leftJoin(USER.profileImage, PROFILE_IMAGE)
                 .where(builder)
-                .orderBy(POST.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
+                .orderBy(POST.createdAt.desc())
                 .fetch();
     }
 
@@ -204,7 +272,41 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
                 .fetchOne();
     }
 
-    private BooleanBuilder buildConditions(Long userId, Long categoryId, List<Long> tagIds, String keyword) {
+    private void setTagsToPosts(List<PostSummaryResponse> posts) {
+        List<Long> postIds = posts.stream()
+                .map(PostSummaryResponse::getPostId)
+                .toList();
+
+        Map<Long, List<TagResponse>> tagMap = getTagsByPostIds(postIds);
+
+        posts.forEach(post -> {
+            post.setTags(tagMap.getOrDefault(post.getPostId(), Collections.emptyList()));
+        });
+    }
+
+    private Map<Long, List<TagResponse>> getTagsByPostIds(List<Long> postIds) {
+        return jpaQueryFactory
+                .select(POST_TAG.post.id,
+                        Projections.constructor(TagResponse.class,
+                                TAG.id,
+                                TAG.name)
+                )
+                .from(POST_TAG)
+                .join(POST_TAG.tag, TAG)
+                .where(POST_TAG.post.id.in(postIds))
+                .orderBy(POST_TAG.id.asc())
+                .fetch()
+                .stream()
+                .collect(Collectors.groupingBy(
+                        tuple -> tuple.get(POST_TAG.post.id),
+                        Collectors.mapping(
+                                tuple -> tuple.get(1, TagResponse.class),
+                                Collectors.toList()
+                        )
+                ));
+    }
+
+    private BooleanBuilder buildPostFilters(Long userId, Long categoryId, List<Long> tagIds, String keyword) {
         BooleanBuilder builder = new BooleanBuilder()
                 .and(POST.user.id.eq(userId))
                 .and(POST.deletedAt.isNull());
@@ -225,19 +327,19 @@ public class PostRepositoryImpl implements PostRepositoryCustom{
         }
 
         if (keyword != null && !keyword.isEmpty()) {
-            builder.and(POST.title.contains(keyword));
+            builder.and(POST.title.containsIgnoreCase(keyword));
         }
 
         return builder;
     }
 
     private BooleanExpression createTagExistsCondition(List<Long> tagIds) {
-            return JPAExpressions
-                    .select(POST_TAG.id)
-                    .from(POST_TAG)
-                    .where(POST_TAG.post.id.eq(POST.id)
-                            .and(POST_TAG.tag.id.in(tagIds))
-                    )
-                    .exists();
+        return JPAExpressions
+                .select(POST_TAG.id)
+                .from(POST_TAG)
+                .where(POST_TAG.post.id.eq(POST.id)
+                        .and(POST_TAG.tag.id.in(tagIds))
+                )
+                .exists();
     }
 }

@@ -1,7 +1,6 @@
 package com.jiwon.mylog.domain.category.entity;
 
 import com.jiwon.mylog.domain.category.dto.request.CategoryRequest;
-import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.domain.user.entity.User;
 import com.jiwon.mylog.global.common.entity.BaseEntity;
 import jakarta.persistence.Column;
@@ -11,16 +10,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -46,10 +41,6 @@ public class Category extends BaseEntity {
     @Builder.Default
     @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 0")
     private Long postCount = 0L;
-
-    @Builder.Default
-    @OneToMany(mappedBy = "category")
-    private List<Post> posts = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;

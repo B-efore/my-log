@@ -122,21 +122,6 @@ public class PostController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/users/{userId}/posts")
-    @Operation(
-            summary = "특정 유저의 게시글 전체 조회",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "특정 유저의 게시글 전체 조회 (페이징 적용)")
-            }
-    )
-    public ResponseEntity<PageResponse> getUserPosts(
-            @PathVariable("userId") Long userId,
-            @PageableDefault(size = 10, page = 0,
-                    sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
-        PageResponse response = postService.getUserPosts(userId, pageable);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
     @GetMapping("/users/{userId}/categories/{categoryId}/posts")
     @Operation(
             summary = "특정 유저의 카테고리별 게시글 조회 (태그 필터링 및 키워드 검색 포함)",
@@ -153,7 +138,7 @@ public class PostController {
             @PageableDefault(size = 10, page = 0,
                     sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
         if (keyword == null || keyword.isEmpty()) {
-            return ResponseEntity.ok(postService.getPostsByCategoryAndTags(
+            return ResponseEntity.ok(postService.getFilteredPosts(
                     userId, categoryId, tags, "", pageable));
         } else {
             return ResponseEntity.ok(postService.searchPosts(

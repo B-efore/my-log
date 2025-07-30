@@ -18,6 +18,7 @@ import com.jiwon.mylog.global.common.error.exception.ForbiddenException;
 import com.jiwon.mylog.global.common.error.exception.NotFoundException;
 import com.jiwon.mylog.domain.category.repository.CategoryRepository;
 import com.jiwon.mylog.domain.user.repository.UserRepository;
+
 import java.util.List;
 
 import com.jiwon.mylog.domain.tag.service.TagService;
@@ -49,7 +50,6 @@ public class PostService {
             evict = {
                     @CacheEvict(value = "post::notice", allEntries = true, condition = "#postRequest.type.equals('공지')"),
                     @CacheEvict(value = "post::main", allEntries = true, condition = "#postRequest.type.equals('일반 글')"),
-                    @CacheEvict(value = "post::list", allEntries = true, condition = "#postRequest.type.equals('일반 글')"),
                     @CacheEvict(value = "post::filter", allEntries = true, condition = "#postRequest.type.equals('일반 글')"),
 
                     @CacheEvict(value = "blog::home", key = "#userId", condition = "#userId != null")
@@ -75,7 +75,6 @@ public class PostService {
             evict = {
                     @CacheEvict(value = "post::notice", allEntries = true, condition = "#postRequest.type.equals('공지')"),
                     @CacheEvict(value = "post::main", allEntries = true, condition = "#postRequest.type.equals('일반 글')"),
-                    @CacheEvict(value = "post::list", allEntries = true, condition = "#postRequest.type.equals('일반 글')"),
                     @CacheEvict(value = "post::filter", allEntries = true, condition = "#postRequest.type.equals('일반 글')"),
 
                     @CacheEvict(value = "blog::home", key = "#userId", condition = "#userId != null")
@@ -98,7 +97,6 @@ public class PostService {
     @Caching(evict = {
             @CacheEvict(value = "post::detail", key = "#postId"),
             @CacheEvict(value = "post::main", allEntries = true),
-            @CacheEvict(value = "post::list", allEntries = true),
             @CacheEvict(value = "post::filter", allEntries = true),
 
             @CacheEvict(value = "blog::home", key = "#userId", condition = "#userId != null")
@@ -114,6 +112,7 @@ public class PostService {
 
     /**
      * 포스트와 연관된 카테고리, 태그 게시글 카운트 증가
+     *
      * @param category
      * @param tags
      */
@@ -126,6 +125,7 @@ public class PostService {
 
     /**
      * 포스트와 연관된 카테고리, 태그 게시글 카운트 감소
+     *
      * @param post
      */
     private void decreaseRelatedPostInfo(Post post) {
@@ -137,9 +137,10 @@ public class PostService {
 
     /**
      * 포스트와 연관된 정보 삭제 (포스트태그, 댓글)
+     *
      * @param post
      */
-    private void deleteRelatedPostInfo(Post post){
+    private void deleteRelatedPostInfo(Post post) {
         post.getPostTags().forEach(postTag -> {
             postTag.setTag(null);
             postTag.setPost(null);
@@ -195,50 +196,13 @@ public class PostService {
                 postPage.getTotalElements());
     }
 
-    @Cacheable(value = "post::list",
-            key = "'user:' + #userId + ':page:' + #pageable.pageNumber + ':size:' + #pageable.pageSize",
-            condition = "#userId != null && #pageable != null"
-    )
-    @Transactional(readOnly = true)
-    public PageResponse getUserPosts(Long userId, Pageable pageable) {
-        Page<Post> postPage = postRepository.findAllByUser(userId, pageable);
-        List<PostSummaryResponse> posts = postPage.stream()
-                .map(PostSummaryResponse::fromPost)
-                .toList();
-
-        return PageResponse.from(
-                posts,
-                postPage.getNumber(),
-                postPage.getSize(),
-                postPage.getTotalPages(),
-                postPage.getTotalElements());
-    }
-
     @Cacheable(value = "post::filter", keyGenerator = "postCacheKeyGenerator")
     @Transactional(readOnly = true)
-    public PageResponse getPostsByCategoryAndTags(
+    public PageResponse getFilteredPosts(
             Long userId,
             Long categoryId, List<Long> tagIds, String keyword,
             Pageable pageable) {
-
-        Page<Post> postPage;
-
-        if (categoryId == null || categoryId.equals(0L)) {
-            postPage = postRepository.findByTags(userId, tagIds, keyword, pageable);
-        } else {
-            postPage = postRepository.findByCategoryAndTags(userId, categoryId, tagIds, keyword, pageable);
-        }
-
-        List<PostSummaryResponse> posts = postPage.stream()
-                .map(PostSummaryResponse::fromPost)
-                .toList();
-
-        return PageResponse.from(
-                posts,
-                postPage.getNumber(),
-                postPage.getSize(),
-                postPage.getTotalPages(),
-                (int) postPage.getTotalElements());
+        return findFilteredPosts(userId, categoryId, tagIds, keyword, pageable);
     }
 
     @Transactional(readOnly = true)
@@ -246,21 +210,14 @@ public class PostService {
             Long userId,
             Long categoryId, List<Long> tagIds, String keyword,
             Pageable pageable) {
+        return findFilteredPosts(userId, categoryId, tagIds, keyword, pageable);
+    }
 
-        Page<Post> postPage;
-
-        if (categoryId == null || categoryId.equals(0L)) {
-            postPage = postRepository.findByTags(userId, tagIds, keyword, pageable);
-        } else {
-            postPage = postRepository.findByCategoryAndTags(userId, categoryId, tagIds, keyword, pageable);
-        }
-
-        List<PostSummaryResponse> posts = postPage.stream()
-                .map(PostSummaryResponse::fromPost)
-                .toList();
-
+    private PageResponse<PostSummaryResponse> findFilteredPosts(Long userId, Long categoryId, List<Long> tagIds, String keyword, Pageable pageable) {
+        Long realCategoryId = (categoryId == null || categoryId.equals(0L)) ? null : categoryId;
+        Page<PostSummaryResponse> postPage = postRepository.findFilteredPosts(userId, realCategoryId, tagIds, keyword, pageable);
         return PageResponse.from(
-                posts,
+                postPage.getContent(),
                 postPage.getNumber(),
                 postPage.getSize(),
                 postPage.getTotalPages(),
@@ -288,7 +245,7 @@ public class PostService {
     }
 
     private void validateOwner(Post post, Long userId) {
-        if(!post.getUser().getId().equals(userId)) {
+        if (!post.getUser().getId().equals(userId)) {
             throw new ForbiddenException(ErrorCode.FORBIDDEN);
         }
     }

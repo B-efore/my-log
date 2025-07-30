@@ -15,11 +15,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -30,7 +28,7 @@ public class LikeService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
 
-    @CacheEvict(value = "like::count", key="'postId:' + #postId", condition = "#postId != null")
+    @CacheEvict(value = "like::count", key = "'postId:' + #postId", condition = "#postId != null")
     @Transactional
     public void createLike(Long userId, Long postId) {
         User user = userRepository.findById(userId)
@@ -53,7 +51,7 @@ public class LikeService {
         }
     }
 
-    @CacheEvict(value = "like::count", key="'postId:' + #postId", condition = "#postId != null")
+    @CacheEvict(value = "like::count", key = "'postId:' + #postId", condition = "#postId != null")
     @Transactional
     public void deleteLike(Long userId, Long postId) {
         validateUserExists(userId);
@@ -78,13 +76,10 @@ public class LikeService {
     @Transactional(readOnly = true)
     public PageResponse getUserLikes(Long userId, Pageable pageable) {
         validateUserExists(userId);
-        Page<Post> postPage = likeRepository.findLikedPostByUserId(userId, pageable);
-        List<PostSummaryResponse> posts = postPage.getContent().stream()
-                .map(PostSummaryResponse::fromPost)
-                .toList();
+        Page<PostSummaryResponse> postPage = postRepository.findLikedPosts(userId, pageable);
 
         return PageResponse.from(
-                posts,
+                postPage.getContent(),
                 postPage.getNumber(),
                 postPage.getSize(),
                 postPage.getTotalPages(),
@@ -93,13 +88,13 @@ public class LikeService {
     }
 
     private void validateUserExists(Long userId) {
-        if(!userRepository.existsById(userId)) {
+        if (!userRepository.existsById(userId)) {
             throw new NotFoundException(ErrorCode.NOT_FOUND_USER);
         }
     }
 
     private void validatePostExists(Long postId) {
-        if(!postRepository.existsById(postId)) {
+        if (!postRepository.existsById(postId)) {
             throw new NotFoundException(ErrorCode.NOT_FOUND_POST);
         }
     }
