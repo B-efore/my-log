@@ -36,6 +36,8 @@ public class PostDetailResponse {
     private CategoryResponse category;
     private List<TagResponse> tags;
     private List<CommentResponse> comments;
+    private RelatedPostResponse previousPost;
+    private RelatedPostResponse nextPost;
 
     public PostDetailResponse(Long postId, String title, String content, String contentPreview, int views, PostStatus postStatus, Visibility visibility, LocalDateTime createdAt, boolean pinned, PostType type, UserResponse user, CategoryResponse category) {
         this.postId = postId;
@@ -73,6 +75,11 @@ public class PostDetailResponse {
                         .map(comment -> CommentResponse.fromComment(comment))
                         .toList())
                 .build();
+    }
+
+    public void setRelatedPosts(RelatedPostResponse previous, RelatedPostResponse next) {
+        this.previousPost = previous;
+        this.nextPost = next;
     }
 
     public void setViews(int views) {

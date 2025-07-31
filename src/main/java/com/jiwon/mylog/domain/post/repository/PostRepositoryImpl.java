@@ -8,6 +8,7 @@ import com.jiwon.mylog.domain.image.entity.QProfileImage;
 import com.jiwon.mylog.domain.like.QLike;
 import com.jiwon.mylog.domain.post.dto.response.PostDetailResponse;
 import com.jiwon.mylog.domain.post.dto.response.PostSummaryResponse;
+import com.jiwon.mylog.domain.post.dto.response.RelatedPostResponse;
 import com.jiwon.mylog.domain.post.entity.QPost;
 import com.jiwon.mylog.domain.tag.dto.response.TagResponse;
 import com.jiwon.mylog.domain.tag.entity.QPostTag;
@@ -17,11 +18,13 @@ import com.jiwon.mylog.domain.user.dto.response.UserResponse;
 import com.jiwon.mylog.domain.user.dto.response.UserSummaryResponse;
 import com.jiwon.mylog.domain.user.entity.QUser;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.DateTemplate;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +50,9 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
     private final JPAQueryFactory jpaQueryFactory;
     private static final QPost POST = QPost.post;
+    private static final QPost PREV_POST = new QPost("prev");
+    private static final QPost NEXT_POST = new QPost("next");
+    private static final QPost SUB_POST = new QPost("sub");
     private static final QUser USER = QUser.user;
     private static final QProfileImage PROFILE_IMAGE = QProfileImage.profileImage;
     private static final QCategory CATEGORY = QCategory.category;
@@ -153,7 +159,21 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
             return Optional.empty();
         }
 
-        List<TagResponse> tags = jpaQueryFactory
+        List<TagResponse> tags = getTagsByPostId(postId);
+        List<CommentResponse> comments = getCommentsByPostId(postId);
+
+        Tuple postData = getPostData(postId);
+        RelatedPostResponse previousPost = findPreviousPost(postData);
+        RelatedPostResponse nextPost = findNextPost(postData);
+
+        postDetailResponse.setTagsAndComments(tags, comments);
+        postDetailResponse.setRelatedPosts(previousPost, nextPost);
+
+        return Optional.of(postDetailResponse);
+    }
+
+    private List<TagResponse> getTagsByPostId(Long postId) {
+        return jpaQueryFactory
                 .select(Projections.constructor(TagResponse.class,
                         TAG.id,
                         TAG.name
@@ -163,8 +183,10 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .where(POST_TAG.post.id.eq(postId))
                 .orderBy(POST_TAG.id.asc())
                 .fetch();
+    }
 
-        List<CommentResponse> comments = jpaQueryFactory
+    private List<CommentResponse> getCommentsByPostId(Long postId) {
+        return jpaQueryFactory
                 .select(Projections.constructor(CommentResponse.class,
                                 COMMENT.id,
                                 COMMENT.parent.id,
@@ -190,9 +212,84 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .where(COMMENT.post.id.eq(postId))
                 .orderBy(COMMENT.createdAt.desc())
                 .fetch();
+    }
 
-        postDetailResponse.setTagsAndComments(tags, comments);
-        return Optional.of(postDetailResponse);
+    private RelatedPostResponse findPreviousPost(Tuple currentPost) {
+
+        if (currentPost == null) {
+            return null;
+        }
+
+        Long userId = currentPost.get(0, Long.class);
+        Long categoryId = currentPost.get(1, Long.class);
+        LocalDateTime createdAt = currentPost.get(2, LocalDateTime.class);
+
+        BooleanBuilder conditions = new BooleanBuilder()
+                .and(POST.user.id.eq(userId))
+                .and(POST.deletedAt.isNull())
+                .and(POST.createdAt.lt(createdAt));
+
+        if (categoryId != null && categoryId > 0L) {
+            conditions.and(POST.category.id.eq(categoryId));
+        } else {
+            conditions.and(POST.category.isNull());
+        }
+
+        return jpaQueryFactory
+                .select(Projections.constructor(RelatedPostResponse.class,
+                                POST.id, POST.title
+                        )
+                )
+                .from(POST)
+                .where(conditions)
+                .orderBy(POST.createdAt.desc())
+                .limit(1)
+                .fetchOne();
+    }
+
+    private RelatedPostResponse findNextPost(Tuple currentPost) {
+
+        if (currentPost == null) {
+            return null;
+        }
+
+        Long userId = currentPost.get(0, Long.class);
+        Long categoryId = currentPost.get(1, Long.class);
+        LocalDateTime createdAt = currentPost.get(2, LocalDateTime.class);
+
+        BooleanBuilder conditions = new BooleanBuilder()
+                .and(POST.user.id.eq(userId))
+                .and(POST.deletedAt.isNull())
+                .and(POST.createdAt.gt(createdAt));
+
+        if (categoryId != null && categoryId > 0L) {
+            conditions.and(POST.category.id.eq(categoryId));
+        } else {
+            conditions.and(POST.category.isNull());
+        }
+
+        return jpaQueryFactory
+                .select(Projections.constructor(RelatedPostResponse.class,
+                                POST.id, POST.title
+                        )
+                )
+                .from(POST)
+                .where(conditions)
+                .orderBy(POST.createdAt.asc())
+                .limit(1)
+                .fetchOne();
+    }
+
+    private Tuple getPostData(Long postId) {
+        Tuple currentPost = jpaQueryFactory
+                .select(POST.user.id,
+                        POST.category.id.coalesce(-1L),
+                        POST.createdAt
+                )
+                .from(POST)
+                .where(POST.id.eq(postId))
+                .fetchOne();
+        return currentPost;
     }
 
     @Override

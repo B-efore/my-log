@@ -2,6 +2,7 @@ package com.jiwon.mylog.domain.post.repository;
 
 import com.jiwon.mylog.domain.post.dto.response.PostDetailResponse;
 import com.jiwon.mylog.domain.post.dto.response.PostSummaryResponse;
+import com.jiwon.mylog.domain.post.dto.response.RelatedPostResponse;
 import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.domain.user.dto.response.UserActivityResponse;
 import org.springframework.data.domain.Page;
