@@ -1,5 +1,6 @@
 package com.jiwon.mylog.domain.post.controller;
 
+import com.jiwon.mylog.domain.post.dto.response.PostNavigationResponse;
 import com.jiwon.mylog.domain.post.service.PostService;
 import com.jiwon.mylog.domain.post.service.PostViewService;
 import com.jiwon.mylog.global.security.auth.annotation.AllUser;
@@ -120,6 +121,24 @@ public class PostController {
                     sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
         PageResponse response = postService.getPosts(pageable);
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/posts/{postId}/navigation")
+    @Operation(
+            summary = "현재 게시글의 정보(카테고리 ID, 카테고리 내에서의 현재 page, offset)를 획득한다."
+    )
+    public ResponseEntity<PostNavigationResponse> getPostNavigation(@PathVariable("postId") Long postId) {
+        PostNavigationResponse response = postService.getPostNavigation(postId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/categories/{categoryId}/posts")
+    public ResponseEntity<PageResponse> getCategorizedPosts(
+            @PathVariable("categoryId") Long categoryId,
+            @RequestParam Long userId,
+            @PageableDefault(size = 5, sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
+        PageResponse response = postService.getCategorizedPosts(categoryId, userId, pageable);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/users/{userId}/categories/{categoryId}/posts")

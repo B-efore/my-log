@@ -7,6 +7,8 @@ import com.jiwon.mylog.domain.post.dto.request.PostRequest;
 import com.jiwon.mylog.domain.post.dto.response.MainPostResponse;
 import com.jiwon.mylog.domain.post.dto.response.NoticePostResponse;
 import com.jiwon.mylog.domain.post.dto.response.PostDetailResponse;
+import com.jiwon.mylog.domain.post.dto.response.PostNavigationResponse;
+import com.jiwon.mylog.domain.post.dto.response.RelatedPostResponse;
 import com.jiwon.mylog.global.common.entity.PageResponse;
 import com.jiwon.mylog.domain.post.dto.response.PostSummaryResponse;
 import com.jiwon.mylog.domain.post.entity.Post;
@@ -194,6 +196,23 @@ public class PostService {
                 postPage.getSize(),
                 postPage.getTotalPages(),
                 postPage.getTotalElements());
+    }
+
+    @Transactional(readOnly = true)
+    public PostNavigationResponse getPostNavigation(Long postId) {
+        return postRepository.findPostNavigation(postId);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse getCategorizedPosts(Long categoryId, Long userId, Pageable pageable) {
+        Page<RelatedPostResponse> postPage = postRepository.findCategorizedPosts(categoryId, userId, pageable);
+        return PageResponse.from(
+          postPage.getContent(),
+          postPage.getNumber(),
+          postPage.getSize(),
+          postPage.getTotalPages(),
+          postPage.getTotalElements()
+        );
     }
 
     @Cacheable(value = "post::filter", keyGenerator = "postCacheKeyGenerator")
