@@ -7,6 +7,7 @@ import com.jiwon.mylog.domain.comment.entity.QComment;
 import com.jiwon.mylog.domain.image.entity.QProfileImage;
 import com.jiwon.mylog.domain.like.QLike;
 import com.jiwon.mylog.domain.post.dto.response.PostDetailResponse;
+import com.jiwon.mylog.domain.post.dto.response.PostNavigationResponse;
 import com.jiwon.mylog.domain.post.dto.response.PostSummaryResponse;
 import com.jiwon.mylog.domain.post.dto.response.RelatedPostResponse;
 import com.jiwon.mylog.domain.post.entity.QPost;
@@ -24,12 +25,12 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.DateTemplate;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
-import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
@@ -214,6 +215,74 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .fetch();
     }
 
+    @Override
+    public PostNavigationResponse findPostNavigation(Long postId) {
+
+        Tuple postData = getPostData(postId);
+        if (postData == null) {
+            return null;
+        }
+
+        Long defaultPageSize = 5L;
+
+        Long userId = postData.get(0, Long.class);
+        Long categoryId = postData.get(1, Long.class);
+        LocalDateTime createdAt = postData.get(2, LocalDateTime.class);
+
+        BooleanBuilder conditions = createCategorizedDefaultConditions(userId, categoryId);
+        Long total = createCountQuery(conditions);
+        Long offset = createCountQuery(conditions.and(POST.createdAt.gt(createdAt)));
+
+        long currentPage = offset / defaultPageSize;
+        long currentPageOffset = offset - (offset % defaultPageSize);
+
+        return PostNavigationResponse.builder()
+                .postId(postId)
+                .userId(userId)
+                .categoryId(categoryId)
+                .currentOffset(currentPageOffset)
+                .currentPage(currentPage)
+                .totalPosts(total)
+                .build();
+    }
+
+    @Override
+    public Page<RelatedPostResponse> findCategorizedPosts(Long categoryId, Long userId, Pageable pageable) {
+        BooleanBuilder conditions = createCategorizedDefaultConditions(userId, categoryId);
+        List<RelatedPostResponse> categorizedPosts =
+                createdCategorizedPostsQuery(conditions, pageable);
+        Long total = createCountQuery(conditions);
+        return new PageImpl<>(categorizedPosts, pageable, total);
+    }
+
+    private BooleanBuilder createCategorizedDefaultConditions(Long userId, Long categoryId) {
+        BooleanBuilder conditions = new BooleanBuilder()
+                .and(POST.user.id.eq(userId))
+                .and(POST.deletedAt.isNull());
+
+        if (categoryId != null && categoryId > 0L) {
+            conditions.and(POST.category.id.eq(categoryId));
+        } else {
+            conditions.and(POST.category.isNull());
+        }
+
+        return conditions;
+    }
+
+    private List<RelatedPostResponse> createdCategorizedPostsQuery(BooleanBuilder conditions, Pageable pageable) {
+        return jpaQueryFactory
+                .select(Projections.constructor(RelatedPostResponse.class,
+                                POST.id, POST.title, POST.createdAt
+                        )
+                )
+                .from(POST)
+                .where(conditions)
+                .orderBy(POST.createdAt.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+    }
+
     private RelatedPostResponse findPreviousPost(Tuple currentPost) {
 
         if (currentPost == null) {
@@ -224,20 +293,13 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         Long categoryId = currentPost.get(1, Long.class);
         LocalDateTime createdAt = currentPost.get(2, LocalDateTime.class);
 
-        BooleanBuilder conditions = new BooleanBuilder()
-                .and(POST.user.id.eq(userId))
-                .and(POST.deletedAt.isNull())
+        BooleanBuilder conditions =
+                createCategorizedDefaultConditions(userId, categoryId)
                 .and(POST.createdAt.lt(createdAt));
-
-        if (categoryId != null && categoryId > 0L) {
-            conditions.and(POST.category.id.eq(categoryId));
-        } else {
-            conditions.and(POST.category.isNull());
-        }
 
         return jpaQueryFactory
                 .select(Projections.constructor(RelatedPostResponse.class,
-                                POST.id, POST.title
+                                POST.id, POST.title, POST.createdAt
                         )
                 )
                 .from(POST)
@@ -257,20 +319,13 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         Long categoryId = currentPost.get(1, Long.class);
         LocalDateTime createdAt = currentPost.get(2, LocalDateTime.class);
 
-        BooleanBuilder conditions = new BooleanBuilder()
-                .and(POST.user.id.eq(userId))
-                .and(POST.deletedAt.isNull())
+        BooleanBuilder conditions =
+                createCategorizedDefaultConditions(userId, categoryId)
                 .and(POST.createdAt.gt(createdAt));
-
-        if (categoryId != null && categoryId > 0L) {
-            conditions.and(POST.category.id.eq(categoryId));
-        } else {
-            conditions.and(POST.category.isNull());
-        }
 
         return jpaQueryFactory
                 .select(Projections.constructor(RelatedPostResponse.class,
-                                POST.id, POST.title
+                                POST.id, POST.title, POST.createdAt
                         )
                 )
                 .from(POST)
