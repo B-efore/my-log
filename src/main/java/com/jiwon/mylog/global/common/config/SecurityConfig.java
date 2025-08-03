@@ -87,7 +87,7 @@ public class SecurityConfig {
                         // 단순 조회 (권한X)
                         .requestMatchers(HttpMethod.GET, "/api/users/**", "/api/posts/**", "/api/categories/**", "/api/images/**", "/api/points/**", "/api/items/**", "/api/sse/**", "/api/likes/**").permitAll()
                         // 블로그 사용자
-                        .requestMatchers("/api/users/**", "/api/posts/**", "/api/categories/**", "/api/comments/**", "/api/images/**", "/api/notifications/**", "/api/likes/**", "/api/readme/**", "/api/openai/**", "/api/guestbooks").authenticated()
+                        .requestMatchers("/api/users/**", "/api/posts/**", "/api/categories/**", "/api/comments/**", "/api/images/**", "/api/s3/**", "/api/notifications/**", "/api/likes/**", "/api/readme/**", "/api/openai/**", "/api/guestbooks").authenticated()
                         // 관리자 전용
                         .requestMatchers("/api/admin/**").hasRole("ADMIN"));
 

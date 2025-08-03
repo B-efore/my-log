@@ -1,6 +1,8 @@
 package com.jiwon.mylog.global.aws;
 
+import com.jiwon.mylog.domain.image.dto.request.MultiImageRequest;
 import com.jiwon.mylog.domain.image.dto.response.PresignedUrlResponse;
+import com.jiwon.mylog.domain.image.dto.response.MultiPresignedUrlResponse;
 import com.jiwon.mylog.global.common.error.ErrorCode;
 import com.jiwon.mylog.global.common.error.exception.AmazonS3Exception;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,7 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -61,6 +64,14 @@ public class S3Service {
     }
 
     @Transactional
+    public MultiPresignedUrlResponse generatePutPresignedUrls(MultiImageRequest multiImages) {
+        List<PresignedUrlResponse> presignedUrls = multiImages.images().stream()
+                .map(image -> generatePutPresignedUrl(image.fileName()))
+                .toList();
+        return new MultiPresignedUrlResponse(presignedUrls);
+    }
+
+    @Transactional
     public void deleteFile(String fileName) {
         try {
             DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
@@ -85,6 +96,6 @@ public class S3Service {
         if (extension == null || extension.isBlank()) {
             throw new IllegalArgumentException("잘못된 확장자입니다.");
         }
-        return UUID.randomUUID() + "." + extension;
+        return "temp/" + UUID.randomUUID() + "." + extension;
     }
 }
