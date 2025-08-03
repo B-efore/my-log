@@ -462,9 +462,12 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     }
 
     private BooleanExpression categoryIdEq(Long categoryId) {
-        return (categoryId == null || categoryId < 0L) ?
-                POST.category.id.isNull() :
-                POST.category.id.eq(categoryId);
+        if (categoryId == null || categoryId == -1L) {
+            return POST.category.id.isNull();
+        } else if (categoryId == 0L) {
+            return null;
+        }
+        return POST.category.id.eq(categoryId);
     }
 
     private BooleanExpression userDeletedAtIsNull() {

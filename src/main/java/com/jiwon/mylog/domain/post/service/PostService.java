@@ -233,8 +233,7 @@ public class PostService {
     }
 
     private PageResponse<PostSummaryResponse> findFilteredPosts(Long userId, Long categoryId, List<Long> tagIds, String keyword, Pageable pageable) {
-        Long realCategoryId = (categoryId == null || categoryId.equals(0L)) ? null : categoryId;
-        Page<PostSummaryResponse> postPage = postRepository.findFilteredPosts(userId, realCategoryId, tagIds, keyword, pageable);
+        Page<PostSummaryResponse> postPage = postRepository.findFilteredPosts(userId, categoryId, tagIds, keyword, pageable);
         return PageResponse.from(
                 postPage.getContent(),
                 postPage.getNumber(),
