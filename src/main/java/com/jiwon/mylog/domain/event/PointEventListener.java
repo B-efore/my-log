@@ -1,15 +1,17 @@
 package com.jiwon.mylog.domain.event;
 
-import com.jiwon.mylog.domain.event.dto.CommentCreatedEvent;
+import com.jiwon.mylog.domain.event.dto.comment.CommentCreatedEvent;
 import com.jiwon.mylog.domain.event.dto.DailyLoginEvent;
-import com.jiwon.mylog.domain.event.dto.PostCreatedEvent;
+import com.jiwon.mylog.domain.event.dto.post.PostCreatedEvent;
 import com.jiwon.mylog.domain.point.repository.PointHistoryRepository;
 import com.jiwon.mylog.domain.point.service.PointService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class PointEventListener {
@@ -27,33 +29,45 @@ public class PointEventListener {
     @Transactional
     @EventListener
     public void handleDailyLogin(DailyLoginEvent event) {
-        if(historyRepository.countDailyPointByDescription(
-                event.getUserId(),
-                DAILY_LOGIN_DESCRIPTION) >= DAILY_LOGIN_LIMIT) {
-            return;
+        try {
+            if (historyRepository.countDailyPointByDescription(
+                    event.userId(),
+                    DAILY_LOGIN_DESCRIPTION) >= DAILY_LOGIN_LIMIT) {
+                return;
+            }
+            pointService.earnPoint(event.userId(), 404, DAILY_LOGIN_DESCRIPTION);
+        } catch (Exception e) {
+            log.warn("로그인 포인트 이벤트 처리 실패: {}", event, e);
         }
-        pointService.earnPoint(event.getUserId(), 404, DAILY_LOGIN_DESCRIPTION);
     }
 
     @Transactional
     @EventListener
     public void handlePostCreated(PostCreatedEvent event) {
-        if (historyRepository.countDailyPointByDescription(
-                event.getUserId(),
-                POST_EARN_DESCRIPTION) >= POST_POINT_LIMIT) {
-            return;
+        try {
+            if (historyRepository.countDailyPointByDescription(
+                    event.userId(),
+                    POST_EARN_DESCRIPTION) >= POST_POINT_LIMIT) {
+                return;
+            }
+            pointService.earnPoint(event.userId(), 77, POST_EARN_DESCRIPTION);
+        } catch (Exception e) {
+            log.warn("게시글 작성 포인트 이벤트 처리 실패: {}", event, e);
         }
-        pointService.earnPoint(event.getUserId(), 77, POST_EARN_DESCRIPTION);
     }
 
     @Transactional
     @EventListener
     public void handleCommentCreated(CommentCreatedEvent event) {
-        if (historyRepository.countDailyPointByDescription(
-                event.getCommentWriterId(),
-                COMMENT_EARN_DESCRIPTION) >= COMMENT_POINT_LIMIT) {
-            return;
+        try {
+            if (historyRepository.countDailyPointByDescription(
+                    event.commentWriterId(),
+                    COMMENT_EARN_DESCRIPTION) >= COMMENT_POINT_LIMIT) {
+                return;
+            }
+            pointService.earnPoint(event.commentWriterId(), 44, COMMENT_EARN_DESCRIPTION);
+        } catch (Exception e) {
+            log.warn("댓글 작성 포인트 이벤트 처리 실패: {}", event, e);
         }
-        pointService.earnPoint(event.getCommentWriterId(), 44, COMMENT_EARN_DESCRIPTION);
     }
 }
