@@ -1,6 +1,7 @@
 package com.jiwon.mylog.global.schedular;
 
 import com.jiwon.mylog.domain.post.repository.PostRepository;
+import com.jiwon.mylog.global.redis.RedisKey;
 import com.jiwon.mylog.global.redis.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,12 +18,11 @@ public class PostViewScheduler {
 
     private final PostRepository postRepository;
     private final RedisUtil redisUtil;
-    private static final String REDIS_KEY = "post:view:count:";
 
     @Scheduled(fixedRate = 10 * 60 * 1000L)
     @Transactional
     public void syncPostViewToDB() {
-        Map<Long, Integer> postCounts = redisUtil.getAllPostView(REDIS_KEY);
+        Map<Long, Integer> postCounts = redisUtil.getAllPostView(RedisKey.VIEW_COUNT_KEY.getPrefix());
         postCounts.forEach((postId, view) -> {
             try {
                 postRepository.updatePostView(postId, view);

@@ -8,6 +8,8 @@ import jakarta.mail.internet.MimeMessage;
 
 import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
+import java.time.Duration;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -26,27 +28,27 @@ public class MailService {
 
     @Transactional(readOnly = true)
     public void verifyEmailCode(String email, String code) {
-        String codeFindByEmail = redisUtil.getData(email);
+        String codeFindByEmail = redisUtil.get(email);
         if (codeFindByEmail == null) {
             throw new MailException(ErrorCode.NOT_FOUND_MAIL_CODE);
         }
         if (!codeFindByEmail.equals(code)) {
             throw new MailException(ErrorCode.INVALID_MAIL_CODE);
         }
-        redisUtil.deleteData(email);
+        redisUtil.delete(email);
     }
 
     @Transactional
     public void sendCodeMail(String email)  {
-        if (redisUtil.existEmailData(email)) {
-            redisUtil.deleteData(email);
+        if (redisUtil.exist(email)) {
+            redisUtil.delete(email);
         }
 
         String subject = "[MyLog] 인증번호입니다.";
         String code = createCode();
         String text = createCodeText(code);
         MimeMessage message = createEmail(email, subject, text);
-        redisUtil.setDataExpire(email, code, 60 * 5L);
+        redisUtil.set(email, code, Duration.ofMinutes(5));
 
         try {
             javaMailSender.send(message);

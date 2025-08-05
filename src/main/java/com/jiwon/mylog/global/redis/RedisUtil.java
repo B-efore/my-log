@@ -17,23 +17,34 @@ public class RedisUtil {
 
     private final StringRedisTemplate redisTemplate;
 
-    /**
-     * 이메일 관련
+    /*
+    기본 메서드
      */
-    public String getData(String key) {
+    public int incrementAndGet(String key, String value, Duration ttl, int increment) {
+        redisTemplate.opsForValue().setIfAbsent(key, value, ttl);
+        Long result = redisTemplate.opsForValue().increment(key, increment);
+        return result.intValue();
+    }
+
+    public void set(String key, String value, Duration ttl) {
+        redisTemplate.opsForValue().set(key, value, ttl);
+    }
+
+    public String get(String key) {
         return redisTemplate.opsForValue().get(key);
     }
 
-    public boolean existEmailData(String key) {
-        return Boolean.TRUE.equals(redisTemplate.hasKey(key));
+    public int getInt(String key, int defaultValue) {
+        String value = redisTemplate.opsForValue().get(key);
+        return value != null ? Integer.parseInt(value) : defaultValue;
     }
 
-    public void setDataExpire(String key, String value, long duration) {
-        redisTemplate.opsForValue().set(key, value, Duration.ofSeconds(duration));
-    }
-
-    public void deleteData(String key) {
+    public void delete(String key) {
         redisTemplate.delete(key);
+    }
+
+    public boolean exist(String key) {
+        return Boolean.TRUE.equals(redisTemplate.hasKey(key));
     }
 
     /**
@@ -48,25 +59,12 @@ public class RedisUtil {
         redisTemplate.expire(key, Duration.ofHours(12));
     }
 
-    public Long increasePostView(String key, String view) {
-        Boolean isNew = redisTemplate.opsForValue().setIfAbsent(key, view);
-        if (Boolean.TRUE.equals(isNew)) {
-            redisTemplate.expire(key, Duration.ofDays(7));
-        }
-        return redisTemplate.opsForValue().increment(key, 1);
-    }
-
-    public int getPostView(String key, int view) {
-        String value = redisTemplate.opsForValue().get(key);
-        return value != null ? Integer.parseInt(value) : view;
-    }
-
     public Map<Long, Integer> getAllPostView(String keyPrefix) {
         Set<String> keys = redisTemplate.keys(keyPrefix);
         return keys.stream()
                 .collect(Collectors.toMap(
                         key -> Long.parseLong(key.replace(keyPrefix, "")),
-                        key -> getPostView(key, 0)
+                        key -> getInt(key, 0)
                 ));
     }
 
