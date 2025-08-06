@@ -1,13 +1,17 @@
 package com.jiwon.mylog.domain.statistic;
 
 import com.jiwon.mylog.domain.statistic.dto.DailyReportResponse;
+import com.jiwon.mylog.domain.statistic.dto.UserRankResponse;
+import com.jiwon.mylog.domain.statistic.repository.UserStatsRepository;
 import com.jiwon.mylog.global.redis.key.RedisKey;
 import com.jiwon.mylog.global.redis.RedisUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -19,6 +23,12 @@ public class UserStatsService {
 
     private final static String REDIS_SET_DEFAULT = "0";
     private final static int REDIS_GET_DEFAULT = 0;
+
+    @Cacheable(value = "stat::ranker", key = "'start:' + #start + ':end:' + #end")
+    @Transactional(readOnly = true)
+    public List<UserRankResponse> getRanker(LocalDate start, LocalDate end) {
+        return userStatsRepository.findWeeklyTopUsers(start, end, 3);
+    }
 
     @Transactional(readOnly = true)
     public DailyReportResponse getUserDailyStats(Long userId, LocalDate date) {
