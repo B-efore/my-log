@@ -1,12 +1,19 @@
 package com.jiwon.mylog.global.redis;
 
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.jiwon.mylog.global.redis.key.UserStatsKey;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -17,23 +24,79 @@ public class RedisUtil {
 
     private final StringRedisTemplate redisTemplate;
 
-    /**
-     * 이메일 관련
+    /*
+    기본 메서드
      */
-    public String getData(String key) {
+    public int incrementAndGet(String key, String value, Duration ttl, int increment) {
+        redisTemplate.opsForValue().setIfAbsent(key, value, ttl);
+        Long result = redisTemplate.opsForValue().increment(key, increment);
+        return result.intValue();
+    }
+
+    public void set(String key, String value, Duration ttl) {
+        redisTemplate.opsForValue().set(key, value, ttl);
+    }
+
+    public String get(String key) {
         return redisTemplate.opsForValue().get(key);
     }
 
-    public boolean existEmailData(String key) {
+    public int getInt(String key, int defaultValue) {
+        String value = redisTemplate.opsForValue().get(key);
+        return value != null ? Integer.parseInt(value) : defaultValue;
+    }
+
+    public void delete(String key) {
+        redisTemplate.delete(key);
+    }
+
+    public boolean exist(String key) {
         return Boolean.TRUE.equals(redisTemplate.hasKey(key));
     }
 
-    public void setDataExpire(String key, String value, long duration) {
-        redisTemplate.opsForValue().set(key, value, Duration.ofSeconds(duration));
+    public Set<UserStatsKey> scanStatsKeys(String pattern, LocalDate target) {
+
+        Set<UserStatsKey> keys = new HashSet<>();
+
+        ScanOptions options = ScanOptions
+                .scanOptions().match(pattern).count(50).build();
+
+        redisTemplate.execute((RedisCallback<Set<UserStatsKey>>) connection -> {
+            try (Cursor<byte[]> cursor = connection.scan(options)) {
+                while (cursor.hasNext()) {
+                    try {
+                        String key = new String(cursor.next());
+                        parseStatsKey(key, keys, target);
+                    } catch (Exception e) {
+                        log.warn("parse key failed", e);
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Redis scan error", e);
+            }
+            return keys;
+        });
+
+        return keys;
     }
 
-    public void deleteData(String key) {
-        redisTemplate.delete(key);
+    private void parseStatsKey(String key, Set<UserStatsKey> keys, LocalDate target) {
+        String[] split = key.split(":");
+
+        if (split.length < 5) return;
+
+        try {
+            Long userId = Long.valueOf(split[3]);
+            LocalDate date = LocalDate.parse(split[4]);
+
+            if (date.isEqual(target)) {
+                keys.add(new UserStatsKey(userId, date));
+            }
+        } catch (NumberFormatException e) {
+            log.warn("올바르지 않은 key 형식 (userId 형식 오류): {}", key);
+        } catch (DateTimeParseException e) {
+            log.warn("올바르지 않은 key 형식 (date 형식 오류): {}", key);
+        }
     }
 
     /**
@@ -48,25 +111,12 @@ public class RedisUtil {
         redisTemplate.expire(key, Duration.ofHours(12));
     }
 
-    public Long increasePostView(String key, String view) {
-        Boolean isNew = redisTemplate.opsForValue().setIfAbsent(key, view);
-        if (Boolean.TRUE.equals(isNew)) {
-            redisTemplate.expire(key, Duration.ofDays(7));
-        }
-        return redisTemplate.opsForValue().increment(key, 1);
-    }
-
-    public int getPostView(String key, int view) {
-        String value = redisTemplate.opsForValue().get(key);
-        return value != null ? Integer.parseInt(value) : view;
-    }
-
     public Map<Long, Integer> getAllPostView(String keyPrefix) {
         Set<String> keys = redisTemplate.keys(keyPrefix);
         return keys.stream()
                 .collect(Collectors.toMap(
                         key -> Long.parseLong(key.replace(keyPrefix, "")),
-                        key -> getPostView(key, 0)
+                        key -> getInt(key, 0)
                 ));
     }
 

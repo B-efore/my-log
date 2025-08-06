@@ -2,7 +2,8 @@ package com.jiwon.mylog.domain.post.service;
 
 import com.jiwon.mylog.domain.category.entity.Category;
 import com.jiwon.mylog.domain.comment.entity.Comment;
-import com.jiwon.mylog.domain.event.dto.PostCreatedEvent;
+import com.jiwon.mylog.domain.event.dto.post.PostCreatedEvent;
+import com.jiwon.mylog.domain.event.dto.post.PostDeletedEvent;
 import com.jiwon.mylog.domain.post.dto.request.PostRequest;
 import com.jiwon.mylog.domain.post.dto.response.MainPostResponse;
 import com.jiwon.mylog.domain.post.dto.response.NoticePostResponse;
@@ -21,6 +22,7 @@ import com.jiwon.mylog.global.common.error.exception.NotFoundException;
 import com.jiwon.mylog.domain.category.repository.CategoryRepository;
 import com.jiwon.mylog.domain.user.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.jiwon.mylog.domain.tag.service.TagService;
@@ -67,7 +69,7 @@ public class PostService {
         Post savedPost = postRepository.save(post);
 
         increaseRelatedPostInfo(category, tags);
-        eventPublisher.publishEvent(new PostCreatedEvent(userId, savedPost.getId()));
+        eventPublisher.publishEvent(new PostCreatedEvent(userId, savedPost.getId(), savedPost.getCreatedAt()));
 
         return PostDetailResponse.fromPost(savedPost);
     }
@@ -109,6 +111,9 @@ public class PostService {
         validateOwner(post, userId);
         decreaseRelatedPostInfo(post);
         deleteRelatedPostInfo(post);
+
+        eventPublisher.publishEvent(new PostDeletedEvent(userId, postId, post.getCreatedAt()));
+
         post.delete();
     }
 
@@ -233,8 +238,7 @@ public class PostService {
     }
 
     private PageResponse<PostSummaryResponse> findFilteredPosts(Long userId, Long categoryId, List<Long> tagIds, String keyword, Pageable pageable) {
-        Long realCategoryId = (categoryId == null || categoryId.equals(0L)) ? null : categoryId;
-        Page<PostSummaryResponse> postPage = postRepository.findFilteredPosts(userId, realCategoryId, tagIds, keyword, pageable);
+        Page<PostSummaryResponse> postPage = postRepository.findFilteredPosts(userId, categoryId, tagIds, keyword, pageable);
         return PageResponse.from(
                 postPage.getContent(),
                 postPage.getNumber(),

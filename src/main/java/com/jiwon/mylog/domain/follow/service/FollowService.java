@@ -1,7 +1,7 @@
 package com.jiwon.mylog.domain.follow.service;
 
-import com.jiwon.mylog.domain.event.dto.FollowCreatedEvent;
-import com.jiwon.mylog.domain.event.dto.FollowDeletedEvent;
+import com.jiwon.mylog.domain.event.dto.follow.FollowCreatedEvent;
+import com.jiwon.mylog.domain.event.dto.follow.FollowDeletedEvent;
 import com.jiwon.mylog.domain.follow.dto.FollowCountResponse;
 import com.jiwon.mylog.domain.follow.dto.FollowListResponse;
 import com.jiwon.mylog.domain.follow.dto.FollowResponse;

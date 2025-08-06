@@ -5,7 +5,8 @@ import com.jiwon.mylog.domain.comment.dto.request.CommentUpdateRequest;
 import com.jiwon.mylog.domain.comment.dto.response.CommentResponse;
 import com.jiwon.mylog.domain.comment.entity.Comment;
 import com.jiwon.mylog.domain.comment.repository.CommentRepository;
-import com.jiwon.mylog.domain.event.dto.CommentCreatedEvent;
+import com.jiwon.mylog.domain.event.dto.comment.CommentCreatedEvent;
+import com.jiwon.mylog.domain.event.dto.comment.CommentDeletedEvent;
 import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.domain.user.entity.User;
 import com.jiwon.mylog.global.common.error.ErrorCode;
@@ -41,7 +42,7 @@ public class CommentService {
 
         Comment parent = null;
         if (request.getParentId() != null) {
-             parent = getComment(request.getParentId());
+            parent = getComment(request.getParentId());
         }
 
         Comment comment = Comment.create(request, parent, user, post);
@@ -49,16 +50,16 @@ public class CommentService {
 
         Long receiverId = post.getUser().getId();
 
-        if (!receiverId.equals(userId)) {
-            eventPublisher.publishEvent(
-                    new CommentCreatedEvent(
-                            postId,
-                            post.getUser().getId(),
-                            comment.getId(),
-                            userId,
-                            user.getUsername())
-            );
-        }
+        eventPublisher.publishEvent(
+                new CommentCreatedEvent(
+                        postId,
+                        receiverId,
+                        savedComment.getId(),
+                        userId,
+                        user.getUsername(),
+                        savedComment.getCreatedAt()
+                )
+        );
 
         return CommentResponse.fromComment(savedComment);
     }
@@ -77,6 +78,19 @@ public class CommentService {
     public void deleteComment(Long userId, Long postId, Long commentId) {
         Comment comment = getComment(commentId);
         validateOwner(userId, comment);
+
+        Long receiverId = comment.getPost().getUser().getId();
+
+        eventPublisher.publishEvent(
+                new CommentDeletedEvent(
+                        postId,
+                        receiverId,
+                        comment.getId(),
+                        userId,
+                        comment.getCreatedAt()
+                )
+        );
+
         comment.delete();
     }
 

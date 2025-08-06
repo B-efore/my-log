@@ -1,6 +1,7 @@
 package com.jiwon.mylog.domain.like;
 
-import com.jiwon.mylog.domain.event.dto.LikeCreatedEvent;
+import com.jiwon.mylog.domain.event.dto.like.LikeCreatedEvent;
+import com.jiwon.mylog.domain.event.dto.like.LikeDeletedEvent;
 import com.jiwon.mylog.domain.post.dto.response.PostSummaryResponse;
 import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.domain.post.repository.PostRepository;
@@ -17,6 +18,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.Objects;
 
 
 @RequiredArgsConstructor
@@ -38,7 +42,7 @@ public class LikeService {
         Long receiverId = post.getUser().getId();
 
         Like like = Like.toLike(user, post);
-        likeRepository.save(like);
+        Like savedLike = likeRepository.save(like);
 
         if (!receiverId.equals(userId)) {
             eventPublisher.publishEvent(
@@ -46,7 +50,9 @@ public class LikeService {
                             postId,
                             receiverId,
                             userId,
-                            user.getUsername())
+                            user.getUsername(),
+                            savedLike.getCreatedAt()
+                    )
             );
         }
     }
@@ -56,7 +62,23 @@ public class LikeService {
     public void deleteLike(Long userId, Long postId) {
         validateUserExists(userId);
         validatePostExists(postId);
+
+        Object[] likeDetails = likeRepository.findLikeDetails(userId, postId);
+        Long receiverId = ((Number) likeDetails[0]).longValue();
+        LocalDateTime createdAt = (LocalDateTime) likeDetails[1];
+
         likeRepository.deleteLike(userId, postId);
+
+        if (!receiverId.equals(userId)) {
+            eventPublisher.publishEvent(
+                    new LikeDeletedEvent(
+                            postId,
+                            receiverId,
+                            userId,
+                            createdAt
+                    )
+            );
+        }
     }
 
     @Cacheable(value = "like::count", key = "'postId:' + #postId", condition = "#postId != null")

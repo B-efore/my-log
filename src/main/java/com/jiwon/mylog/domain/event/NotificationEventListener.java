@@ -1,9 +1,9 @@
 package com.jiwon.mylog.domain.event;
 
-import com.jiwon.mylog.domain.event.dto.CommentCreatedEvent;
-import com.jiwon.mylog.domain.event.dto.FollowCreatedEvent;
-import com.jiwon.mylog.domain.event.dto.FollowDeletedEvent;
-import com.jiwon.mylog.domain.event.dto.LikeCreatedEvent;
+import com.jiwon.mylog.domain.event.dto.comment.CommentCreatedEvent;
+import com.jiwon.mylog.domain.event.dto.follow.FollowCreatedEvent;
+import com.jiwon.mylog.domain.event.dto.follow.FollowDeletedEvent;
+import com.jiwon.mylog.domain.event.dto.like.LikeCreatedEvent;
 import com.jiwon.mylog.domain.notification.entity.Notification;
 import com.jiwon.mylog.domain.notification.repository.NotificationRepository;
 import com.jiwon.mylog.domain.notification.service.NotificationService;
@@ -30,66 +30,70 @@ public class NotificationEventListener {
     @Transactional
     @EventListener
     public void handleCommentCreated(CommentCreatedEvent event) {
-        Long receiverId = event.getPostWriterId();
-        User receiver = getReceiver(receiverId);
+        if (event.postWriterId().equals(event.commentWriterId())) {
+            return;
+        }
 
-        Notification notification = Notification.create(
-                receiver,
-                event.getCommentWriterName() + "왹이 외계 수집물에 발  사를 남기다!",
-                "/posts/" + event.getPostId(),
-                NotificationType.COMMENT
-        );
-        notificationRepository.save(notification);
-
-        sendSSE(receiverId, notification);
+        try {
+            handleNotification(
+                    event.postWriterId(),
+                    event.commentWriterName() + "왹이 외계 수집물에 발  사를 남기다!",
+                    "/posts/" + event.postId(),
+                    NotificationType.COMMENT
+            );
+        } catch (Exception e) {
+            log.warn("댓글 생성 이벤트 알림 처리 실패: {}", event, e);
+        }
     }
 
     @Transactional
     @EventListener
     public void handleLikeCreated(LikeCreatedEvent event) {
-        Long receiverId = event.getPostWriterId();
-        User receiver = getReceiver(receiverId);
-
-        Notification notification = Notification.create(
-                receiver,
-                event.getLikeWriterName() + "왹이 외계 수집물에 푸  딩을 달았다!",
-                "/posts/" + event.getPostId(),
-                NotificationType.LIKE
-        );
-        notificationRepository.save(notification);
-
-        sendSSE(receiverId, notification);
+        try {
+            handleNotification(
+                    event.postWriterId(),
+                    event.likeWriterName() + "왹이 외계 수집물에 푸  딩을 달았다!",
+                    "/posts/" + event.postId(),
+                    NotificationType.LIKE
+            );
+        } catch (Exception e) {
+            log.warn("좋아요 생성 이벤트 알림 처리 실패: {}", event, e);
+        }
     }
 
     @Transactional
     @EventListener
     public void handleFollowCreated(FollowCreatedEvent event) {
-        Long receiverId = event.getReceiverId();
-        User receiver = getReceiver(event.getReceiverId());
-
-        Notification notification = Notification.create(
-                receiver,
-                event.getFollowerName() + "왹이 잡 았다! 너 잡혔다!",
-                "/" + event.getFollowerId(),
-                NotificationType.FOLLOW
-        );
-        notificationRepository.save(notification);
-
-        sendSSE(receiverId, notification);
+        try {
+            handleNotification(
+                    event.receiverId(),
+                    event.followerName() + "왹이 잡 았다! 너 잡혔다!",
+                    "/" + event.followerId(),
+                    NotificationType.FOLLOW
+            );
+        } catch (Exception e) {
+            log.warn("팔로우 이벤트 알림 처리 실패: {}", event, e);
+        }
     }
 
     @Transactional
     @EventListener
     public void handleUnFollowCreated(FollowDeletedEvent event) {
-        Long receiverId = event.getReceiverId();
-        User receiver = getReceiver(receiverId);
+        try {
+            handleNotification(
+                    event.receiverId(),
+                    "오오자비로운" + event.followerName() + "왹께서널놓아주시니",
+                    "/" + event.followerId(),
+                    NotificationType.FOLLOW
+            );
+        } catch (Exception e) {
+            log.warn("언팔로우 이벤트 알림 처리 실패: {}", event, e);
+        }
+    }
 
-        Notification notification = Notification.create(
-                receiver,
-                "오오자비로운" + event.getFollowerName() + "왹께서널놓아주시니",
-                "/" + event.getFollowerId(),
-                NotificationType.FOLLOW
-        );
+    private void handleNotification(Long receiverId, String content, String url, NotificationType type) {
+        User receiver = getReceiver(receiverId);
+        Notification notification = Notification.create(receiver, content, url, type);
         notificationRepository.save(notification);
 
         sendSSE(receiverId, notification);
