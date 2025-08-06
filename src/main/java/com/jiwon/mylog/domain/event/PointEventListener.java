@@ -59,6 +59,10 @@ public class PointEventListener {
     @Transactional
     @EventListener
     public void handleCommentCreated(CommentCreatedEvent event) {
+        if (!event.postWriterId().equals(event.commentWriterId())) {
+            return;
+        }
+
         try {
             if (historyRepository.countDailyPointByDescription(
                     event.commentWriterId(),

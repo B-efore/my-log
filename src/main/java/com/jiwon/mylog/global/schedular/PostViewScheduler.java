@@ -1,7 +1,7 @@
 package com.jiwon.mylog.global.schedular;
 
 import com.jiwon.mylog.domain.post.repository.PostRepository;
-import com.jiwon.mylog.global.redis.RedisKey;
+import com.jiwon.mylog.global.redis.key.RedisKey;
 import com.jiwon.mylog.global.redis.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

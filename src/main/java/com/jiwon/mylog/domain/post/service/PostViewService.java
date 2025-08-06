@@ -1,6 +1,6 @@
 package com.jiwon.mylog.domain.post.service;
 
-import com.jiwon.mylog.global.redis.RedisKey;
+import com.jiwon.mylog.global.redis.key.RedisKey;
 import com.jiwon.mylog.global.redis.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

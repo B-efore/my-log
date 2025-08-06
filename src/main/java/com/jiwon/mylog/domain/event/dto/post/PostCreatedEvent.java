@@ -1,4 +1,6 @@
 package com.jiwon.mylog.domain.event.dto.post;
 
-public record PostCreatedEvent(Long userId, Long postId) {
+import java.time.LocalDateTime;
+
+public record PostCreatedEvent(Long userId, Long postId, LocalDateTime createdAt) {
 }

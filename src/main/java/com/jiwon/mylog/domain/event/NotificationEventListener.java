@@ -30,6 +30,10 @@ public class NotificationEventListener {
     @Transactional
     @EventListener
     public void handleCommentCreated(CommentCreatedEvent event) {
+        if (event.postWriterId().equals(event.commentWriterId())) {
+            return;
+        }
+
         try {
             handleNotification(
                     event.postWriterId(),

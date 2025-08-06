@@ -1,4 +1,6 @@
 package com.jiwon.mylog.domain.event.dto.post;
 
-public record PostDeletedEvent(Long userId, Long postId) {
+import java.time.LocalDateTime;
+
+public record PostDeletedEvent(Long userId, Long postId, LocalDateTime createdAt) {
 }
