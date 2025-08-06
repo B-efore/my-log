@@ -1,6 +1,6 @@
 package com.jiwon.mylog.global.schedular;
 
-import com.jiwon.mylog.domain.statistic.UserStatsRepository;
+import com.jiwon.mylog.domain.statistic.repository.UserStatsRepository;
 import com.jiwon.mylog.global.redis.key.RedisKey;
 import com.jiwon.mylog.global.redis.RedisUtil;
 import com.jiwon.mylog.global.redis.key.UserStatsKey;

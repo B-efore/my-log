@@ -1,5 +1,6 @@
-package com.jiwon.mylog.domain.statistic;
+package com.jiwon.mylog.domain.statistic.repository;
 
+import com.jiwon.mylog.domain.statistic.UserDailyStats;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -10,7 +11,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 @Repository
-public interface UserStatsRepository extends JpaRepository<UserDailyStats, Long> {
+public interface UserStatsRepository extends JpaRepository<UserDailyStats, Long>, UserStatsCustomRepository {
     Optional<UserDailyStats> findByUserIdAndDate(Long userId, LocalDate date);
 
     @Modifying
