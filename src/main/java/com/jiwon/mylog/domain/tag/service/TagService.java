@@ -4,16 +4,16 @@ import com.jiwon.mylog.global.common.entity.PageResponse;
 import com.jiwon.mylog.domain.tag.dto.request.TagRequest;
 import com.jiwon.mylog.domain.tag.dto.response.TagResponse;
 import com.jiwon.mylog.domain.tag.entity.Tag;
-import com.jiwon.mylog.domain.tag.repository.TagRepository;
+import com.jiwon.mylog.domain.tag.repository.tag.TagRepository;
 import com.jiwon.mylog.domain.user.entity.User;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
@@ -36,39 +36,32 @@ public class TagService {
     }
 
     @Transactional
-    public List<Tag> getTagsById(User user, List<TagRequest> tagRequests) {
-
+    public List<Tag> getOrCreateTags(User user, List<TagRequest> tagRequests) {
         List<String> names = tagRequests.stream()
                 .map(TagRequest::getName)
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
 
-        // 이미 존재하는 태그
-        List<Tag> existingTags = tagRepository.findAllByUserAndNameIn(user, names);
-
-        List<String> existNames = existingTags.stream()
-                .map(Tag::getName)
-                .collect(Collectors.toList());
-
-        // 새로운 태그
-        List<Tag> createdTags = names.stream()
-                .filter(name -> !existNames.contains(name))
-                .map(name -> createTag(user, name))
-                .collect(Collectors.toList());
-
-        tagRepository.saveAll(createdTags);
-
-        return Stream.of(existingTags, createdTags)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+        return names.stream()
+                .map(name -> findOrCreateTag(user, name))
+                .toList();
     }
 
-    private Tag createTag(User user, String tagName) {
-        Tag tag = Tag.builder()
-                .name(tagName)
-                .usageCount(0L)
-                .user(user)
-                .build();
-        return tag;
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public Tag findOrCreateTag(User user, String name) {
+        return tagRepository.findByUserAndName(user, name)
+                .orElseGet(() -> {
+                    try {
+                        Tag tag = Tag.builder()
+                                .name(name)
+                                .usageCount(0L)
+                                .user(user)
+                                .build();
+                        return tagRepository.save(tag);
+                    } catch (DataIntegrityViolationException e) {
+                        return tagRepository.findByUserAndName(user, name)
+                                .orElseThrow(() -> new IllegalStateException("Tag should exist but not found: " + name));
+                    }
+                });
     }
 }

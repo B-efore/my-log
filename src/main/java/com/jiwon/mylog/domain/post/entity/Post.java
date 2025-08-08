@@ -79,7 +79,7 @@ public class Post extends BaseEntity {
     private List<PostImage> images = new ArrayList<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "post")
     private List<PostTag> postTags = new ArrayList<>();
 
     @Builder.Default
