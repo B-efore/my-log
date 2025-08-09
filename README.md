@@ -4,7 +4,8 @@
 
 ---
 
-![MyLogImage](https://github.com/user-attachments/assets/3f0ecf3a-30ad-4fd8-b70e-bce55db1b783)
+![MyLogImage](https://github.com/user-attachments/assets/abea6c2f-1558-44a9-9eff-6f8894ace2d2)
+
 > MyLog는 ‘나만의 블로그를 만들자’는 마음에서 시작한 서비스입니다.
 기본적인 블로그 기능을 갖춘 동시에, 외계·괴담 등 비일상적인 소재를 더해 독특한 분위기를 연출했습니다.
 사용자는 블로그를 이용하면서 조금은 불안한 오늘의 운세를 확인하거나, 숨겨진 메시지를 발견하고, 유령이나 외계인을 마주치는 등 특별한 경험을 누릴 수 있습니다.
