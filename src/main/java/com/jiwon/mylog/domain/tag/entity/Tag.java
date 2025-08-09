@@ -1,7 +1,6 @@
 package com.jiwon.mylog.domain.tag.entity;
 
 import com.jiwon.mylog.domain.user.entity.User;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,16 +9,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -48,15 +43,19 @@ public class Tag {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Builder.Default
-    @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PostTag> postTags = new ArrayList<>();
-
     public void incrementUsage() {
         this.usageCount++;
     }
 
     public void decrementUsage() {
         this.usageCount = Math.max(0, this.usageCount - 1);
+    }
+
+    public static Tag create(User user, String name) {
+        return Tag.builder()
+                .user(user)
+                .name(name)
+                .usageCount(0L)
+                .build();
     }
 }

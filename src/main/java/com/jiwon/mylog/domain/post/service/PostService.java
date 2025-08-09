@@ -69,9 +69,7 @@ public class PostService {
         User user = getUserById(userId);
         Category category = getCategoryById(userId, postRequest.getCategoryId());
         List<Tag> tags = tagService.getOrCreateTags(user, postRequest.getTagRequests());
-
-        Post post = Post.create(postRequest, user, category, tags);
-        Post savedPost = postRepository.save(post);
+        Post savedPost = postRepository.save(Post.create(postRequest, user, category));
 
         if (tags != null && !tags.isEmpty()) {
             List<PostTag> postTags = tags.stream()

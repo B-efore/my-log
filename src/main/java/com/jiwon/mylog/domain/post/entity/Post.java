@@ -86,7 +86,7 @@ public class Post extends BaseEntity {
     @OneToMany(mappedBy = "post")
     private List<Comment> comments = new ArrayList<>();
 
-    public static Post create(PostRequest request, User user, Category category, List<Tag> tags) {
+    public static Post create(PostRequest request, User user, Category category) {
         Post post = Post.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
@@ -98,7 +98,6 @@ public class Post extends BaseEntity {
                 .pinned(request.isPinned())
                 .type(PostType.fromString(request.getType()))
                 .build();
-        post.setTags(tags);
         return post;
     }
 
@@ -110,12 +109,6 @@ public class Post extends BaseEntity {
         this.pinned = request.isPinned();
         this.category = category;
         updateTags(tags);
-    }
-
-    private void setTags(List<Tag> tags) {
-        this.postTags = tags.stream()
-                .map(tag -> PostTag.createPostTag(this, tag))
-                .toList();
     }
 
     private void updateTags(List<Tag> tags) {

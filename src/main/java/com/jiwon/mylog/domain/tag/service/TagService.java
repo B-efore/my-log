@@ -1,5 +1,6 @@
 package com.jiwon.mylog.domain.tag.service;
 
+import com.jiwon.mylog.domain.tag.repository.tag.TagJdbcRepository;
 import com.jiwon.mylog.global.common.entity.PageResponse;
 import com.jiwon.mylog.domain.tag.dto.request.TagRequest;
 import com.jiwon.mylog.domain.tag.dto.response.TagResponse;
@@ -10,16 +11,15 @@ import com.jiwon.mylog.domain.user.entity.User;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
 public class TagService {
 
+    private final TagJdbcRepository tagJdbcRepository;
     private final TagRepository tagRepository;
 
     @Transactional(readOnly = true)
@@ -42,26 +42,12 @@ public class TagService {
                 .distinct()
                 .toList();
 
-        return names.stream()
-                .map(name -> findOrCreateTag(user, name))
+        List<Tag> tags = names.stream()
+                .map(name -> Tag.create(user, name))
                 .toList();
-    }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public Tag findOrCreateTag(User user, String name) {
-        return tagRepository.findByUserAndName(user, name)
-                .orElseGet(() -> {
-                    try {
-                        Tag tag = Tag.builder()
-                                .name(name)
-                                .usageCount(0L)
-                                .user(user)
-                                .build();
-                        return tagRepository.save(tag);
-                    } catch (DataIntegrityViolationException e) {
-                        return tagRepository.findByUserAndName(user, name)
-                                .orElseThrow(() -> new IllegalStateException("Tag should exist but not found: " + name));
-                    }
-                });
+        tagJdbcRepository.upsert(tags);
+
+        return tagRepository.findAllByUserAndNameIn(user, names);
     }
 }
