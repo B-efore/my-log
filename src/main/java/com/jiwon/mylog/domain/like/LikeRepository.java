@@ -6,18 +6,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Objects;
-
 @Repository
 public interface LikeRepository extends JpaRepository<Like, Long> {
     boolean existsByUserIdAndPostId(Long userId, Long postId);
 
-    @Query(value = "SELECT p.user_id, l.created_at " +
-            "FROM likes l " +
-            "INNER JOIN posts p ON l.post_id = p.id " +
-            "WHERE l.user_id = :userId AND l.post_id = :postId",
+    @Query(value = "select p.user_id as receiverId, l.created_at as createdAt "
+            + "from likes l "
+            + "inner join post p on l.post_id = p.id "
+            + "where l.user_id = :userId and p.id = :postId",
             nativeQuery = true)
-    Object[] findLikeDetails(@Param("userId") Long userId, @Param("postId") Long postId);
+    LikeNotificationDetails findLikeNotificationDetails(@Param("userId") Long userId, @Param("postId") Long postId);
 
     @Modifying
     @Query(value = "insert ignore into likes(user_id, post_id) values(:userId, :postId)", nativeQuery = true)

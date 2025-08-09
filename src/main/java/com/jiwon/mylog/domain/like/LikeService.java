@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 
 @RequiredArgsConstructor
@@ -63,9 +62,8 @@ public class LikeService {
         validateUserExists(userId);
         validatePostExists(postId);
 
-        Object[] likeDetails = likeRepository.findLikeDetails(userId, postId);
-        Long receiverId = ((Number) likeDetails[0]).longValue();
-        LocalDateTime createdAt = (LocalDateTime) likeDetails[1];
+        LikeNotificationDetails likeDetails = likeRepository.findLikeNotificationDetails(userId, postId);
+        Long receiverId = likeDetails.getReceiverId();
 
         likeRepository.deleteLike(userId, postId);
 
@@ -75,7 +73,7 @@ public class LikeService {
                             postId,
                             receiverId,
                             userId,
-                            createdAt
+                            likeDetails.getCreatedAt()
                     )
             );
         }
