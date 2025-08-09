@@ -51,9 +51,9 @@ public class NotificationEventListener {
     public void handleLikeCreated(LikeCreatedEvent event) {
         try {
             handleNotification(
-                    event.postWriterId(),
-                    event.likeWriterName() + "왹이 외계 수집물에 푸  딩을 달았다!",
-                    "/posts/" + event.postId(),
+                    event.receiverId(),
+                    event.senderName() + "왹이 외계 수집물에 푸  딩을 달았다!",
+                    "/posts/" + event.targetId(),
                     NotificationType.LIKE
             );
         } catch (Exception e) {

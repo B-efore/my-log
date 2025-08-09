@@ -1,7 +1,9 @@
-package com.jiwon.mylog.domain.like;
+package com.jiwon.mylog.domain.like.service;
 
 import com.jiwon.mylog.domain.event.dto.like.LikeCreatedEvent;
 import com.jiwon.mylog.domain.event.dto.like.LikeDeletedEvent;
+import com.jiwon.mylog.domain.like.repository.PostLikeRepository;
+import com.jiwon.mylog.domain.like.entity.PostLike;
 import com.jiwon.mylog.domain.post.dto.response.PostSummaryResponse;
 import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.domain.post.repository.PostRepository;
@@ -11,93 +13,84 @@ import com.jiwon.mylog.global.common.entity.PageResponse;
 import com.jiwon.mylog.global.common.error.ErrorCode;
 import com.jiwon.mylog.global.common.error.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-
 
 @RequiredArgsConstructor
 @Service
-public class LikeService {
+public class PostLikeService implements LikeService {
 
     private final ApplicationEventPublisher eventPublisher;
-    private final LikeRepository likeRepository;
+    private final PostLikeRepository postLikeRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
 
-    @CacheEvict(value = "like::count", key = "'postId:' + #postId", condition = "#postId != null")
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isLiked(Long userId, Long postId) {
+        return postLikeRepository.existsByUserIdAndPostId(userId, postId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Long countLikes(Long postId) {
+        return postLikeRepository.countByPostId(postId);
+    }
+
+    @Override
     @Transactional
-    public void createLike(Long userId, Long postId) {
+    public void like(Long userId, Long postId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
-        Post post = postRepository.findById(postId)
+        Post post = postRepository.findByIdWithUser(postId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_POST));
-        Long receiverId = post.getUser().getId();
 
-        Like like = Like.toLike(user, post);
-        Like savedLike = likeRepository.save(like);
+        PostLike savedPostLike = postLikeRepository.save(PostLike.toPostLike(user, post));
+
+        Long receiverId = post.getUser().getId();
 
         if (!receiverId.equals(userId)) {
             eventPublisher.publishEvent(
                     new LikeCreatedEvent(
                             postId,
                             receiverId,
-                            userId,
+                            user.getId(),
                             user.getUsername(),
-                            savedLike.getCreatedAt()
+                            savedPostLike.getCreatedAt()
                     )
             );
         }
     }
 
-    @CacheEvict(value = "like::count", key = "'postId:' + #postId", condition = "#postId != null")
+    @Override
     @Transactional
-    public void deleteLike(Long userId, Long postId) {
-        validateUserExists(userId);
-        validatePostExists(postId);
+    public void unlike(Long userId, Long postId) {
+        PostLike postLike = postLikeRepository.findWithDetails(userId, postId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND));
+        postLikeRepository.delete(postLike);
 
-        LikeNotificationDetails likeDetails = likeRepository.findLikeNotificationDetails(userId, postId);
-        Long receiverId = likeDetails.getReceiverId();
-
-        likeRepository.deleteLike(userId, postId);
+        Long receiverId = postLike.getUser().getId();
+        Long targetId = postLike.getPost().getId();
 
         if (!receiverId.equals(userId)) {
             eventPublisher.publishEvent(
                     new LikeDeletedEvent(
-                            postId,
+                            targetId,
                             receiverId,
                             userId,
-                            likeDetails.getCreatedAt()
+                            postLike.getCreatedAt()
                     )
             );
         }
     }
 
-    @Cacheable(value = "like::count", key = "'postId:' + #postId", condition = "#postId != null")
-    @Transactional(readOnly = true)
-    public long getLikeCount(Long postId) {
-        validatePostExists(postId);
-        return likeRepository.countByPostId(postId);
-    }
-
-    @Transactional(readOnly = true)
-    public boolean getLikeStatus(Long userId, Long postId) {
-        validateUserExists(userId);
-        validatePostExists(postId);
-        return likeRepository.existsByUserIdAndPostId(userId, postId);
-    }
-
     @Transactional(readOnly = true)
     public PageResponse getUserLikes(Long userId, Pageable pageable) {
-        validateUserExists(userId);
         Page<PostSummaryResponse> postPage = postRepository.findLikedPosts(userId, pageable);
-
         return PageResponse.from(
                 postPage.getContent(),
                 postPage.getNumber(),
@@ -105,17 +98,5 @@ public class LikeService {
                 postPage.getTotalPages(),
                 postPage.getTotalElements()
         );
-    }
-
-    private void validateUserExists(Long userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException(ErrorCode.NOT_FOUND_USER);
-        }
-    }
-
-    private void validatePostExists(Long postId) {
-        if (!postRepository.existsById(postId)) {
-            throw new NotFoundException(ErrorCode.NOT_FOUND_POST);
-        }
     }
 }
