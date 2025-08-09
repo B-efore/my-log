@@ -10,6 +10,8 @@ import com.jiwon.mylog.domain.post.dto.response.NoticePostResponse;
 import com.jiwon.mylog.domain.post.dto.response.PostDetailResponse;
 import com.jiwon.mylog.domain.post.dto.response.PostNavigationResponse;
 import com.jiwon.mylog.domain.post.dto.response.RelatedPostResponse;
+import com.jiwon.mylog.domain.tag.entity.PostTag;
+import com.jiwon.mylog.domain.tag.repository.posttag.PostTagJdbcRepository;
 import com.jiwon.mylog.global.common.entity.PageResponse;
 import com.jiwon.mylog.domain.post.dto.response.PostSummaryResponse;
 import com.jiwon.mylog.domain.post.entity.Post;
@@ -22,7 +24,8 @@ import com.jiwon.mylog.global.common.error.exception.NotFoundException;
 import com.jiwon.mylog.domain.category.repository.CategoryRepository;
 import com.jiwon.mylog.domain.user.repository.UserRepository;
 
-import java.time.LocalDateTime;
+import jakarta.persistence.EntityManager;
+import java.util.Comparator;
 import java.util.List;
 
 import com.jiwon.mylog.domain.tag.service.TagService;
@@ -43,8 +46,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PostService {
 
+    private final EntityManager em;
     private final ApplicationEventPublisher eventPublisher;
     private final TagService tagService;
+    private final PostTagJdbcRepository postTagJdbcRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
@@ -63,15 +68,21 @@ public class PostService {
     public PostDetailResponse createPost(Long userId, PostRequest postRequest) {
         User user = getUserById(userId);
         Category category = getCategoryById(userId, postRequest.getCategoryId());
-        List<Tag> tags = tagService.getTagsById(user, postRequest.getTagRequests());
+        List<Tag> tags = tagService.getOrCreateTags(user, postRequest.getTagRequests());
+        Post savedPost = postRepository.save(Post.create(postRequest, user, category));
 
-        Post post = Post.create(postRequest, user, category, tags);
-        Post savedPost = postRepository.save(post);
+        if (tags != null && !tags.isEmpty()) {
+            List<PostTag> postTags = tags.stream()
+                    .map(tag -> PostTag.createPostTag(savedPost, tag))
+                    .toList();
+            postTagJdbcRepository.saveAll(postTags);
+        }
 
         increaseRelatedPostInfo(category, tags);
         eventPublisher.publishEvent(new PostCreatedEvent(userId, savedPost.getId(), savedPost.getCreatedAt()));
 
-        return PostDetailResponse.fromPost(savedPost);
+        return postRepository.findPostDetail(savedPost.getId())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_POST));
     }
 
     @Caching(
@@ -91,11 +102,14 @@ public class PostService {
 
         decreaseRelatedPostInfo(post);
         Category category = getCategoryById(userId, postRequest.getCategoryId());
-        List<Tag> tags = tagService.getTagsById(post.getUser(), postRequest.getTagRequests());
+        List<Tag> tags = tagService.getOrCreateTags(post.getUser(), postRequest.getTagRequests());
         increaseRelatedPostInfo(category, tags);
 
         post.update(postRequest, category, tags);
-        return PostDetailResponse.fromPost(post);
+        em.flush();
+
+        return postRepository.findPostDetail(post.getId())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_POST));
     }
 
     @Caching(evict = {
@@ -127,7 +141,11 @@ public class PostService {
         if (category != null) {
             category.incrementUsage();
         }
-        tags.forEach(Tag::incrementUsage);
+
+        List<Tag> sortedTags = tags.stream()
+                .sorted(Comparator.comparing(Tag::getId))
+                .toList();
+        sortedTags.forEach(Tag::incrementUsage);
     }
 
     /**

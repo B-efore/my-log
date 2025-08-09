@@ -1,6 +1,5 @@
-package com.jiwon.mylog.domain.tag.repository;
+package com.jiwon.mylog.domain.tag.repository.tag;
 
-import com.jiwon.mylog.domain.category.entity.Category;
 import com.jiwon.mylog.domain.tag.entity.Tag;
 import com.jiwon.mylog.domain.user.entity.User;
 import java.util.List;
@@ -17,6 +16,8 @@ public interface TagRepository extends JpaRepository<Tag, Long>, TagRepositoryCu
 
     @Query("select t from Tag t where t.user.id = :userId")
     List<Tag> findAllByUserId(@Param("userId") Long userId);
+
+    Optional<Tag> findByUserAndName(User user, String name);
 
     @Modifying(clearAutomatically = true)
     @Query("update Tag t set t.usageCount = (select coalesce(count(pt.id), 0) from PostTag pt where pt.tag.id = t.id and pt.post.deletedAt is null)")

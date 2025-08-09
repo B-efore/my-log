@@ -5,7 +5,7 @@ import com.jiwon.mylog.domain.category.entity.QCategory;
 import com.jiwon.mylog.domain.comment.dto.response.CommentResponse;
 import com.jiwon.mylog.domain.comment.entity.QComment;
 import com.jiwon.mylog.domain.image.entity.QProfileImage;
-import com.jiwon.mylog.domain.like.QLike;
+import com.jiwon.mylog.domain.like.entity.QPostLike;
 import com.jiwon.mylog.domain.post.dto.response.PostDetailResponse;
 import com.jiwon.mylog.domain.post.dto.response.PostNavigationResponse;
 import com.jiwon.mylog.domain.post.dto.response.PostSummaryResponse;
@@ -56,7 +56,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     private static final QPostTag POST_TAG = QPostTag.postTag;
     private static final QTag TAG = QTag.tag;
     private static final QComment COMMENT = QComment.comment;
-    private static final QLike LIKE = QLike.like;
+    private static final QPostLike POST_LIKE = QPostLike.postLike;
 
     @Override
     public Page<PostSummaryResponse> findLikedPosts(Long userId, Pageable pageable) {
@@ -79,8 +79,8 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                                 POST.createdAt
                         )
                 )
-                .from(LIKE)
-                .join(LIKE.post, POST)
+                .from(POST_LIKE)
+                .join(POST_LIKE.post, POST)
                 .join(POST.user, USER)
                 .leftJoin(POST.category, CATEGORY)
                 .leftJoin(USER.profileImage, PROFILE_IMAGE)
@@ -89,13 +89,13 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .orderBy(LIKE.createdAt.desc())
+                .orderBy(POST_LIKE.createdAt.desc())
                 .fetch();
 
         Long total = jpaQueryFactory
-                .select(LIKE.count())
-                .from(LIKE)
-                .join(LIKE.post, POST)
+                .select(POST_LIKE.count())
+                .from(POST_LIKE)
+                .join(POST_LIKE.post, POST)
                 .where(likeUserIdEq(userId),
                         postDeletedAtIsNull())
                 .fetchOne();
@@ -458,7 +458,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     }
 
     private BooleanExpression likeUserIdEq(Long userId) {
-        return userId != null ? LIKE.user.id.eq(userId) : null;
+        return userId != null ? POST_LIKE.user.id.eq(userId) : null;
     }
 
     private BooleanExpression categoryIdEq(Long categoryId) {

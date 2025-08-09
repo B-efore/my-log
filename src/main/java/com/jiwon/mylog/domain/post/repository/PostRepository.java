@@ -53,4 +53,7 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
             "from Post p " +
             "where p.user.id = :userId and p.pinned = true and p.deletedAt is null")
     List<PinnedPostResponse> findPinnedPostsByUserId(@Param("userId") Long userId);
+
+    @Query("select p from Post p join fetch p.user where p.id = :postId")
+    Optional<Post> findByIdWithUser(@Param("postId") Long postId);
 }

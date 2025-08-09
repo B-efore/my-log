@@ -12,7 +12,7 @@ import com.jiwon.mylog.domain.post.repository.PostRepository;
 import com.jiwon.mylog.domain.tag.dto.request.TagRequest;
 import com.jiwon.mylog.domain.tag.entity.PostTag;
 import com.jiwon.mylog.domain.tag.entity.Tag;
-import com.jiwon.mylog.domain.tag.repository.TagRepository;
+import com.jiwon.mylog.domain.tag.repository.tag.TagRepository;
 import com.jiwon.mylog.domain.tag.service.TagService;
 import com.jiwon.mylog.domain.user.entity.User;
 import com.jiwon.mylog.domain.user.repository.UserRepository;

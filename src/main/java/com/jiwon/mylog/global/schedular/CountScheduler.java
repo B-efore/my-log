@@ -1,7 +1,7 @@
 package com.jiwon.mylog.global.schedular;
 
 import com.jiwon.mylog.domain.category.repository.CategoryRepository;
-import com.jiwon.mylog.domain.tag.repository.TagRepository;
+import com.jiwon.mylog.domain.tag.repository.tag.TagRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;

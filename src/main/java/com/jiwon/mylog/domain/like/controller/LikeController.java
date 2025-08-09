@@ -1,7 +1,7 @@
-package com.jiwon.mylog.domain.like;
+package com.jiwon.mylog.domain.like.controller;
 
+import com.jiwon.mylog.domain.like.service.PostLikeService;
 import com.jiwon.mylog.global.common.entity.PageResponse;
-import com.jiwon.mylog.global.common.entity.SliceResponse;
 import com.jiwon.mylog.global.security.auth.annotation.LoginUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -21,29 +21,29 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class LikeController {
 
-    private final LikeService likeService;
+    private final PostLikeService postLikeService;
 
     @PostMapping("/posts/{postId}/likes")
-    public ResponseEntity<Void> createLike(@LoginUser Long userId, @PathVariable Long postId) {
-        likeService.createLike(userId, postId);
+    public ResponseEntity<Void> likePost(@LoginUser Long userId, @PathVariable Long postId) {
+        postLikeService.like(userId, postId);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @DeleteMapping("/posts/{postId}/likes")
-    public ResponseEntity<Void> deleteLike(@LoginUser Long userId, @PathVariable Long postId) {
-        likeService.deleteLike(userId, postId);
+    public ResponseEntity<Void> unlikePost(@LoginUser Long userId, @PathVariable Long postId) {
+        postLikeService.unlike(userId, postId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/posts/{postId}/likes/count")
-    public ResponseEntity<Long> getLikeCount(@PathVariable Long postId) {
-        long likeCount = likeService.getLikeCount(postId);
+    public ResponseEntity<Long> countPostLike(@PathVariable Long postId) {
+        long likeCount = postLikeService.countLikes(postId);
         return ResponseEntity.ok(likeCount);
     }
 
     @GetMapping("/posts/{postId}/likes")
-    public ResponseEntity<Boolean> getLikeStatus(@LoginUser Long userId, @PathVariable Long postId) {
-        boolean likeStatus = likeService.getLikeStatus(userId, postId);
+    public ResponseEntity<Boolean> isLikedPost(@LoginUser Long userId, @PathVariable Long postId) {
+        boolean likeStatus = postLikeService.isLiked(userId, postId);
         return ResponseEntity.ok(likeStatus);
     }
 
@@ -51,7 +51,7 @@ public class LikeController {
     public ResponseEntity<PageResponse> getUserLikes(
             @PathVariable Long userId,
             @PageableDefault(size = 10, sort="createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        PageResponse response = likeService.getUserLikes(userId, pageable);
+        PageResponse response = postLikeService.getUserLikes(userId, pageable);
         return ResponseEntity.ok(response);
     }
 }

@@ -55,7 +55,7 @@ public class UserStatsEventListener {
         if (!validateIsToday(event.createdAt())) return;
 
         try {
-            userStatsService.updateReceivedLikes(event.postWriterId(), 1);
+            userStatsService.updateReceivedLikes(event.receiverId(), 1);
         } catch (Exception e) {
             log.warn("좋아요 생성 이벤트 통계 처리 실패: {}", event, e);
         }
@@ -66,7 +66,7 @@ public class UserStatsEventListener {
         if (!validateIsToday(event.createdAt())) return;
 
         try {
-            userStatsService.updateReceivedLikes(event.postWriterId(), -1);
+            userStatsService.updateReceivedLikes(event.receiverId(), -1);
         } catch (Exception e) {
             log.warn("좋아요 삭제 이벤트 통계 처리 실패: {}", event, e);
         }

@@ -1,4 +1,4 @@
-package com.jiwon.mylog.domain.tag.repository;
+package com.jiwon.mylog.domain.tag.repository.posttag;
 
 import com.jiwon.mylog.domain.tag.entity.PostTag;
 import org.springframework.data.jpa.repository.JpaRepository;
