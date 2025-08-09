@@ -25,6 +25,7 @@ import com.jiwon.mylog.global.security.token.sevice.TokenService;
 import com.jiwon.mylog.global.utils.CookieUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -36,6 +37,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @AllArgsConstructor
 @Service
 public class AuthService {
@@ -129,7 +131,7 @@ public class AuthService {
         if (!userRepository.existsByEmail(email)) {
             throw new NotFoundException(ErrorCode.NOT_FOUND_USER);
         }
-        mailService.sendCodeMail(email);
+        mailService.sendCodeMailAsync(mailRequest.getEmail());
     }
 
     @Transactional

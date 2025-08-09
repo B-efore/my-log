@@ -11,12 +11,15 @@ import java.security.SecureRandom;
 import java.time.Duration;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MailService {
@@ -38,21 +41,23 @@ public class MailService {
         redisUtil.delete(email);
     }
 
-    @Transactional
-    public void sendCodeMail(String email)  {
+    @Async("mailExecutor")
+    public void sendCodeMailAsync(String email) {
         if (redisUtil.exist(email)) {
             redisUtil.delete(email);
         }
-
         String subject = "[MyLog] 인증번호입니다.";
+
         String code = createCode();
         String text = createCodeText(code);
-        MimeMessage message = createEmail(email, subject, text);
         redisUtil.set(email, code, Duration.ofMinutes(5));
 
         try {
+            log.info("인증코드 전송 - email:{}", email);
+            MimeMessage message = createEmail(email ,subject, text );
             javaMailSender.send(message);
         } catch (org.springframework.mail.MailException e) {
+            log.error("인증코드 전송 실패 - email:{}", email);
             throw new MailException(ErrorCode.FAIlED_MAIL_SEND);
         }
     }
