@@ -30,7 +30,7 @@
 
 ## 프로젝트 아키텍처
 
-![MyLog아키텍처](https://github.com/user-attachments/assets/35d60228-011c-476a-85c1-a31a7fa972ff)
+![](https://github.com/user-attachments/assets/9f644032-dc36-4e8d-926c-ca708c27face)
 
 ---
 ## ERD
