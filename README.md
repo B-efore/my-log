@@ -4,7 +4,7 @@
 
 ---
 
-![MyLogImage](https://github.com/user-attachments/assets/abea6c2f-1558-44a9-9eff-6f8894ace2d2)
+![MyLogImage](https://github.com/user-attachments/assets/4a83d5b4-60fe-449c-887b-f1d5a0d31076)
 
 > MyLog는 ‘나만의 블로그를 만들자’는 마음에서 시작한 서비스입니다.
 기본적인 블로그 기능을 갖춘 동시에, 외계·괴담 등 비일상적인 소재를 더해 독특한 분위기를 연출했습니다.
