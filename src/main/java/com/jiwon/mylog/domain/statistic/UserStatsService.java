@@ -2,9 +2,14 @@ package com.jiwon.mylog.domain.statistic;
 
 import com.jiwon.mylog.domain.statistic.dto.DailyReportResponse;
 import com.jiwon.mylog.domain.statistic.dto.UserRankResponse;
+import com.jiwon.mylog.domain.statistic.entity.UserDailyStats;
+import com.jiwon.mylog.domain.statistic.entity.UserWeeklyRanker;
 import com.jiwon.mylog.domain.statistic.repository.UserStatsRepository;
+import com.jiwon.mylog.domain.statistic.repository.UserWeeklyRankerRepository;
 import com.jiwon.mylog.global.redis.key.RedisKey;
 import com.jiwon.mylog.global.redis.RedisUtil;
+import java.util.Collections;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -20,14 +25,26 @@ public class UserStatsService {
     private final RedisUtil redisUtil;
 
     private final UserStatsRepository userStatsRepository;
+    private final UserWeeklyRankerRepository userWeeklyRankerRepository;
 
     private final static String REDIS_SET_DEFAULT = "0";
     private final static int REDIS_GET_DEFAULT = 0;
 
-    @Cacheable(value = "stat::ranker", key = "'start:' + #start + ':end:' + #end")
+    @Cacheable(value = "stat::ranker")
     @Transactional(readOnly = true)
-    public List<UserRankResponse> getRanker(LocalDate start, LocalDate end) {
-        return userStatsRepository.findWeeklyTopUsers(start, end, 3);
+    public List<UserRankResponse> getRanker() {
+        Optional<LocalDate> latest = userWeeklyRankerRepository.findLatestWeekStartDate();
+
+        if (latest.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<UserWeeklyRanker> rankers =
+                userWeeklyRankerRepository.findAllByWeekStart(latest.get());
+
+        return rankers.stream()
+                .map(UserRankResponse::fromRanker)
+                .toList();
     }
 
     @Transactional(readOnly = true)

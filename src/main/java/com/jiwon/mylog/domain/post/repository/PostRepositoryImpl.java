@@ -6,10 +6,12 @@ import com.jiwon.mylog.domain.comment.dto.response.CommentResponse;
 import com.jiwon.mylog.domain.comment.entity.QComment;
 import com.jiwon.mylog.domain.image.entity.QProfileImage;
 import com.jiwon.mylog.domain.like.entity.QPostLike;
+import com.jiwon.mylog.domain.post.dto.response.MainPostResponse;
 import com.jiwon.mylog.domain.post.dto.response.PostDetailResponse;
 import com.jiwon.mylog.domain.post.dto.response.PostNavigationResponse;
 import com.jiwon.mylog.domain.post.dto.response.PostSummaryResponse;
 import com.jiwon.mylog.domain.post.dto.response.RelatedPostResponse;
+import com.jiwon.mylog.domain.post.entity.PostType;
 import com.jiwon.mylog.domain.post.entity.QPost;
 import com.jiwon.mylog.domain.tag.dto.response.TagResponse;
 import com.jiwon.mylog.domain.tag.entity.QPostTag;
@@ -18,6 +20,7 @@ import com.jiwon.mylog.domain.user.dto.response.UserActivityResponse;
 import com.jiwon.mylog.domain.user.dto.response.UserResponse;
 import com.jiwon.mylog.domain.user.dto.response.UserSummaryResponse;
 import com.jiwon.mylog.domain.user.entity.QUser;
+import com.jiwon.mylog.global.common.enums.Visibility;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
@@ -120,6 +123,42 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         }
 
         return new PageImpl<>(posts, pageable, total);
+    }
+
+    @Override
+    public Page<MainPostResponse> findAllPosts(Pageable pageable) {
+        BooleanBuilder conditions = new BooleanBuilder()
+                .and(postDeletedAtIsNull())
+                .and(postVisibilityEq(Visibility.PUBLIC))
+                .and(postTypeEq(PostType.NORMAL));
+
+        List<MainPostResponse> posts = jpaQueryFactory
+                .select(Projections.constructor(MainPostResponse.class,
+                                POST.id,
+                                POST.title,
+                                POST.contentPreview,
+                                POST.postStatus,
+                                POST.visibility,
+                                POST.createdAt,
+                                Projections.constructor(UserSummaryResponse.class,
+                                        USER.id,
+                                        USER.username,
+                                        PROFILE_IMAGE.fileKey.coalesce("")
+                                )
+                        )
+                )
+                .from(POST)
+                .join(POST.user, USER)
+                .leftJoin(USER.profileImage, PROFILE_IMAGE)
+                .where(conditions)
+                .orderBy(POST.createdAt.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        Long count = createCountQuery(conditions);
+
+        return new PageImpl<>(posts, pageable, count);
     }
 
     private List<PostSummaryResponse> createPostSummaryQuery(BooleanBuilder builder, Pageable pageable) {
@@ -476,6 +515,14 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
     private BooleanExpression postDeletedAtIsNull() {
         return POST.deletedAt.isNull();
+    }
+
+    private BooleanExpression postVisibilityEq(Visibility visibility) {
+        return POST.visibility.eq(visibility);
+    }
+
+    private BooleanExpression postTypeEq(PostType type) {
+        return POST.type.eq(type);
     }
 
     private BooleanExpression titleContainsKeyword(String keyword) {

@@ -209,12 +209,10 @@ public class PostService {
             condition = "#pageable != null")
     @Transactional(readOnly = true)
     public PageResponse getPosts(Pageable pageable) {
-        Page<Post> postPage = postRepository.findAll(pageable);
-        List<MainPostResponse> posts = postPage.stream()
-                .map(MainPostResponse::fromPost)
-                .toList();
+        Page<MainPostResponse> postPage = postRepository.findAllPosts(pageable);
+
         return PageResponse.from(
-                posts,
+                postPage.getContent(),
                 postPage.getNumber(),
                 postPage.getSize(),
                 postPage.getTotalPages(),

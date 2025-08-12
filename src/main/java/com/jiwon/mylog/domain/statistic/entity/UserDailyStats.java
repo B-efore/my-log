@@ -1,4 +1,4 @@
-package com.jiwon.mylog.domain.statistic;
+package com.jiwon.mylog.domain.statistic.entity;
 
 import com.jiwon.mylog.domain.user.entity.User;
 import jakarta.persistence.Entity;
@@ -10,16 +10,15 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import lombok.experimental.SuperBuilder;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SuperBuilder
 @Getter
 @Entity
 @Table(
@@ -28,7 +27,7 @@ import java.time.LocalDate;
                 columnNames = {"user_id", "date"}
         )
 )
-public class UserDailyStats {
+public class UserDailyStats extends BaseStats {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -38,14 +37,6 @@ public class UserDailyStats {
     private User user;
 
     private LocalDate date;
-
-    private int receivedLikes = 0;
-
-    private int receivedComments = 0;
-
-    private int createdPosts = 0;
-
-    private int createdComments = 0;
 
     public static UserDailyStats empty(LocalDate date) {
         return UserDailyStats.builder()

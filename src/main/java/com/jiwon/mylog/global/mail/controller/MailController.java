@@ -31,7 +31,7 @@ public class MailController {
             }
     )
     public ResponseEntity<String> sendCodeMail(@RequestBody MailRequest request) {
-        mailService.sendCodeMail(request.getEmail());
+        mailService.sendCodeMailAsync(request.getEmail());
         return new ResponseEntity<>("인증 코드가 발송되었습니다.", HttpStatus.OK);
     }
 
