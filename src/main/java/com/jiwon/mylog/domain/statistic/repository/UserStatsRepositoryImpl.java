@@ -1,8 +1,8 @@
 package com.jiwon.mylog.domain.statistic.repository;
 
 import com.jiwon.mylog.domain.image.entity.QProfileImage;
-import com.jiwon.mylog.domain.statistic.QUserDailyStats;
 import com.jiwon.mylog.domain.statistic.dto.UserRankResponse;
+import com.jiwon.mylog.domain.statistic.entity.QUserDailyStats;
 import com.jiwon.mylog.domain.user.entity.QUser;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.NumberExpression;
@@ -31,7 +31,7 @@ public class UserStatsRepositoryImpl implements UserStatsCustomRepository {
         NumberExpression<Integer> receivedCommentsSum = stat.receivedComments.sum();
         NumberExpression<Integer> createdPostsSum = stat.createdPosts.sum();
         NumberExpression<Integer> createdCommentsSum = stat.createdComments.sum();
-        NumberExpression<Integer> totalScore = receivedLikesSum
+        NumberExpression<Long> totalScore = receivedLikesSum.longValue()
                 .add(receivedCommentsSum)
                 .add(createdPostsSum)
                 .add(createdCommentsSum);
@@ -52,7 +52,7 @@ public class UserStatsRepositoryImpl implements UserStatsCustomRepository {
                 .leftJoin(user.profileImage, profileImage)
                 .where(stat.date.between(startDate, endDate))
                 .groupBy(user.id)
-                .orderBy(totalScore.desc())
+                .orderBy(totalScore.desc(), user.id.asc())
                 .limit(limit)
                 .fetch();
     }

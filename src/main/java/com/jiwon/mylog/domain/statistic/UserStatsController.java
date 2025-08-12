@@ -22,17 +22,10 @@ public class UserStatsController {
     private final UserStatsService userStatsService;
 
     @GetMapping("/users/rankers/weekly")
-    public ResponseEntity<List<UserRankResponse>> getRanker(
-            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate
-    ) {
-        LocalDate end = endDate != null ? endDate : LocalDate.now().minusDays(1);
-        LocalDate start = startDate != null ? startDate : end.minusDays(6);
-
-        List<UserRankResponse> response = userStatsService.getRanker(start, end);
+    public ResponseEntity<List<UserRankResponse>> getRanker() {
+        List<UserRankResponse> response = userStatsService.getRanker();
         return ResponseEntity.ok(response);
     }
-
 
     @GetMapping("/users/stats")
     public ResponseEntity<DailyReportResponse> getDailyStats(

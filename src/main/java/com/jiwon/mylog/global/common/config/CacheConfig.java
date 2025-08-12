@@ -25,6 +25,12 @@ public class CacheConfig {
                         .expireAfterWrite(Duration.ofDays(1))
                         .build());
 
+        cacheManager.registerCustomCache("stat::ranker",
+                Caffeine.newBuilder()
+                        .maximumSize(5)
+                        .expireAfterWrite(Duration.ofDays(1))
+                        .build());
+
         return cacheManager;
     }
 }
