@@ -1,5 +1,6 @@
 package com.jiwon.mylog.domain.post.repository;
 
+import com.jiwon.mylog.domain.post.dto.response.MainPostResponse;
 import com.jiwon.mylog.domain.post.dto.response.PostDetailResponse;
 import com.jiwon.mylog.domain.post.dto.response.PostNavigationResponse;
 import com.jiwon.mylog.domain.post.dto.response.PostSummaryResponse;
@@ -16,6 +17,8 @@ public interface PostRepositoryCustom {
     Page<PostSummaryResponse> findLikedPosts(Long userId, Pageable pageable);
 
     Page<PostSummaryResponse> findFilteredPosts(Long userId, Long categoryId, List<Long> tagIds, String keyword, Pageable pageable);
+
+    Page<MainPostResponse> findAllPosts(Pageable pageable);
 
     Optional<PostDetailResponse> findPostDetail(Long postId);
 

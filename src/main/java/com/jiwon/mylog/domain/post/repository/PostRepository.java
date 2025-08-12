@@ -29,14 +29,6 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
             countQuery = "select count(p) from Post p where p.deletedAt is null and p.type = 'NOTICE'")
     Page<Post> findAllNotice(Pageable pageable);
 
-    @Query(value = "select p from Post p " +
-            "join fetch p.user u " +
-            "left join fetch u.profileImage " +
-            "where p.deletedAt is null and p.visibility = 'PUBLIC' and p.type = 'NORMAL' " +
-            "order by p.createdAt desc",
-            countQuery = "select count(p) from Post p where p.deletedAt is null and p.visibility = 'PUBLIC' and p.type = 'NORMAL'")
-    Page<Post> findAll(Pageable pageable);
-
     @Query("select p from Post p join fetch p.user left join fetch p.category where p.id = :id")
     Optional<Post> findWithUserAndCategory(@Param("id") Long id);
 
