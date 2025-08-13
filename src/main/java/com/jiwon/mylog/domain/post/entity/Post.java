@@ -79,7 +79,7 @@ public class Post extends BaseEntity {
     private List<PostImage> images = new ArrayList<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostTag> postTags = new ArrayList<>();
 
     @Builder.Default
@@ -112,12 +112,12 @@ public class Post extends BaseEntity {
     }
 
     private void updateTags(List<Tag> tags) {
-        this.postTags.clear();
-        this.postTags.addAll(
-                tags.stream()
-                        .map(tag -> PostTag.createPostTag(this, tag))
-                        .toList()
-        );
+        this.postTags.removeIf(pt -> !tags.contains(pt.getTag()));
+        for (Tag tag : tags) {
+            if (postTags.stream().noneMatch(pt -> pt.getTag().equals(tag))) {
+                postTags.add(PostTag.createPostTag(this, tag));
+            }
+        }
     }
 
     public void delete() {
