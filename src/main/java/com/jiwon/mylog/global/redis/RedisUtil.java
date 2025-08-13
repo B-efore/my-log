@@ -1,5 +1,6 @@
 package com.jiwon.mylog.global.redis;
 
+import com.jiwon.mylog.global.redis.key.RedisKey;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -111,11 +112,11 @@ public class RedisUtil {
         redisTemplate.expire(key, Duration.ofHours(12));
     }
 
-    public Map<Long, Integer> getAllPostView(String keyPrefix) {
-        Set<String> keys = redisTemplate.keys(keyPrefix);
+    public Map<Long, Integer> getAllPostView(RedisKey keyPattern) {
+        Set<String> keys = redisTemplate.keys(keyPattern.getPrefix() + "*");
         return keys.stream()
                 .collect(Collectors.toMap(
-                        key -> Long.parseLong(key.replace(keyPrefix, "")),
+                        key -> keyPattern.getUserIdentifier(key),
                         key -> getInt(key, 0)
                 ));
     }
