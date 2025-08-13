@@ -19,15 +19,18 @@ public class PostViewScheduler {
     private final PostRepository postRepository;
     private final RedisUtil redisUtil;
 
-    @Scheduled(fixedRate = 10 * 60 * 1000L)
+    @Scheduled(fixedRate = 30 * 60 * 1000L)
     @Transactional
     public void syncPostViewToDB() {
-        Map<Long, Integer> postCounts = redisUtil.getAllPostView(RedisKey.VIEW_COUNT_KEY.getPrefix());
+        Map<Long, Integer> postCounts = redisUtil.getAllPostView(RedisKey.VIEW_COUNT_KEY);
+        log.info("PostViewScheduler 시작: {}개", postCounts.size());
+
         postCounts.forEach((postId, view) -> {
             try {
+                log.debug("postId: {}, view: {}", postId, view);
                 postRepository.updatePostView(postId, view);
             } catch (Exception e) {
-                log.error("조회수 동기화 실패, 게시글 {}: {}", postId, e.getMessage());
+                log.error("조회수 동기화 실패, postId={}: {}", postId, e.getMessage());
             }
         });
     }

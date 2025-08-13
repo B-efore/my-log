@@ -30,6 +30,12 @@ public enum RedisKey {
         return prefix;
     }
 
+    public Long getUserIdentifier(String redisKey) {
+        int index = redisKey.lastIndexOf(':');
+        String keyString = redisKey.substring(index + 1);
+        return Long.parseLong(keyString);
+    }
+
     public Duration getTtl() {
         return ttl;
     }
