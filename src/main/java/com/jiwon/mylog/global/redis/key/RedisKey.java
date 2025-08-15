@@ -7,6 +7,9 @@ import java.time.LocalDate;
 
 @RequiredArgsConstructor
 public enum RedisKey {
+
+    REFRESH_TOKEN("refresh-token:user:", Duration.ofDays(30)),
+
     RECEIVED_COMMENTS("user:stats:receivedComments:", Duration.ofDays(2)),
     RECEIVED_LIKES("user:stats:receivedLikes:", Duration.ofDays(2)),
     CREATED_POSTS("user:stats:createdPosts:", Duration.ofDays(2)),
