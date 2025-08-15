@@ -71,8 +71,9 @@ public class AuthController {
                     @ApiResponse(responseCode = "404", description = "토큰 정보에 해당하는 유저를 찾을 수 없음")
             }
     )
-    public ResponseEntity<TokenResponse> reissueToken(@CookieValue("refreshToken") String refreshToken) {
-        TokenResponse tokenResponse = authService.reissueToken(refreshToken);
+    public ResponseEntity<TokenResponse> reissueToken(
+            HttpServletResponse response, @CookieValue("refreshToken") String refreshToken) {
+        TokenResponse tokenResponse = authService.reissueToken(response, refreshToken);
         return ResponseEntity.ok(tokenResponse);
     }
 

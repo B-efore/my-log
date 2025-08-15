@@ -1,5 +1,6 @@
 package com.jiwon.mylog.global.common.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jiwon.mylog.global.common.error.ExceptionHandlerFilter;
 import com.jiwon.mylog.global.oauth.CustomOAuth2UserService;
 import com.jiwon.mylog.global.oauth.OAuth2Properties;
@@ -39,9 +40,10 @@ public class SecurityConfig {
 
     private final ApplicationEventPublisher eventPublisher;
     private final OAuth2Properties oAuth2Properties;
+    private final CustomOAuth2UserService customOAuth2UserService;
     private final JwtService jwtService;
     private final TokenService tokenService;
-    private final CustomOAuth2UserService customOAuth2UserService;
+    private final ObjectMapper objectMapper;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -102,7 +104,7 @@ public class SecurityConfig {
                 );
 
         http
-                .addFilterBefore(new ExceptionHandlerFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new ExceptionHandlerFilter(objectMapper), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JwtTokenAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
         http
                 .exceptionHandling(exceptions -> exceptions

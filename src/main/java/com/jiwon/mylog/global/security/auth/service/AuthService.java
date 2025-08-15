@@ -10,6 +10,7 @@ import com.jiwon.mylog.domain.user.entity.User;
 import com.jiwon.mylog.domain.user.dto.request.auth.UserLoginRequest;
 import com.jiwon.mylog.global.common.error.exception.CustomException;
 import com.jiwon.mylog.global.common.error.exception.DuplicateException;
+import com.jiwon.mylog.global.common.error.exception.InvalidTokenException;
 import com.jiwon.mylog.global.common.error.exception.UnauthorizedException;
 import com.jiwon.mylog.global.mail.dto.request.MailRequest;
 import com.jiwon.mylog.global.mail.service.MailService;
@@ -27,6 +28,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -78,26 +80,19 @@ public class AuthService {
             String accountId = userLoginRequest.getAccountId();
             String role = userDetails.getAuthorities().iterator().next().getAuthority();
 
-            String accessToken = jwtService.createAccessToken(userId, accountId, role);
-            String refreshToken = jwtService.createRefreshToken(userId, accessToken, role);
-            tokenService.saveToken(new TokenRequest(userId, refreshToken));
-
-            CookieUtil.setRefreshTokenCookie(response, "refreshToken", refreshToken);
-
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
             eventPublisher.publishEvent(new DailyLoginEvent(userId));
 
-            return TokenResponse.of(accessToken);
+            return issueJwtToken(response, userId, accountId, role);
         } catch (BadCredentialsException e) {
             throw new InvalidAccountIdOrPasswordException(ErrorCode.INVALID_ACCOUNT_ID_OR_PASSWORD);
         } catch (AuthenticationException e) {
-            throw new IllegalArgumentException(e.getMessage());
+            throw new UnauthorizedException(ErrorCode.UNAUTHORIZED);
         }
     }
 
     @Transactional
-    public TokenResponse reissueToken(String refreshToken) {
+    public TokenResponse reissueToken(HttpServletResponse response, String refreshToken) {
 
         validateToken(refreshToken);
 
@@ -108,8 +103,7 @@ public class AuthService {
         validateExistUser(userId);
         tokenService.validateRefreshToken(userId, refreshToken);
 
-        String accessToken = jwtService.createAccessToken(userId, accountId, userRole);
-        return TokenResponse.of(accessToken);
+        return issueJwtToken(response, userId, accountId, userRole);
     }
 
     @Transactional(readOnly = true)
@@ -144,9 +138,18 @@ public class AuthService {
         user.updatePassword(encodedPassword);
     }
 
+    private TokenResponse issueJwtToken(HttpServletResponse response, Long userId, String accountId, String role) {
+        String accessToken = jwtService.createAccessToken(userId, accountId, role);
+        String refreshToken = jwtService.createRefreshToken(userId, accountId, role);
+        tokenService.saveToken(new TokenRequest(userId, refreshToken));
+        CookieUtil.setRefreshTokenCookie(response, "refreshToken", refreshToken);
+
+        return TokenResponse.of(accessToken);
+    }
+
     private void validateToken(String refreshToken) {
         if (!jwtService.validateToken(refreshToken)) {
-            throw new UnauthorizedException(ErrorCode.INVALID_TOKEN);
+            throw new InvalidTokenException(ErrorCode.INVALID_TOKEN);
         }
     }
 
