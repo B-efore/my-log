@@ -1,8 +1,6 @@
 package com.jiwon.mylog.global.security.jwt;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jiwon.mylog.global.common.error.ErrorCode;
-import com.jiwon.mylog.global.common.error.ErrorResponse;
+import com.jiwon.mylog.global.common.error.exception.InvalidTokenException;
 import com.jiwon.mylog.global.security.auth.user.JwtUserDetails;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -54,6 +52,10 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
             }
         } catch (ExpiredJwtException e) {
             throw e;
+        } catch (InvalidTokenException e) {
+            response.setStatus(e.getErrorCode().getStatus().value());
+            response.getWriter().write("{\"code\": \"INVALID_TOKEN\", \"message\": \"Token is invalid.\"}");
+            return;
         }
 
         filterChain.doFilter(request, response);

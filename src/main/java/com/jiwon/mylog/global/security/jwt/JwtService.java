@@ -1,21 +1,18 @@
 package com.jiwon.mylog.global.security.jwt;
 
+import com.jiwon.mylog.global.common.error.ErrorCode;
+import com.jiwon.mylog.global.common.error.exception.InvalidTokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ClaimsBuilder;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import javax.crypto.SecretKey;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -83,16 +80,10 @@ public class JwtService {
         } catch (ExpiredJwtException e) {
             log.error("Expired JWT token: {}", e.getMessage());
             throw e;
-        } catch (MalformedJwtException e) {
-            log.error("Invalid JWT token format: {}", e.getMessage());
-        } catch (UnsupportedJwtException e) {
-            log.error("Unsupported JWT: {}", e.getMessage());
-        } catch (IllegalArgumentException e) {
+        } catch (JwtException | IllegalArgumentException e) {
             log.error("Invalid JWT token: {}", e.getMessage());
-        } catch (JwtException e) {
-            log.error("JWT error: {}", e.getMessage());
+            throw new InvalidTokenException(ErrorCode.INVALID_TOKEN);
         }
-        return false;
     }
 
     public String getAccessToken(String authorizationHeader) {
@@ -109,7 +100,7 @@ public class JwtService {
         String secret = jwtProperties.getSecretKey();
 
         if(secret == null || secret.isBlank()) {
-            log.info("secret = {}", jwtProperties.getSecretKey());
+            log.info("secret = {}", secret);
             throw new IllegalArgumentException("JWT secret Key 값이 비어있습니다.");
         }
 
