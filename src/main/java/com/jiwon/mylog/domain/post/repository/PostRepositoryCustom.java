@@ -2,7 +2,6 @@ package com.jiwon.mylog.domain.post.repository;
 
 import com.jiwon.mylog.domain.post.dto.response.MainPostResponse;
 import com.jiwon.mylog.domain.post.dto.response.PostDetailResponse;
-import com.jiwon.mylog.domain.post.dto.response.PostNavigationResponse;
 import com.jiwon.mylog.domain.post.dto.response.PostSummaryResponse;
 import com.jiwon.mylog.domain.post.dto.response.RelatedPostResponse;
 import com.jiwon.mylog.domain.user.dto.response.UserActivityResponse;
@@ -24,7 +23,5 @@ public interface PostRepositoryCustom {
 
     List<UserActivityResponse> findUserActivities(Long userId, LocalDate start, LocalDate end);
 
-    PostNavigationResponse findPostNavigation(Long postId);
-
-    Page<RelatedPostResponse> findCategorizedPosts(Long categoryId, Long userId, Pageable pageable);
+    Page<RelatedPostResponse> findRelatedPosts(Long postId, Integer page, int size);
 }

@@ -8,7 +8,7 @@ import com.jiwon.mylog.domain.image.entity.QProfileImage;
 import com.jiwon.mylog.domain.like.entity.QPostLike;
 import com.jiwon.mylog.domain.post.dto.response.MainPostResponse;
 import com.jiwon.mylog.domain.post.dto.response.PostDetailResponse;
-import com.jiwon.mylog.domain.post.dto.response.PostNavigationResponse;
+import com.jiwon.mylog.domain.post.dto.response.PostRelationData;
 import com.jiwon.mylog.domain.post.dto.response.PostSummaryResponse;
 import com.jiwon.mylog.domain.post.dto.response.RelatedPostResponse;
 import com.jiwon.mylog.domain.post.entity.PostType;
@@ -21,8 +21,9 @@ import com.jiwon.mylog.domain.user.dto.response.UserResponse;
 import com.jiwon.mylog.domain.user.dto.response.UserSummaryResponse;
 import com.jiwon.mylog.domain.user.entity.QUser;
 import com.jiwon.mylog.global.common.enums.Visibility;
+import com.jiwon.mylog.global.common.error.ErrorCode;
+import com.jiwon.mylog.global.common.error.exception.NotFoundException;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.DateTemplate;
@@ -33,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
@@ -288,13 +290,13 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     }
 
     private void loadAdjacentPosts(Long postId, PostDetailResponse postDetailResponse) {
-        Tuple postData = getPostData(postId);
+        PostRelationData postData = getPostData(postId);
         if (postData == null) {
             postDetailResponse.setRelatedPosts(null, null);
         } else {
-            Long userId = postData.get(0, Long.class);
-            Long categoryId = postData.get(1, Long.class);
-            LocalDateTime createdAt = postData.get(2, LocalDateTime.class);
+            Long userId = postData.userId();
+            Long categoryId = postData.categoryId();
+            LocalDateTime createdAt = postData.createdAt();
 
             RelatedPostResponse previousPost = getPreviousPost(userId, categoryId, createdAt);
             RelatedPostResponse nextPost = getNextPost(userId, categoryId, createdAt);
@@ -336,56 +338,47 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .fetchOne();
     }
 
-    private Tuple getPostData(Long postId) {
-        Tuple currentPost = jpaQueryFactory
-                .select(POST.user.id,
+    private PostRelationData getPostData(Long postId) {
+        return jpaQueryFactory
+                .select(Projections.constructor(PostRelationData.class,
+                        POST.user.id,
                         POST.category.id.coalesce(-1L),
                         POST.createdAt
-                )
+                ))
                 .from(POST)
                 .where(postIdEq(postId))
                 .fetchOne();
-        return currentPost;
     }
 
     @Override
-    public PostNavigationResponse findPostNavigation(Long postId) {
+    public Page<RelatedPostResponse> findRelatedPosts(Long postId, Integer page, int size) {
 
-        Tuple postData = getPostData(postId);
+        PostRelationData postData = getPostData(postId);
         if (postData == null) {
-            return null;
+            throw new NotFoundException(ErrorCode.NOT_FOUND_POST);
         }
 
-        Long defaultPageSize = 5L;
+        Long categoryId = postData.categoryId();
+        Long userId = postData.userId();
+        LocalDateTime createdAt = postData.createdAt();
 
-        Long userId = postData.get(0, Long.class);
-        Long categoryId = postData.get(1, Long.class);
-        LocalDateTime createdAt = postData.get(2, LocalDateTime.class);
+        Integer currentPage = page;
 
-        BooleanBuilder conditions =
-                buildCategoryPostConditions(userId, categoryId)
-                        .and(createdAtGt(createdAt));
-        Long offset = createCountQuery(conditions);
+        if (page == null) {
+            BooleanBuilder newerPostConditions =
+                    buildCategoryPostConditions(userId, categoryId)
+                            .and(createdAtGt(createdAt));
 
-        long currentPage = offset / defaultPageSize;
-        long currentPageOffset = offset - (offset % defaultPageSize);
+            Long newerPostCount = createCountQuery(newerPostConditions);
+            currentPage = newerPostCount.intValue() / size;
+        }
 
-        return PostNavigationResponse.builder()
-                .postId(postId)
-                .userId(userId)
-                .categoryId(categoryId)
-                .currentOffset(currentPageOffset)
-                .currentPage(currentPage)
-                .build();
-    }
-
-    @Override
-    public Page<RelatedPostResponse> findCategorizedPosts(Long categoryId, Long userId, Pageable pageable) {
         BooleanBuilder conditions = buildCategoryPostConditions(userId, categoryId);
         List<RelatedPostResponse> categoryPosts =
-                createCategoryPostQuery(conditions, pageable);
+                createCategoryPostQuery(conditions, currentPage, size);
         Long total = createCountQuery(conditions);
-        return new PageImpl<>(categoryPosts, pageable, total);
+
+        return new PageImpl<>(categoryPosts, PageRequest.of(currentPage, size), total);
     }
 
     private BooleanBuilder buildCategoryPostConditions(Long userId, Long categoryId) {
@@ -395,7 +388,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .and(categoryIdEq(categoryId));
     }
 
-    private List<RelatedPostResponse> createCategoryPostQuery(BooleanBuilder conditions, Pageable pageable) {
+    private List<RelatedPostResponse> createCategoryPostQuery(BooleanBuilder conditions, int page, int size) {
         return jpaQueryFactory
                 .select(Projections.constructor(RelatedPostResponse.class,
                                 POST.id, POST.title, POST.createdAt
@@ -404,8 +397,8 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .from(POST)
                 .where(conditions)
                 .orderBy(POST.createdAt.desc())
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
+                .offset(page * size)
+                .limit(size)
                 .fetch();
     }
 

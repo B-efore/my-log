@@ -17,7 +17,7 @@ public class CacheConfig {
 
         cacheManager.setCaffeine(Caffeine.newBuilder()
                 .maximumSize(1000)
-                .expireAfterWrite(Duration.ofHours(1)));
+                .expireAfterWrite(Duration.ofMinutes(30)));
 
         cacheManager.registerCustomCache("dailyFortune",
                 Caffeine.newBuilder()
