@@ -14,13 +14,10 @@ public interface UserWeeklyRankerRepository extends JpaRepository<UserWeeklyRank
 
     void deleteByWeekStart(LocalDate weekStart);
 
-    @Query("select MAX(uwr.weekStart) from UserWeeklyRanker uwr")
-    Optional<LocalDate> findLatestWeekStartDate();
-
     @Query("select uwr from UserWeeklyRanker uwr "
             + "join fetch uwr.user u "
             + "left join fetch u.profileImage "
-            + "where uwr.weekStart = :weekStart "
-            + "order by uwr.rankOrder asc ")
-    List<UserWeeklyRanker> findAllByWeekStart(@Param("weekStart") LocalDate weekStart);
+            + "where uwr.weekStart = (select max(uwr2.weekStart) from UserWeeklyRanker uwr2) "
+            + "order by uwr.rankOrder asc")
+    List<UserWeeklyRanker> findAllByWeekStart();
 }

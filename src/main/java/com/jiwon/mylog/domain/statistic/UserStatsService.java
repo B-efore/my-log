@@ -33,14 +33,7 @@ public class UserStatsService {
     @Cacheable(value = "stat::ranker")
     @Transactional(readOnly = true)
     public List<UserRankResponse> getRanker() {
-        Optional<LocalDate> latest = userWeeklyRankerRepository.findLatestWeekStartDate();
-
-        if (latest.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        List<UserWeeklyRanker> rankers =
-                userWeeklyRankerRepository.findAllByWeekStart(latest.get());
+        List<UserWeeklyRanker> rankers = userWeeklyRankerRepository.findAllByWeekStart();
 
         return rankers.stream()
                 .map(UserRankResponse::fromRanker)
