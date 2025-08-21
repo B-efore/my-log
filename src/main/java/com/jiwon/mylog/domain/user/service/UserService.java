@@ -2,7 +2,9 @@ package com.jiwon.mylog.domain.user.service;
 
 import com.jiwon.mylog.domain.item.entity.Item;
 import com.jiwon.mylog.domain.item.entity.UserItem;
+import com.jiwon.mylog.domain.item.entity.UserItemGrowth;
 import com.jiwon.mylog.domain.item.repository.ItemRepository;
+import com.jiwon.mylog.domain.item.repository.UserItemGrowthRepository;
 import com.jiwon.mylog.domain.item.repository.UserItemRepository;
 import com.jiwon.mylog.domain.point.service.PointService;
 import com.jiwon.mylog.global.common.entity.PageResponse;
@@ -29,6 +31,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
     private final UserItemRepository userItemRepository;
+    private final UserItemGrowthRepository userItemGrowthRepository;
     private final PointService pointService;
 
     @Transactional(readOnly = true)
@@ -81,5 +84,13 @@ public class UserService {
 
         UserItem userItem = UserItem.create(user, item, 1);
         userItemRepository.save(userItem);
+
+        if (item.isGrowable()) {
+            UserItemGrowth userItemGrowth = UserItemGrowth.builder()
+                    .currentSkin(null)
+                    .userItem(userItem)
+                    .build();
+            userItemGrowthRepository.save(userItemGrowth);
+        }
     }
 }

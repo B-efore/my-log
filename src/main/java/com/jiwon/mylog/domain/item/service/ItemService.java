@@ -27,6 +27,7 @@ public class ItemService {
                 .name(request.getName())
                 .description(request.getDescription())
                 .price(request.getPrice())
+                .growable(request.isGrowable())
                 .build();
         itemRepository.save(item);
     }
@@ -35,7 +36,7 @@ public class ItemService {
     public ItemResponse updateItem(Long itemId, ItemRequest request) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND));
-        item.update(request.getName(), request.getDescription(), request.getPrice());
+        item.update(request.getName(), request.getDescription(), request.getPrice(), request.isGrowable());
         return ItemResponse.fromItem(item);
     }
 

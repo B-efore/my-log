@@ -15,4 +15,5 @@ public class ItemRequest {
     @NotBlank
     private String description;
     private int price;
+    private boolean growable;
 }
