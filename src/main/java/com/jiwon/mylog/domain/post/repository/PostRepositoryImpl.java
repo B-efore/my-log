@@ -2,7 +2,6 @@ package com.jiwon.mylog.domain.post.repository;
 
 import com.jiwon.mylog.domain.category.dto.response.CategoryResponse;
 import com.jiwon.mylog.domain.category.entity.QCategory;
-import com.jiwon.mylog.domain.comment.dto.response.CommentResponse;
 import com.jiwon.mylog.domain.comment.entity.QComment;
 import com.jiwon.mylog.domain.image.entity.QProfileImage;
 import com.jiwon.mylog.domain.like.entity.QPostLike;
@@ -235,16 +234,15 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
             return Optional.empty();
         }
 
-        loadCommentsAndTags(postId, postDetailResponse);
+        loadTags(postId, postDetailResponse);
         loadAdjacentPosts(postId, postDetailResponse);
 
         return Optional.of(postDetailResponse);
     }
 
-    private void loadCommentsAndTags(Long postId, PostDetailResponse postDetailResponse) {
+    private void loadTags(Long postId, PostDetailResponse postDetailResponse) {
         List<TagResponse> tags = getTagsByPostId(postId);
-        List<CommentResponse> comments = getCommentsByPostId(postId);
-        postDetailResponse.setTagsAndComments(tags, comments);
+        postDetailResponse.setTags(tags);
     }
 
     private List<TagResponse> getTagsByPostId(Long postId) {
@@ -257,35 +255,6 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .join(POST_TAG.tag, TAG)
                 .where(POST_TAG.post.id.eq(postId))
                 .orderBy(POST_TAG.id.asc())
-                .fetch();
-    }
-
-    private List<CommentResponse> getCommentsByPostId(Long postId) {
-        return jpaQueryFactory
-                .select(Projections.constructor(CommentResponse.class,
-                                COMMENT.id,
-                                COMMENT.parent.id,
-                                COMMENT.depth,
-                                COMMENT.visibility,
-                                COMMENT.commentStatus,
-                                COMMENT.content,
-                                Projections.constructor(UserResponse.class,
-                                        USER.id,
-                                        USER.username,
-                                        USER.bio,
-                                        PROFILE_IMAGE.fileKey.coalesce(""),
-                                        USER.status
-                                ),
-                                COMMENT.createdAt,
-                                COMMENT.updatedAt,
-                                COMMENT.deletedAt
-                        )
-                )
-                .from(COMMENT)
-                .join(COMMENT.user, USER)
-                .leftJoin(COMMENT.user.profileImage, PROFILE_IMAGE)
-                .where(COMMENT.post.id.eq(postId))
-                .orderBy(COMMENT.createdAt.desc())
                 .fetch();
     }
 
@@ -432,11 +401,13 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     }
 
     private Long createCountQuery(BooleanBuilder builder) {
-        return jpaQueryFactory
+        Long count = jpaQueryFactory
                 .select(POST.count())
                 .from(POST)
                 .where(builder)
                 .fetchOne();
+
+        return count != null ? count : 0L;
     }
 
     private void setTagsToPosts(List<PostSummaryResponse> posts) {
