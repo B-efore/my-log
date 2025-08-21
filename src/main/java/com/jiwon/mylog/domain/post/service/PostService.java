@@ -8,7 +8,6 @@ import com.jiwon.mylog.domain.post.dto.request.PostRequest;
 import com.jiwon.mylog.domain.post.dto.response.MainPostResponse;
 import com.jiwon.mylog.domain.post.dto.response.NoticePostResponse;
 import com.jiwon.mylog.domain.post.dto.response.PostDetailResponse;
-import com.jiwon.mylog.domain.post.dto.response.PostNavigationResponse;
 import com.jiwon.mylog.domain.post.dto.response.RelatedPostResponse;
 import com.jiwon.mylog.domain.tag.entity.PostTag;
 import com.jiwon.mylog.domain.tag.repository.posttag.PostTagJdbcRepository;
@@ -59,7 +58,6 @@ public class PostService {
             evict = {
                     @CacheEvict(value = "post::notice", allEntries = true, condition = "#postRequest.type.equals('공지')"),
                     @CacheEvict(value = "post::main", allEntries = true, condition = "#postRequest.type.equals('일반 글')"),
-                    @CacheEvict(value = "post::filter", allEntries = true, condition = "#postRequest.type.equals('일반 글')"),
 
                     @CacheEvict(value = "blog::home", key = "#userId", condition = "#userId != null")
             }
@@ -90,7 +88,6 @@ public class PostService {
             evict = {
                     @CacheEvict(value = "post::notice", allEntries = true, condition = "#postRequest.type.equals('공지')"),
                     @CacheEvict(value = "post::main", allEntries = true, condition = "#postRequest.type.equals('일반 글')"),
-                    @CacheEvict(value = "post::filter", allEntries = true, condition = "#postRequest.type.equals('일반 글')"),
 
                     @CacheEvict(value = "blog::home", key = "#userId", condition = "#userId != null")
             }
@@ -115,7 +112,6 @@ public class PostService {
     @Caching(evict = {
             @CacheEvict(value = "post::detail", key = "#postId"),
             @CacheEvict(value = "post::main", allEntries = true),
-            @CacheEvict(value = "post::filter", allEntries = true),
 
             @CacheEvict(value = "blog::home", key = "#userId", condition = "#userId != null")
     })
@@ -176,7 +172,7 @@ public class PostService {
     }
 
     @Cacheable(value = "post::notice",
-            key = "'page:' + #pageable.pageNumber + ':size:' + #pageable.pageSize",
+            key = "'page:' + #pageable.pageNumber",
             condition = "#pageable != null"
     )
     @Transactional(readOnly = true)
@@ -205,7 +201,7 @@ public class PostService {
     }
 
     @Cacheable(value = "post::main",
-            key = "'page:' + #pageable.pageNumber + ':size:' + #pageable.pageSize",
+            key = "'page:' + #pageable.pageNumber",
             condition = "#pageable != null")
     @Transactional(readOnly = true)
     public PageResponse getPosts(Pageable pageable) {
@@ -220,13 +216,8 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public PostNavigationResponse getPostNavigation(Long postId) {
-        return postRepository.findPostNavigation(postId);
-    }
-
-    @Transactional(readOnly = true)
-    public PageResponse getCategorizedPosts(Long categoryId, Long userId, Pageable pageable) {
-        Page<RelatedPostResponse> postPage = postRepository.findCategorizedPosts(categoryId, userId, pageable);
+    public PageResponse getRelatedPosts(Long postId, Integer page, int size) {
+        Page<RelatedPostResponse> postPage = postRepository.findRelatedPosts(postId, page, size);
         return PageResponse.from(
           postPage.getContent(),
           postPage.getNumber(),
@@ -236,7 +227,6 @@ public class PostService {
         );
     }
 
-    @Cacheable(value = "post::filter", keyGenerator = "postCacheKeyGenerator")
     @Transactional(readOnly = true)
     public PageResponse getFilteredPosts(
             Long userId,

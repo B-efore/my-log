@@ -9,6 +9,7 @@ import com.jiwon.mylog.domain.event.dto.comment.CommentCreatedEvent;
 import com.jiwon.mylog.domain.event.dto.comment.CommentDeletedEvent;
 import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.domain.user.entity.User;
+import com.jiwon.mylog.global.common.entity.PageResponse;
 import com.jiwon.mylog.global.common.error.ErrorCode;
 import com.jiwon.mylog.global.common.error.exception.ForbiddenException;
 import com.jiwon.mylog.global.common.error.exception.NotFoundException;
@@ -16,8 +17,9 @@ import com.jiwon.mylog.domain.post.repository.PostRepository;
 import com.jiwon.mylog.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,7 +33,6 @@ public class CommentService {
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
 
-    @CacheEvict(value = "post::detail", key = "#postId")
     @Transactional
     public CommentResponse createComment(Long userId, Long postId, CommentCreateRequest request) {
 
@@ -64,7 +65,6 @@ public class CommentService {
         return CommentResponse.fromComment(savedComment);
     }
 
-    @CacheEvict(value = "post::detail", key = "#postId")
     @Transactional
     public CommentResponse updateComment(Long userId, Long postId, Long commentId, CommentUpdateRequest request) {
         Comment comment = getComment(commentId);
@@ -73,7 +73,6 @@ public class CommentService {
         return CommentResponse.fromComment(comment);
     }
 
-    @CacheEvict(value = "post::detail", key = "#postId")
     @Transactional
     public void deleteComment(Long userId, Long postId, Long commentId) {
         Comment comment = getComment(commentId);
@@ -92,6 +91,18 @@ public class CommentService {
         );
 
         comment.delete();
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse getComments(Long postId, Pageable pageable) {
+        Page<CommentResponse> commentPage = commentRepository.findByPostId(postId, pageable);
+        return PageResponse.from(
+                commentPage.getContent(),
+                commentPage.getNumber(),
+                commentPage.getSize(),
+                commentPage.getTotalPages(),
+                commentPage.getTotalElements()
+        );
     }
 
     private Comment getComment(Long commentId) {

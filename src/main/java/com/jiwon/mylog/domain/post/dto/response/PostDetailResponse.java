@@ -5,7 +5,6 @@ import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.domain.post.entity.PostType;
 import com.jiwon.mylog.global.common.enums.Visibility;
 import com.jiwon.mylog.domain.category.dto.response.CategoryResponse;
-import com.jiwon.mylog.domain.comment.dto.response.CommentResponse;
 import com.jiwon.mylog.domain.post.entity.PostStatus;
 import com.jiwon.mylog.domain.tag.dto.response.TagResponse;
 import com.jiwon.mylog.domain.user.dto.response.UserResponse;
@@ -35,7 +34,6 @@ public class PostDetailResponse {
     private UserResponse user;
     private CategoryResponse category;
     private List<TagResponse> tags;
-    private List<CommentResponse> comments;
     private RelatedPostResponse previousPost;
     private RelatedPostResponse nextPost;
 
@@ -71,9 +69,6 @@ public class PostDetailResponse {
                 .createdAt(post.getCreatedAt())
                 .pinned(post.isPinned())
                 .type(post.getType())
-                .comments(post.getComments().stream()
-                        .map(comment -> CommentResponse.fromComment(comment))
-                        .toList())
                 .build();
     }
 
@@ -86,8 +81,7 @@ public class PostDetailResponse {
         this.views = views;
     }
 
-    public void setTagsAndComments(List<TagResponse> tags, List<CommentResponse> comments) {
+    public void setTags(List<TagResponse> tags) {
         this.tags = tags;
-        this.comments = comments;
     }
 }

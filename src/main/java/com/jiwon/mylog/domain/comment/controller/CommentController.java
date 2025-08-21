@@ -1,6 +1,7 @@
 package com.jiwon.mylog.domain.comment.controller;
 
 import com.jiwon.mylog.domain.comment.service.CommentService;
+import com.jiwon.mylog.global.common.entity.PageResponse;
 import com.jiwon.mylog.global.security.auth.annotation.LoginUser;
 import com.jiwon.mylog.domain.comment.dto.request.CommentCreateRequest;
 import com.jiwon.mylog.domain.comment.dto.request.CommentUpdateRequest;
@@ -10,9 +11,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -77,5 +81,16 @@ public class CommentController {
             @PathVariable("commentId") Long commentId) {
         commentService.deleteComment(userId, postId, commentId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("/posts/{postId}/comments")
+    @Operation(
+            summary = "게시글에 해당하는 댓글 목록 조회 (페이징)"
+    )
+    public ResponseEntity<PageResponse> getComments(
+            @PathVariable("postId") Long postId,
+            @PageableDefault(size = 10, page = 0) Pageable pageable) {
+        PageResponse response = commentService.getComments(postId, pageable);
+        return ResponseEntity.ok(response);
     }
 }

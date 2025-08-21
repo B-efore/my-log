@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface CommentRepository extends JpaRepository<Comment, Long> {
+public interface CommentRepository extends JpaRepository<Comment, Long>, CommentRepositoryCustom {
     @Query("select c from Comment c join fetch c.user u where c.id = :commentId")
     Optional<Comment> findById(@Param("commentId") Long commentId);
 }
