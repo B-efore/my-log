@@ -15,6 +15,8 @@ import com.jiwon.mylog.global.common.error.exception.ForbiddenException;
 import com.jiwon.mylog.global.common.error.exception.NotFoundException;
 import com.jiwon.mylog.domain.post.repository.PostRepository;
 import com.jiwon.mylog.domain.user.repository.UserRepository;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -49,12 +51,18 @@ public class CommentService {
         Comment comment = Comment.create(request, parent, user, post);
         Comment savedComment = commentRepository.save(comment);
 
-        Long receiverId = post.getUser().getId();
+        Set<Long> receiverIds = new HashSet<>();
+        receiverIds.add(post.getUser().getId());
+        if (parent != null) {
+            receiverIds.add(parent.getUser().getId());
+        }
+        receiverIds.remove(userId);
 
         eventPublisher.publishEvent(
                 new CommentCreatedEvent(
                         postId,
-                        receiverId,
+                        post.getUser().getId(),
+                        receiverIds,
                         savedComment.getId(),
                         userId,
                         user.getUsername(),
