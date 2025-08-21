@@ -12,7 +12,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Configuration
 public class AsyncConfig implements AsyncConfigurer {
 
-    @Bean("mailExecutor")
+    @Bean("Async")
     public Executor customTaskExecutor() {
         ThreadPoolTaskExecutor ex = new ThreadPoolTaskExecutor();
         ex.setCorePoolSize(5);

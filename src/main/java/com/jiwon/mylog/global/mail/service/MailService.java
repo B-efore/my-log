@@ -41,7 +41,7 @@ public class MailService {
         redisUtil.delete(email);
     }
 
-    @Async("mailExecutor")
+    @Async("Async")
     public void sendCodeMailAsync(String email) {
         if (redisUtil.exist(email)) {
             redisUtil.delete(email);
