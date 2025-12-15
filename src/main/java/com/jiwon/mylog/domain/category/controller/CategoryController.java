@@ -44,7 +44,7 @@ public class CategoryController {
             @LoginUser Long userId,
             @Valid @RequestBody CategoryRequest categoryRequest) {
         CategoryResponse response = categoryService.createCategory(userId, categoryRequest);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PatchMapping("/categories/{categoryId}")
@@ -64,7 +64,7 @@ public class CategoryController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{categoryId}")
+    @DeleteMapping("/categories/{categoryId}")
     @Operation(
             summary = "카테고리 삭제",
             responses = {
@@ -76,7 +76,7 @@ public class CategoryController {
             @LoginUser Long userId,
             @PathVariable("categoryId") Long categoryId) {
         categoryService.deleteCategory(userId, categoryId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/users/{userId}/categories")
