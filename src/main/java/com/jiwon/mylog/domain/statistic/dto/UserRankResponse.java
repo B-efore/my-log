@@ -18,9 +18,7 @@ public record UserRankResponse(
         return UserRankResponse.builder()
                 .userId(ranker.getUser().getId())
                 .username(ranker.getUser().getUsername())
-                .imageKey(ranker.getUser().getProfileImage() != null ?
-                        ranker.getUser().getProfileImage().getFileKey() :
-                        "")
+                .imageKey(ranker.getUser().getProfileImage())
                 .receivedLikes(ranker.getReceivedLikes())
                 .receivedComments(ranker.getReceivedComments())
                 .createdComments(ranker.getCreatedComments())

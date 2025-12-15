@@ -17,7 +17,7 @@ public class FollowResponse {
         return FollowResponse.builder()
                 .userId(user.getId())
                 .username(user.getUsername())
-                .imageKey(user.getProfileImage() == null ? "" : user.getProfileImage().getFileKey())
+                .imageKey(user.getProfileImage())
                 .build();
     }
 }

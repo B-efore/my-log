@@ -23,8 +23,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("select u from User u where u.accountId = :accountId")
     Optional<User> findByAccountId(@Param("accountId") String accountId);
 
-    @Query(value = "select u from User u left join fetch u.profileImage where u.id = :userId")
-    Optional<User> findUserWithProfileImage(@Param("userId") Long userId);
-
     Page<User> findByUsernameContaining(String username, Pageable pageable);
 }

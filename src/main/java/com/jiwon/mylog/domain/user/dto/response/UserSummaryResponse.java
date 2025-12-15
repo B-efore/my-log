@@ -17,7 +17,7 @@ public class UserSummaryResponse {
         return UserSummaryResponse.builder()
                 .userId(user.getId())
                 .username(user.getUsername())
-                .imageKey(user.getProfileImage() == null ? "" : user.getProfileImage().getFileKey())
+                .imageKey(user.getProfileImage())
                 .build();
     }
 }

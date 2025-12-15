@@ -1,7 +1,6 @@
 package com.jiwon.mylog;
 
 import com.jiwon.mylog.domain.category.entity.Category;
-import com.jiwon.mylog.domain.image.entity.ProfileImage;
 import com.jiwon.mylog.domain.item.entity.Item;
 import com.jiwon.mylog.domain.notification.entity.Notification;
 import com.jiwon.mylog.domain.notification.entity.NotificationType;
@@ -19,12 +18,6 @@ public class TestDataFactory {
                 .username(username)
                 .status(UserStatus.ACTIVE)
                 .build();
-    }
-
-    public static ProfileImage createImage(User user, String fileKey) {
-        ProfileImage profileImage = ProfileImage.forUserProfile(user);
-        profileImage.updateProfile(fileKey);
-        return profileImage;
     }
 
     public static Category createCategory(User user, String name){

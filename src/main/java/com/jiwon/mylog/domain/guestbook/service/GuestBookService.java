@@ -24,7 +24,7 @@ public class GuestBookService {
 
     @Transactional
     public GuestBookResponse createGuestBook(Long writerId, GuestBookRequest guestBookRequest) {
-        User writer = userRepository.findUserWithProfileImage(writerId)
+        User writer = userRepository.findById(writerId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
         User receiver = userRepository.findById(guestBookRequest.getReceiverId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));

@@ -36,7 +36,7 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public UserResponse getUserProfile(Long userId) {
-        User user = userRepository.findUserWithProfileImage(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
         return UserResponse.fromUser(user);
     }

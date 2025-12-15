@@ -1,6 +1,5 @@
 package com.jiwon.mylog.domain.statistic.repository;
 
-import com.jiwon.mylog.domain.image.entity.QProfileImage;
 import com.jiwon.mylog.domain.statistic.dto.UserRankResponse;
 import com.jiwon.mylog.domain.statistic.entity.QUserDailyStats;
 import com.jiwon.mylog.domain.user.entity.QUser;
@@ -25,7 +24,6 @@ public class UserStatsRepositoryImpl implements UserStatsCustomRepository {
     public List<UserRankResponse> findWeeklyTopUsers(LocalDate startDate, LocalDate endDate, int limit) {
         QUserDailyStats stat = QUserDailyStats.userDailyStats;
         QUser user = QUser.user;
-        QProfileImage profileImage = QProfileImage.profileImage;
 
         NumberExpression<Integer> receivedLikesSum = stat.receivedLikes.sum();
         NumberExpression<Integer> receivedCommentsSum = stat.receivedComments.sum();
@@ -40,7 +38,7 @@ public class UserStatsRepositoryImpl implements UserStatsCustomRepository {
                 .select(Projections.constructor(UserRankResponse.class,
                         user.id,
                         user.username,
-                        profileImage.fileKey.coalesce(""),
+                        user.profileImage,
                         receivedLikesSum,
                         receivedCommentsSum,
                         createdPostsSum,
@@ -49,7 +47,6 @@ public class UserStatsRepositoryImpl implements UserStatsCustomRepository {
                 ))
                 .from(stat)
                 .join(stat.user, user)
-                .leftJoin(user.profileImage, profileImage)
                 .where(stat.date.between(startDate, endDate))
                 .groupBy(user.id)
                 .orderBy(totalScore.desc(), user.id.asc())
