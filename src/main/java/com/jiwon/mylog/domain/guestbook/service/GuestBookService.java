@@ -10,8 +10,6 @@ import com.jiwon.mylog.global.common.entity.PageResponse;
 import com.jiwon.mylog.global.common.error.ErrorCode;
 import com.jiwon.mylog.global.common.error.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,7 +22,6 @@ public class GuestBookService {
     private final UserRepository userRepository;
     private final GuestBookRepository guestBookRepository;
 
-    @CacheEvict(value = "guestBook", allEntries = true)
     @Transactional
     public GuestBookResponse createGuestBook(Long writerId, GuestBookRequest guestBookRequest) {
         User writer = userRepository.findUserWithProfileImage(writerId)
@@ -35,10 +32,6 @@ public class GuestBookService {
         return GuestBookResponse.from(guestBook, writer);
     }
 
-    @Cacheable(value = "guestBook",
-            key = "'userId:' + #userId + 'page:' + #pageable.pageNumber",
-            condition = "#userId > 0L && #pageable != null"
-    )
     @Transactional(readOnly = true)
     public PageResponse getUserGuestBooks(Long userId, Pageable pageable) {
         Page<GuestBookResponse> guestBookPage = guestBookRepository.getGuestBooksByReceiverId(userId, pageable);
