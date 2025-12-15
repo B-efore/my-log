@@ -1,6 +1,7 @@
 package com.jiwon.mylog.domain.item.entity;
 
 import com.jiwon.mylog.domain.user.entity.User;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -10,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -31,6 +33,9 @@ public class UserItem {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id", nullable = false)
     private Item item;
+
+    @OneToOne(mappedBy = "userItem", cascade = CascadeType.ALL, orphanRemoval = true)
+    private UserItemGrowth growth;
 
     private int quantity;
 

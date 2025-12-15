@@ -53,15 +53,6 @@ public class PostService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
 
-    @Caching(
-            put = @CachePut(value = "post::detail", key = "#result.postId", unless = "#result.postId == null"),
-            evict = {
-                    @CacheEvict(value = "post::notice", allEntries = true, condition = "#postRequest.type.equals('공지')"),
-                    @CacheEvict(value = "post::main", allEntries = true, condition = "#postRequest.type.equals('일반 글')"),
-
-                    @CacheEvict(value = "blog::home", key = "#userId", condition = "#userId != null")
-            }
-    )
     @Transactional
     public PostDetailResponse createPost(Long userId, PostRequest postRequest) {
         User user = getUserById(userId);
@@ -83,15 +74,6 @@ public class PostService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_POST));
     }
 
-    @Caching(
-            put = @CachePut(value = "post::detail", key = "#postId", unless = "#postId == null"),
-            evict = {
-                    @CacheEvict(value = "post::notice", allEntries = true, condition = "#postRequest.type.equals('공지')"),
-                    @CacheEvict(value = "post::main", allEntries = true, condition = "#postRequest.type.equals('일반 글')"),
-
-                    @CacheEvict(value = "blog::home", key = "#userId", condition = "#userId != null")
-            }
-    )
     @Transactional
     public PostDetailResponse updatePost(Long userId, Long postId, PostRequest postRequest) {
         Post post = getPostWithDetails(postId);
@@ -109,12 +91,6 @@ public class PostService {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_POST));
     }
 
-    @Caching(evict = {
-            @CacheEvict(value = "post::detail", key = "#postId"),
-            @CacheEvict(value = "post::main", allEntries = true),
-
-            @CacheEvict(value = "blog::home", key = "#userId", condition = "#userId != null")
-    })
     @Transactional
     public void deletePost(Long userId, Long postId) {
         Post post = getPostWithDetails(postId);
@@ -171,10 +147,6 @@ public class PostService {
         post.getComments().forEach(Comment::delete);
     }
 
-    @Cacheable(value = "post::notice",
-            key = "'page:' + #pageable.pageNumber",
-            condition = "#pageable != null"
-    )
     @Transactional(readOnly = true)
     public PageResponse getAllNotices(Pageable pageable) {
         Page<Post> noticePage = postRepository.findAllNotice(pageable);
@@ -189,20 +161,12 @@ public class PostService {
                 noticePage.getTotalElements());
     }
 
-    @Cacheable(value = "post::detail",
-            key = "#postId",
-            unless = "#result == null",
-            condition = "#postId != null && #postId > 0"
-    )
     @Transactional(readOnly = true)
     public PostDetailResponse getPost(Long postId) {
         return postRepository.findPostDetail(postId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_POST));
     }
 
-    @Cacheable(value = "post::main",
-            key = "'page:' + #pageable.pageNumber",
-            condition = "#pageable != null")
     @Transactional(readOnly = true)
     public PageResponse getPosts(Pageable pageable) {
         Page<MainPostResponse> postPage = postRepository.findAllPosts(pageable);

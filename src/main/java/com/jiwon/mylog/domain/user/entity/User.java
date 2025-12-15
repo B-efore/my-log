@@ -3,7 +3,6 @@ package com.jiwon.mylog.domain.user.entity;
 import com.jiwon.mylog.domain.category.entity.Category;
 import com.jiwon.mylog.domain.comment.entity.Comment;
 import com.jiwon.mylog.domain.follow.entity.Follow;
-import com.jiwon.mylog.domain.image.entity.ProfileImage;
 import com.jiwon.mylog.domain.item.entity.UserItem;
 import com.jiwon.mylog.domain.post.entity.Post;
 import com.jiwon.mylog.global.common.entity.BaseEntity;
@@ -17,7 +16,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 import java.util.ArrayList;
@@ -60,8 +58,8 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private UserStatus status;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private ProfileImage profileImage;
+    @Column(name = "profile_image")
+    private String profileImage;
 
     @Builder.Default
     private String bio = "";
@@ -104,7 +102,7 @@ public class User extends BaseEntity {
         this.bio = bio;
     }
 
-    public void updateProfileImage(ProfileImage profileImage) {
+    public void updateProfileImage(String profileImage) {
         this.profileImage = profileImage;
     }
 

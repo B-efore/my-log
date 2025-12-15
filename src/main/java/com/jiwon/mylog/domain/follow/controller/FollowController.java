@@ -1,5 +1,6 @@
 package com.jiwon.mylog.domain.follow.controller;
 
+import com.jiwon.mylog.domain.follow.dto.FollowCheckResponse;
 import com.jiwon.mylog.domain.follow.dto.FollowCountResponse;
 import com.jiwon.mylog.domain.follow.dto.FollowListResponse;
 import com.jiwon.mylog.domain.follow.service.FollowService;
@@ -36,7 +37,7 @@ public class FollowController {
             @LoginUser Long fromUserId,
             @PathVariable("toUserId") Long toUserId) {
         followService.follow(fromUserId, toUserId);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @DeleteMapping("/follow/{toUserId}")
@@ -52,15 +53,15 @@ public class FollowController {
             @LoginUser Long fromUserId,
             @PathVariable("toUserId") Long toUserId) {
         followService.unfollow(fromUserId, toUserId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{currentUserId}/followings/{targetUserId}")
-    public ResponseEntity<?> checkFollowing(
+    public ResponseEntity<FollowCheckResponse> checkFollowing(
             @PathVariable("currentUserId") Long currentUserId,
             @PathVariable("targetUserId") Long targetUserId) {
-        Boolean response = followService.checkFollowing(currentUserId, targetUserId);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        FollowCheckResponse response = followService.checkFollowing(currentUserId, targetUserId);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{userId}/followings")
@@ -72,7 +73,7 @@ public class FollowController {
     )
     public ResponseEntity<?> getFollowings(@PathVariable("userId") Long userId) {
         FollowListResponse response = followService.getFollowings(userId);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{userId}/followers")
@@ -84,10 +85,10 @@ public class FollowController {
     )
     public ResponseEntity<?> getFollowers(@PathVariable("userId") Long userId) {
         FollowListResponse response = followService.getFollowers(userId);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{userId}/follows")
+    @GetMapping("/{userId}/follows/counts")
     @Operation(
             summary = "특정 유저의 팔로잉/팔로워 수 조회",
             responses = {
@@ -96,6 +97,6 @@ public class FollowController {
     )
     public ResponseEntity<FollowCountResponse> getFollowCounts(@PathVariable("userId") Long userId) {
         FollowCountResponse response = followService.getFollowCounts(userId);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(response);
     }
 }

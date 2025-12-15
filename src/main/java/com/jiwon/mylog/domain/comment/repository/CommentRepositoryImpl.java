@@ -2,7 +2,6 @@ package com.jiwon.mylog.domain.comment.repository;
 
 import com.jiwon.mylog.domain.comment.dto.response.CommentResponse;
 import com.jiwon.mylog.domain.comment.entity.QComment;
-import com.jiwon.mylog.domain.image.entity.QProfileImage;
 import com.jiwon.mylog.domain.user.dto.response.UserResponse;
 import com.jiwon.mylog.domain.user.entity.QUser;
 import com.querydsl.core.BooleanBuilder;
@@ -23,7 +22,6 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
 
     private static final QComment COMMENT = QComment.comment;
     private static final QUser USER = QUser.user;
-    private static final QProfileImage PROFILE_IMAGE = QProfileImage.profileImage;
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
@@ -45,7 +43,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                                         USER.id,
                                         USER.username,
                                         USER.bio,
-                                        PROFILE_IMAGE.fileKey.coalesce(""),
+                                        USER.profileImage,
                                         USER.status
                                 ),
                                 COMMENT.createdAt,
@@ -55,7 +53,6 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 )
                 .from(COMMENT)
                 .leftJoin(COMMENT.user, USER)
-                .leftJoin(USER.profileImage, PROFILE_IMAGE)
                 .where(conditions)
                 .orderBy(COMMENT.createdAt.desc(), COMMENT.id.desc())
                 .offset(pageable.getOffset())

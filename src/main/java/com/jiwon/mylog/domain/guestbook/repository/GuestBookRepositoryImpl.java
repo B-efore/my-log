@@ -2,7 +2,6 @@ package com.jiwon.mylog.domain.guestbook.repository;
 
 import com.jiwon.mylog.domain.guestbook.dto.GuestBookResponse;
 import com.jiwon.mylog.domain.guestbook.entity.QGuestBook;
-import com.jiwon.mylog.domain.image.entity.QProfileImage;
 import com.jiwon.mylog.domain.user.dto.response.UserSummaryResponse;
 import com.jiwon.mylog.domain.user.entity.QUser;
 import com.querydsl.core.BooleanBuilder;
@@ -23,7 +22,6 @@ public class GuestBookRepositoryImpl implements GuestBookCustom {
     private final JPAQueryFactory jpaQueryFactory;
     private static final QGuestBook GUEST_BOOK = QGuestBook.guestBook;
     private static final QUser USER = QUser.user;
-    private static final QProfileImage PROFILE_IMAGE = QProfileImage.profileImage;
 
     @Override
     public Page<GuestBookResponse> getGuestBooksByReceiverId(Long receiverId, Pageable pageable) {
@@ -40,13 +38,12 @@ public class GuestBookRepositoryImpl implements GuestBookCustom {
                                 Projections.constructor(UserSummaryResponse.class,
                                         USER.id,
                                         USER.username,
-                                        PROFILE_IMAGE.fileKey.coalesce("")
+                                        USER.profileImage
                                 )
                         )
                 )
                 .from(GUEST_BOOK)
                 .join(GUEST_BOOK.writer, USER)
-                .leftJoin(USER.profileImage, PROFILE_IMAGE)
                 .where(builder)
                 .orderBy(GUEST_BOOK.createdAt.desc())
                 .offset(pageable.getOffset())

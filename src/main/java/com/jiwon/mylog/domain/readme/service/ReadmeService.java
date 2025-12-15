@@ -20,7 +20,6 @@ public class ReadmeService {
     private final UserRepository userRepository;
     private final ReadmeRepository readmeRepository;
 
-    @CacheEvict(value = "blog::home", key = "#userId", condition = "#userId != null")
     @Transactional
     public ReadmeResponse editReadme(Long userId, ReadmeRequest request) {
         Readme readme = readmeRepository.findByUserId(userId).orElse(null);
@@ -36,7 +35,6 @@ public class ReadmeService {
         return ReadmeResponse.from(readmeRepository.save(readme));
     }
 
-    @CacheEvict(value = "blog::home", key = "#userId", condition = "#userId != null")
     @Transactional
     public void deleteReadme(Long userId) {
         Readme readme = readmeRepository.findByUserId(userId)

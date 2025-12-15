@@ -2,7 +2,9 @@ package com.jiwon.mylog.domain.user.service;
 
 import com.jiwon.mylog.domain.item.entity.Item;
 import com.jiwon.mylog.domain.item.entity.UserItem;
+import com.jiwon.mylog.domain.item.entity.UserItemGrowth;
 import com.jiwon.mylog.domain.item.repository.ItemRepository;
+import com.jiwon.mylog.domain.item.repository.UserItemGrowthRepository;
 import com.jiwon.mylog.domain.item.repository.UserItemRepository;
 import com.jiwon.mylog.domain.point.service.PointService;
 import com.jiwon.mylog.global.common.entity.PageResponse;
@@ -29,16 +31,16 @@ public class UserService {
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
     private final UserItemRepository userItemRepository;
+    private final UserItemGrowthRepository userItemGrowthRepository;
     private final PointService pointService;
 
     @Transactional(readOnly = true)
     public UserResponse getUserProfile(Long userId) {
-        User user = userRepository.findUserWithProfileImage(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
         return UserResponse.fromUser(user);
     }
 
-    @CacheEvict(value = "blog::home", key = "#userId", condition = "#userId != null")
     @Transactional
     public UserResponse updateUserProfile(Long userId, UserProfileRequest userProfileRequest) {
         User user = userRepository.findById(userId)
@@ -81,5 +83,13 @@ public class UserService {
 
         UserItem userItem = UserItem.create(user, item, 1);
         userItemRepository.save(userItem);
+
+        if (item.isGrowable()) {
+            UserItemGrowth userItemGrowth = UserItemGrowth.builder()
+                    .currentSkin(null)
+                    .userItem(userItem)
+                    .build();
+            userItemGrowthRepository.save(userItemGrowth);
+        }
     }
 }

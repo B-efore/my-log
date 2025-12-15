@@ -2,8 +2,6 @@ package com.jiwon.mylog.domain.image.service;
 
 import com.jiwon.mylog.domain.image.dto.response.ImageResponse;
 import com.jiwon.mylog.domain.image.dto.response.PresignedUrlResponse;
-import com.jiwon.mylog.domain.image.entity.ProfileImage;
-import com.jiwon.mylog.domain.image.repository.ProfileImageRepository;
 import com.jiwon.mylog.domain.user.entity.User;
 import com.jiwon.mylog.domain.user.repository.UserRepository;
 import com.jiwon.mylog.global.aws.S3Service;
@@ -11,7 +9,6 @@ import com.jiwon.mylog.global.common.error.ErrorCode;
 import com.jiwon.mylog.global.common.error.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -28,45 +25,34 @@ public class ImageService {
 
     private final S3Service s3Service;
     private final UserRepository userRepository;
-    private final ProfileImageRepository profileImageRepository;
 
     @Transactional(readOnly = true)
     public ImageResponse getProfileImage(Long userId) {
-        ProfileImage profileImage = profileImageRepository.findByUserId(userId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND));
-        return ImageResponse.create(null, profileImage.getFileKey(), IMAGE_PROFILE);
+        User user = getUser(userId);
+        return ImageResponse.create(null, user.getProfileImage(), IMAGE_PROFILE);
     }
 
-    @CacheEvict(value = "blog::home", key = "#userId", condition = "#userId != null")
     @Transactional
     public ImageResponse uploadProfileImage(Long userId, String fileName) {
-
         validateImage(fileName);
         PresignedUrlResponse response = s3Service.generatePutPresignedUrl(fileName);
 
         User user = getUser(userId);
-        ProfileImage profileImage = profileImageRepository.findByUserId(userId)
-                .orElseGet(() -> ProfileImage.forUserProfile(user));
-        profileImage.updateProfile(response.getKey());
-
-        if (profileImage.getId() == null) {
-            profileImageRepository.save(profileImage);
-        }
+        user.updateProfileImage(response.getKey());
 
         return ImageResponse.create(response.getPresignedUrl(), response.getKey(), IMAGE_PROFILE);
     }
 
-    @CacheEvict(value = "blog::home", key = "#userId", condition = "#userId != null")
     @Transactional
     public void deleteProfileImage(Long userId) {
-        User user = userRepository.findUserWithProfileImage(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NOT_FOUND_USER));
 
         if (user.getProfileImage() == null) {
             throw new NotFoundException(ErrorCode.NOT_FOUND);
         }
 
-        String fileKey = user.getProfileImage().getFileKey();
+        String fileKey = user.getProfileImage();
         user.deleteProfileImage();
         deleteImageFromS3(fileKey);
     }

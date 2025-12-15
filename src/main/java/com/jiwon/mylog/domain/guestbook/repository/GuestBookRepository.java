@@ -7,12 +7,4 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface GuestBookRepository extends JpaRepository<GuestBook, Long>, GuestBookCustom {
 
-    /***
-     *     @Query("select new com.jiwon.mylog.domain.post.dto.response.PinnedPostResponse(p.id, p.title, p.contentPreview) " +
-     *             "from Post p " +
-     *             "where p.user.id = :userId and p.pinned = true and p.deletedAt is null")
-     * @param receiverId
-     * @return
-     */
-
 }

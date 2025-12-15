@@ -2,6 +2,7 @@ package com.jiwon.mylog.domain.follow.service;
 
 import com.jiwon.mylog.domain.event.dto.follow.FollowCreatedEvent;
 import com.jiwon.mylog.domain.event.dto.follow.FollowDeletedEvent;
+import com.jiwon.mylog.domain.follow.dto.FollowCheckResponse;
 import com.jiwon.mylog.domain.follow.dto.FollowCountResponse;
 import com.jiwon.mylog.domain.follow.dto.FollowListResponse;
 import com.jiwon.mylog.domain.follow.dto.FollowResponse;
@@ -51,7 +52,6 @@ public class FollowService {
 
     @Transactional
     public void unfollow(Long fromUserId, Long toUserId) {
-        validateFollow(fromUserId, toUserId);
         validateIsFollowing(fromUserId, toUserId, false);
 
         Follow follow = followRepository.findByFromUserIdAndToUserId(fromUserId, toUserId)
@@ -71,32 +71,27 @@ public class FollowService {
     }
 
     @Transactional(readOnly = true)
-    public Boolean checkFollowing(Long currentUserId, Long targetUserId) {
-        return followRepository.existsByFromUserIdAndToUserId(currentUserId, targetUserId);
+    public FollowCheckResponse checkFollowing(Long currentUserId, Long targetUserId) {
+        boolean isFollowing = followRepository.existsByFromUserIdAndToUserId(currentUserId, targetUserId);
+        return new FollowCheckResponse(isFollowing);
     }
 
     @Transactional(readOnly = true)
     public FollowListResponse getFollowings(Long userId) {
-        List<FollowResponse> followings = followRepository.findFollowings(userId).stream()
-                .map(FollowResponse::fromUser)
-                .toList();
+        List<FollowResponse> followings = followRepository.findFollowings(userId);
         return new FollowListResponse(followings);
     }
 
     @Transactional(readOnly = true)
     public FollowListResponse getFollowers(Long userId) {
-        List<FollowResponse> followers = followRepository.findFollowers(userId).stream()
-                .map(FollowResponse::fromUser)
-                .toList();
+        List<FollowResponse> followers = followRepository.findFollowers(userId);
         return new FollowListResponse(followers);
     }
 
     @Transactional(readOnly = true)
     public FollowCountResponse getFollowCounts(Long userId) {
-        List<Object[]> counts = followRepository.countFollowsByUserId(userId);
-        Object[] row = counts.get(0);
-        Long followingsCount = row[0] != null ? ((Number) row[0]).longValue() : 0L;
-        Long followersCount = row[1] != null ? ((Number) row[1]).longValue() : 0L;
+        long followingsCount = followRepository.countByFromUserId(userId);
+        long followersCount = followRepository.countByToUserId(userId);
         return new FollowCountResponse(followingsCount, followersCount);
     }
 

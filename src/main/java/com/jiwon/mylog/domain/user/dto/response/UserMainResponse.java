@@ -31,7 +31,7 @@ public class UserMainResponse {
                 .userId(user.getId())
                 .username(user.getUsername())
                 .bio(user.getBio())
-                .imageKey(user.getProfileImage() == null ? "" : user.getProfileImage().getFileKey())
+                .imageKey(user.getProfileImage())
                 .readme(readme)
                 .pinnedPosts(pinnedPosts)
                 .activities(activities)
