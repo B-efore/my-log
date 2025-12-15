@@ -27,7 +27,6 @@ public class UserBlogService {
     private final PostRepository postRepository;
     private final ReadmeRepository readmeRepository;
 
-    @Cacheable(value = "blog::home", key = "#userId", condition = "#userId != null")
     @Transactional(readOnly = true)
     public UserMainResponse getUserMain(Long userId) {
         User user = userRepository.findById(userId)

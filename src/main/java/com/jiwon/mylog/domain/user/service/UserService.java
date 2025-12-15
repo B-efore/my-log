@@ -41,7 +41,6 @@ public class UserService {
         return UserResponse.fromUser(user);
     }
 
-    @CacheEvict(value = "blog::home", key = "#userId", condition = "#userId != null")
     @Transactional
     public UserResponse updateUserProfile(Long userId, UserProfileRequest userProfileRequest) {
         User user = userRepository.findById(userId)
