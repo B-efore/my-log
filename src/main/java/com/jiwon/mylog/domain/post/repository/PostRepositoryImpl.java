@@ -2,8 +2,6 @@ package com.jiwon.mylog.domain.post.repository;
 
 import com.jiwon.mylog.domain.category.dto.response.CategoryResponse;
 import com.jiwon.mylog.domain.category.entity.QCategory;
-import com.jiwon.mylog.domain.comment.entity.QComment;
-import com.jiwon.mylog.domain.image.entity.QProfileImage;
 import com.jiwon.mylog.domain.like.entity.QPostLike;
 import com.jiwon.mylog.domain.post.dto.response.MainPostResponse;
 import com.jiwon.mylog.domain.post.dto.response.PostDetailResponse;
@@ -55,11 +53,9 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
     private static final QPost POST = QPost.post;
     private static final QUser USER = QUser.user;
-    private static final QProfileImage PROFILE_IMAGE = QProfileImage.profileImage;
     private static final QCategory CATEGORY = QCategory.category;
     private static final QPostTag POST_TAG = QPostTag.postTag;
     private static final QTag TAG = QTag.tag;
-    private static final QComment COMMENT = QComment.comment;
     private static final QPostLike POST_LIKE = QPostLike.postLike;
 
     @Override
@@ -78,7 +74,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                                 Projections.constructor(UserSummaryResponse.class,
                                         USER.id,
                                         USER.username,
-                                        PROFILE_IMAGE.fileKey.coalesce("")
+                                        USER.profileImage
                                 ),
                                 POST.createdAt
                         )
@@ -87,7 +83,6 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .join(POST_LIKE.post, POST)
                 .join(POST.user, USER)
                 .leftJoin(POST.category, CATEGORY)
-                .leftJoin(USER.profileImage, PROFILE_IMAGE)
                 .where(likeUserIdEq(userId),
                         postDeletedAtIsNull()
                 )
@@ -133,28 +128,41 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .and(postVisibilityEq(Visibility.PUBLIC))
                 .and(postTypeEq(PostType.NORMAL));
 
-        List<MainPostResponse> posts = jpaQueryFactory
-                .select(Projections.constructor(MainPostResponse.class,
-                                POST.id,
-                                POST.title,
-                                POST.contentPreview,
-                                POST.postStatus,
-                                POST.visibility,
-                                POST.createdAt,
-                                Projections.constructor(UserSummaryResponse.class,
-                                        USER.id,
-                                        USER.username,
-                                        PROFILE_IMAGE.fileKey.coalesce("")
-                                )
-                        )
-                )
+        List<Long> postIds = jpaQueryFactory
+                .select(POST.id)
                 .from(POST)
-                .join(POST.user, USER)
-                .leftJoin(USER.profileImage, PROFILE_IMAGE)
-                .where(conditions)
+                .where(
+                        postDeletedAtIsNull(),
+                        postVisibilityEq(Visibility.PUBLIC),
+                        postTypeEq(PostType.NORMAL)
+                )
                 .orderBy(POST.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
+                .fetch();
+
+        if (postIds.isEmpty()) {
+            return new PageImpl<>(Collections.emptyList(), pageable, 0);
+        }
+
+        List<MainPostResponse> posts = jpaQueryFactory
+                .select(Projections.constructor(MainPostResponse.class,
+                        POST.id,
+                        POST.title,
+                        POST.contentPreview,
+                        POST.postStatus,
+                        POST.visibility,
+                        POST.createdAt,
+                        Projections.constructor(UserSummaryResponse.class,
+                                USER.id,
+                                USER.username,
+                                USER.profileImage
+                        )
+                ))
+                .from(POST)
+                .join(POST.user, USER)
+                .where(POST.id.in(postIds))
+                .orderBy(POST.createdAt.desc())
                 .fetch();
 
         Long count = createCountQuery(conditions);
@@ -177,7 +185,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                                 Projections.constructor(UserSummaryResponse.class,
                                         USER.id,
                                         USER.username,
-                                        PROFILE_IMAGE.fileKey.coalesce("")
+                                        USER.profileImage
                                 ),
                                 POST.createdAt
                         )
@@ -185,7 +193,6 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .from(POST)
                 .join(POST.user, USER)
                 .leftJoin(POST.category, CATEGORY)
-                .leftJoin(USER.profileImage, PROFILE_IMAGE)
                 .where(builder)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -211,7 +218,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                                 USER.id,
                                 USER.username,
                                 USER.bio,
-                                PROFILE_IMAGE.fileKey.coalesce(""),
+                                USER.profileImage,
                                 USER.status
                         ),
                         Projections.constructor(CategoryResponse.class,
@@ -222,7 +229,6 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .from(POST)
                 .leftJoin(POST.category, CATEGORY)
                 .leftJoin(POST.user, USER)
-                .leftJoin(POST.user.profileImage, PROFILE_IMAGE)
                 .where(
                         postIdEq(postId),
                         postDeletedAtIsNull(),
