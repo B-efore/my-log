@@ -1,9 +1,11 @@
 package com.jiwon.mylog.domain.follow.dto;
 
 import com.jiwon.mylog.domain.user.entity.User;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
+@AllArgsConstructor
 @Builder
 @Getter
 public class FollowResponse {

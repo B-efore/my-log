@@ -9,6 +9,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,15 +26,23 @@ import java.time.LocalDateTime;
 @Builder
 @Entity
 @EntityListeners(AuditingEntityListener.class)
+@Table(
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_follow_from_to",
+                        columnNames = {"from_user_id", "to_user_id"}
+                )
+        }
+)
 public class Follow {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private User fromUser;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private User toUser;
 
     @CreatedDate
